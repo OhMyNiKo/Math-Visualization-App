@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Hyperbolic Functions and the Catenary · Physics Intuition App</title>
+<script src="theme.js"></script>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:6px;margin-bottom:10px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:14px var(--mono);padding:8px 10px;min-width:0}
+.fin input:focus{outline:none;border-color:var(--acc)}
+.fin button{background:var(--panel2);border:1px solid var(--acc);color:var(--acc);
+  font:600 12px var(--mono);padding:0 12px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · HYPERBOLIC FUNCTIONS · MODULE 28 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Hyperbolic Functions and the Catenary</h1>
+    <p class="sub">View A builds cosh, sinh and tanh out of two exponentials: drag the probe x✱
+    along the plot and slide t to see the point (cosh t, sinh t) ride the unit hyperbola with a
+    sector of area t/2 behind it, exactly as (cos θ, sin θ) rides the circle. View B hangs a real
+    chain between two supports you can drag, lays the "obvious" parabola over it, and magnifies
+    the difference until you cannot un-see it.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equations</span>
+        <span class="fx">\(\displaystyle \cosh x = \frac{e^x+e^{-x}}{2},\ \sinh x=\frac{e^x-e^{-x}}{2} \)
+        <span class="mutx">· \(\displaystyle \cosh^2 x-\sinh^2 x = 1 \) · \(\displaystyle y = a\cosh\frac{x}{a} \)</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="seg">
+          <button data-v="A" class="on">A · sinh, cosh, tanh</button>
+          <button data-v="B">B · catenary vs parabola</button>
+        </div>
+        <div id="ctlA">
+          <div class="ctl"><label><span>probe x✱ (or drag it)</span><b id="rX">x✱ = 1.00</b></label>
+            <input type="range" id="sX" min="-250" max="250" value="100"></div>
+          <div class="ctl"><label><span>hyperbolic angle t</span><b id="rT">t = 1.20</b></label>
+            <input type="range" id="sT" min="-200" max="200" value="120"></div>
+          <p class="hint">On the unit circle the sector from (1,0) to (cos θ, sin θ) has area θ/2.
+          On the unit hyperbola x² &minus; y² = 1 the sector from (1,0) to (cosh t, sinh t) has area
+          t/2. That is what makes t "the hyperbolic angle", even though no rotation is involved.</p>
+        </div>
+        <div id="ctlB" style="display:none">
+          <div class="ctl"><label><span>span L (or drag a support)</span><b id="rL">L = 6.00</b></label>
+            <input type="range" id="sL" min="100" max="1000" value="600"></div>
+          <div class="ctl"><label><span>chain parameter a = T₀/(λg)</span><b id="rAa">a = 2.00</b></label>
+            <input type="range" id="sAa" min="40" max="600" value="200"></div>
+          <div class="ctl"><label><span>magnify the difference</span><b id="rN">×10</b></label>
+            <input type="range" id="sN" min="1" max="50" value="10" step="1"></div>
+          <p class="hint">a is the horizontal tension divided by the weight per unit length; a small
+          a means a slack, heavy chain (deep sag), a large a a tight one. The parabola is drawn through
+          the same two supports with the same lowest point, so it is the best parabola one could
+          hope for, and it still misses.</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"A hanging chain is a parabola." Galileo said so, and it is wrong: the tension in a chain
+        grows along its length because it carries more chain, and that makes the curve
+        <b>y = a cosh(x/a)</b>, a catenary. A parabola is what you get when the load is uniform
+        per unit of horizontal distance (a suspension-bridge deck), not per unit of chain. With the
+        supports and lowest point matched, the two curves still differ by up to
+        <span class="live" id="oLive">?</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: cosh, sinh, tanh from Math.exp; the hyperbolic sector filled as a polygon of 120
+    points along the branch (area t/2 exactly, since ½∫(cosh²&minus;sinh²)dt = t/2); the chain is
+    y = a cosh(x/a) shifted to the supports, its length 2a sinh(L/2a), the comparison parabola
+    fixed by the same endpoints and vertex, and the maximum deviation found by sampling 800 points.
+    One file of vanilla JavaScript, no libraries beyond the shared KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>{if(!isFinite(v))return "—";const s=Math.abs(v).toFixed(d);return (v<0&&+s!==0?"−":"")+s;};
+let MONO="11px ui-monospace,Menlo,monospace";   /* 9px on a phone-width canvas, set in draw() */
+const setFont=W=>{MONO=(W<560?"9px":"11px")+" ui-monospace,Menlo,monospace";return W<560;};
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    `<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+
+const S={view:"A",xs:1.0,tt:1.2,L:6,a:2,N:10,drag:null,lock:null,viewB:null,mw:0};
+const TAU=2*Math.PI;
+
+/* ---------- catenary numbers (used by both views for the live misconception) ---------- */
+function chain(){
+  const L=S.L,a=S.a,c=Math.cosh(L/(2*a)),sag=a*(c-1);
+  const yc=x=>a*Math.cosh(x/a)-a*c;                 /* supports at y = 0, vertex at y = -sag */
+  const yp=x=>-sag+sag*(2*x/L)*(2*x/L);              /* same ends, same lowest point */
+  let dmax=0,xm=0;
+  for(let i=0;i<=800;i++){const x=-L/2+L*i/800,d=yc(x)-yp(x);if(Math.abs(d)>dmax){dmax=Math.abs(d);xm=x;}}
+  return{L,a,c,sag,yc,yp,dmax,xm:Math.abs(xm),len:2*a*Math.sinh(L/(2*a))};
+}
+
+/* ---------- view A ---------- */
+function drawA(g,W,H){
+  const mw=Math.round(W*0.655);S.mw=mw;
+  const V={xmin:-2.6,xmax:2.6,ymin:-3.4,ymax:3.4};
+  const X=x=>(x-V.xmin)/(V.xmax-V.xmin)*mw,Y=y=>H-(y-V.ymin)/(V.ymax-V.ymin)*H,XI=px=>V.xmin+(V.xmax-V.xmin)*px/mw;
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  for(let x=Math.ceil(V.xmin);x<=V.xmax;x++){g.beginPath();g.moveTo(X(x),0);g.lineTo(X(x),H);g.stroke();}
+  for(let y=Math.ceil(V.ymin);y<=V.ymax;y++){g.beginPath();g.moveTo(0,Y(y));g.lineTo(mw,Y(y));g.stroke();}
+  g.strokeStyle=C.axis;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(X(0),0);g.lineTo(X(0),H);g.stroke();
+  g.beginPath();g.moveTo(0,Y(0));g.lineTo(mw,Y(0));g.stroke();
+  g.font=MONO;g.fillStyle=C.dim;g.textAlign="left";
+  for(let x=-2;x<=2;x++)if(x)g.fillText(x,X(x)+3,Y(0)+13);
+  for(let y=-3;y<=3;y++)if(y)g.fillText(y,X(0)+4,Y(y)-3);
+
+  g.save();g.beginPath();g.rect(0,0,mw,H);g.clip();
+  const plot=(fn,col,w,dash)=>{
+    g.strokeStyle=col;g.lineWidth=w;g.setLineDash(dash||[]);g.beginPath();let pen=false;
+    for(let px=0;px<=mw;px++){const y=fn(XI(px));if(!isFinite(y)){pen=false;continue;}
+      const sy=Y(Math.max(V.ymin-2,Math.min(V.ymax+2,y)));pen?g.lineTo(px,sy):g.moveTo(px,sy);pen=true;}
+    g.stroke();g.setLineDash([]);
+  };
+  plot(x=>Math.exp(x)/2,C.dim,1.2,[5,4]);
+  plot(x=>Math.exp(-x)/2,C.dim,1.2,[5,4]);
+  plot(Math.cosh,C.acc,2.4);
+  plot(Math.sinh,C.amber,2.2);
+  plot(Math.tanh,C.blue,2.2);
+  /* the probe */
+  const xs=S.xs,ch=Math.cosh(xs),sh=Math.sinh(xs),th=Math.tanh(xs),ep=Math.exp(xs)/2,em=Math.exp(-xs)/2;
+  g.strokeStyle=C.ink;g.lineWidth=1;g.setLineDash([5,4]);
+  g.beginPath();g.moveTo(X(xs),0);g.lineTo(X(xs),H);g.stroke();g.setLineDash([]);
+  const dot=(y,col,r)=>{if(y<V.ymin||y>V.ymax)return;g.fillStyle=col;g.beginPath();g.arc(X(xs),Y(y),r,0,TAU);g.fill();
+    g.strokeStyle=C.edge;g.lineWidth=1.5;g.stroke();};
+  dot(ep,C.dim,3.5);dot(em,C.dim,3.5);dot(ch,C.acc,6);dot(sh,C.amber,6);dot(th,C.blue,6);
+  g.restore();
+  g.fillStyle=C.ink;g.textAlign="center";g.fillText("x✱",X(xs),14);
+  g.fillStyle=C.bg2;g.fillRect(mw-(W<560?166:196),H-68,W<560?162:192,64);
+  g.textAlign="right";
+  g.fillStyle=C.dim;g.fillText("- - eˣ/2 and e⁻ˣ/2",mw-10,H-54);
+  g.fillStyle=C.acc;g.fillText("— cosh x = their sum",mw-10,H-40);
+  g.fillStyle=C.amber;g.fillText("— sinh x = their difference",mw-10,H-26);
+  g.fillStyle=C.blue;g.fillText("— tanh x = sinh/cosh",mw-10,H-12);
+  g.textAlign="left";
+
+  /* side panel: the unit hyperbola with the sector of area t/2 */
+  const px0=mw+16,pw=W-px0-6;
+  const sc=Math.min(pw/4.8,(H-64)/8);
+  const py0=(H-8*sc)/2+16;
+  const PX=x=>px0+(x+0.4)*sc,PY=y=>py0+(4-y)*sc;
+  g.strokeStyle=C.hair;g.lineWidth=1;g.strokeRect(px0,py0,4.8*sc,8*sc);
+  g.fillStyle=C.mut;g.textAlign="left";g.fillText(W<560?"x² − y² = 1":"unit hyperbola x² − y² = 1",px0,py0-8);
+  g.save();g.beginPath();g.rect(px0,py0,4.8*sc,8*sc);g.clip();
+  g.strokeStyle=C.grid;
+  for(let x=0;x<=4;x++){g.beginPath();g.moveTo(PX(x),py0);g.lineTo(PX(x),py0+8*sc);g.stroke();}
+  for(let y=-4;y<=4;y++){g.beginPath();g.moveTo(px0,PY(y));g.lineTo(px0+4.8*sc,PY(y));g.stroke();}
+  g.strokeStyle=C.axis;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(PX(0),py0);g.lineTo(PX(0),py0+8*sc);g.stroke();
+  g.beginPath();g.moveTo(px0,PY(0));g.lineTo(px0+4.8*sc,PY(0));g.stroke();
+  g.strokeStyle=C.dim;g.lineWidth=1;g.setLineDash([4,4]);
+  g.beginPath();g.moveTo(PX(0),PY(0));g.lineTo(PX(4.4),PY(4.4));g.stroke();
+  g.beginPath();g.moveTo(PX(0),PY(0));g.lineTo(PX(4.4),PY(-4.4));g.stroke();g.setLineDash([]);
+  const t=S.tt;
+  /* sector */
+  g.beginPath();g.moveTo(PX(0),PY(0));g.lineTo(PX(1),PY(0));
+  for(let i=1;i<=120;i++){const s=t*i/120;g.lineTo(PX(Math.cosh(s)),PY(Math.sinh(s)));}
+  g.closePath();g.fillStyle=C.accA+"0.28)";g.fill();g.strokeStyle=C.acc;g.lineWidth=1;g.stroke();
+  /* the branch */
+  g.strokeStyle=C.ink;g.lineWidth=2;g.beginPath();
+  for(let i=0;i<=200;i++){const s=-2.3+4.6*i/200;const x=PX(Math.cosh(s)),y=PY(Math.sinh(s));i?g.lineTo(x,y):g.moveTo(x,y);}
+  g.stroke();
+  const hx=Math.cosh(t),hy=Math.sinh(t);
+  g.setLineDash([4,3]);g.lineWidth=1;
+  g.strokeStyle=C.acc;g.beginPath();g.moveTo(PX(hx),PY(hy));g.lineTo(PX(hx),PY(0));g.stroke();
+  g.strokeStyle=C.amber;g.beginPath();g.moveTo(PX(hx),PY(hy));g.lineTo(PX(0),PY(hy));g.stroke();
+  g.setLineDash([]);
+  g.fillStyle=C.acc;g.beginPath();g.arc(PX(hx),PY(hy),5.5,0,TAU);g.fill();g.strokeStyle=C.edge;g.lineWidth=1.5;g.stroke();
+  g.restore();
+  g.textAlign="left";
+  g.fillStyle=C.acc;g.fillText("cosh t = "+fmt(hx,3),PX(Math.min(hx,2.6))+6,PY(0)+(hy>=0?14:-6));
+  g.fillStyle=C.amber;g.fillText("sinh t = "+fmt(hy,3),PX(0)+6,PY(hy)+(hy>=0?-6:14));
+  g.fillStyle=C.ink;g.fillText("(cosh t, sinh t)",PX(Math.min(hx,2.6))+8,PY(hy)+(hy>=0?16:-10));
+  g.fillStyle=C.acc;g.fillText("shaded area = t/2 = "+fmt(t/2,3),px0,py0+8*sc+16);
+  g.fillStyle=C.mut;g.fillText("circle analogue: area = θ/2",px0,py0+8*sc+31);
+
+  rows([
+    ["probe x✱",fmt(xs,3)],
+    ["eˣ/2, e⁻ˣ/2",fmt(ep,4)+", "+fmt(em,4)],
+    ["cosh x✱ = sum",fmt(ch,4),"acc"],
+    ["sinh x✱ = difference",fmt(sh,4),"amber"],
+    ["tanh x✱ = sinh/cosh",fmt(th,4),"blue"],
+    ["cosh² − sinh²",fmt(ch*ch-sh*sh,3),"acc"],
+    ["hyperbolic angle t",fmt(S.tt,3)],
+    ["sector area t/2",fmt(S.tt/2,4),"acc"]]);
+}
+
+/* ---------- view B ---------- */
+function drawB(g,W,H){
+  const K=chain(),{L,a,sag,yc,yp,dmax,xm,len}=K,N=S.N;
+  const ye=x=>yp(x)+N*(yc(x)-yp(x));
+  let view=S.lock;
+  if(!view){
+    const pad=0.1*L+0.4;let ylo=-sag,yhi=0;
+    for(let i=0;i<=200;i++){const y=ye(-L/2+L*i/200);if(y<ylo)ylo=y;if(y>yhi)yhi=y;}
+    const py=0.12*(yhi-ylo)+0.5;ylo-=py;yhi+=py;
+    const xlo=-L/2-pad,xhi=L/2+pad;
+    const sc=Math.min((W-24)/(xhi-xlo),(H-70)/(yhi-ylo));
+    const cx=W/2,cy=H/2+18,mx=0,my=(ylo+yhi)/2;
+    view={X:x=>cx+(x-mx)*sc,Y:y=>cy-(y-my)*sc,XI:px=>mx+(px-cx)/sc,sc};
+  }
+  S.viewB=view;const{X,Y}=view;
+  /* faint metre grid */
+  const gstep=L>=6?2:1;
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  for(let x=-Math.ceil(L);x<=Math.ceil(L);x+=gstep){g.beginPath();g.moveTo(X(x),0);g.lineTo(X(x),H);g.stroke();}
+  for(let y=0;y>-sag*3-60;y-=gstep){g.beginPath();g.moveTo(0,Y(y));g.lineTo(W,Y(y));g.stroke();if(Y(y)>H)break;}
+  g.strokeStyle=C.axis;g.lineWidth=1.5;g.beginPath();g.moveTo(0,Y(0));g.lineTo(W,Y(0));g.stroke();
+  g.font=MONO;g.fillStyle=C.dim;g.textAlign="center";
+  for(let x=-Math.ceil(L);x<=Math.ceil(L);x+=gstep)if(x)g.fillText(x,X(x),Y(0)-5);
+  g.textAlign="left";
+  const plot=(fn,col,w,dash)=>{
+    g.strokeStyle=col;g.lineWidth=w;g.setLineDash(dash||[]);g.beginPath();
+    for(let i=0;i<=400;i++){const x=-L/2+L*i/400;const px=X(x),py=Y(fn(x));i?g.lineTo(px,py):g.moveTo(px,py);}
+    g.stroke();g.setLineDash([]);
+  };
+  if(N>1)plot(ye,C.amber,1.5);
+  plot(yp,C.hot,1.8,[7,5]);
+  plot(yc,C.acc,2.8);
+  /* the biggest gap, on the real curves and on the magnified one */
+  g.strokeStyle=C.hot;g.lineWidth=3;
+  [-xm,xm].forEach(x=>{g.beginPath();g.moveTo(X(x),Y(yp(x)));g.lineTo(X(x),Y(yc(x)));g.stroke();});
+  if(N>1){g.lineWidth=1.5;g.setLineDash([3,3]);
+    [-xm,xm].forEach(x=>{g.beginPath();g.moveTo(X(x),Y(yp(x)));g.lineTo(X(x),Y(ye(x)));g.stroke();});g.setLineDash([]);}
+  /* supports */
+  [-L/2,L/2].forEach(x=>{g.fillStyle=C.ink;g.fillRect(X(x)-7,Y(0)-7,14,14);g.strokeStyle=C.edge;g.lineWidth=1.5;g.strokeRect(X(x)-7,Y(0)-7,14,14);});
+  g.fillStyle=C.mut;g.textAlign="center";g.fillText("drag a support",X(L/2),Y(0)-16);g.fillText("drag a support",X(-L/2),Y(0)-16);
+  /* labels */
+  const nar=W<560;
+  g.textAlign="left";
+  g.fillStyle=C.acc;g.fillText(nar?"— chain":"— chain: y = a cosh(x/a), a = "+fmt(a),12,18);
+  g.fillStyle=C.hot;g.fillText(nar?"- - parabola":"- - parabola through the same supports and lowest point",12,34);
+  if(N>1){g.fillStyle=C.amber;g.fillText(nar?"— gap ×"+N:"— parabola + "+N+" × (chain − parabola): the gap magnified ×"+N,12,50);}
+  g.fillStyle=C.ink;g.textAlign="right";
+  g.fillText((nar?"length = ":"chain length 2a sinh(L/2a) = ")+fmt(len,3),W-12,18);
+  g.fillText((nar?"sag = ":"sag a(cosh(L/2a) − 1) = ")+fmt(sag,3),W-12,34);
+  g.fillStyle=C.hot;g.fillText((nar?"max gap = ":"max |chain − parabola| = ")+fmt(dmax,4)+" at x = ±"+fmt(xm),W-12,50);
+  g.textAlign="center";g.fillStyle=C.mut;g.fillText("span L = "+fmt(L),X(0),Y(0)+16);
+
+  rows([
+    ["span L",fmt(L,2)],
+    ["parameter a",fmt(a,2)],
+    ["L / 2a",fmt(L/(2*a),3)],
+    ["sag a(cosh(L/2a) − 1)",fmt(sag,4),"acc"],
+    ["chain length 2a sinh(L/2a)",fmt(len,4),"acc"],
+    ["max |catenary − parabola|",fmt(dmax,4),"hot"],
+    ["…at x = ±",fmt(xm,3)],
+    ["as a fraction of the sag",fmt(100*dmax/sag,2)+" %","amber"]]);
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  setFont(W);
+  if(S.view==="A")drawA(g,W,H);else drawB(g,W,H);
+  const K=chain();
+  document.getElementById("oLive").textContent=fmt(K.dmax,4)+" units on a span of "+fmt(K.L)+" (a = "+fmt(K.a)+")";
+}
+
+/* ---------- interaction ---------- */
+function toLogical(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+cv.addEventListener("pointerdown",e=>{
+  const p=toLogical(e);
+  if(S.view==="A"){
+    if(p.x>S.mw)return;
+    S.drag="probe";cv.setPointerCapture(e.pointerId);move(e);
+  }else{
+    const v=S.viewB;if(!v)return;
+    const d1=Math.abs(p.x-v.X(S.L/2)),d2=Math.abs(p.x-v.X(-S.L/2));
+    if(Math.min(d1,d2)<40&&Math.abs(p.y-v.Y(0))<40){S.drag="sup";S.lock=v;cv.setPointerCapture(e.pointerId);move(e);}
+  }
+});
+function setL(L){S.L=L;document.getElementById("sL").value=Math.round(L*100);document.getElementById("rL").textContent="L = "+L.toFixed(2);}
+function move(e){
+  if(!S.drag)return;
+  const p=toLogical(e);
+  if(S.drag==="probe"){
+    const mw=S.mw||cv.clientWidth*0.655;
+    S.xs=Math.max(-2.5,Math.min(2.5,-2.6+5.2*p.x/mw));
+    document.getElementById("sX").value=Math.round(S.xs*100);
+    document.getElementById("rX").textContent="x✱ = "+S.xs.toFixed(2);
+  }else{
+    const xw=S.viewB.XI(p.x);
+    setL(Math.max(1,Math.min(10,2*Math.abs(xw))));
+  }
+  draw();
+}
+cv.addEventListener("pointermove",move);
+cv.addEventListener("pointerup",()=>{S.drag=null;S.lock=null;draw();});
+cv.addEventListener("pointercancel",()=>{S.drag=null;S.lock=null;draw();});
+
+function bind(id,set){document.getElementById(id).addEventListener("input",e=>{set(+e.target.value);draw();});}
+bind("sX",v=>{S.xs=v/100;document.getElementById("rX").textContent="x✱ = "+S.xs.toFixed(2);});
+bind("sT",v=>{S.tt=v/100;document.getElementById("rT").textContent="t = "+S.tt.toFixed(2);});
+bind("sL",v=>{S.L=v/100;document.getElementById("rL").textContent="L = "+S.L.toFixed(2);});
+bind("sAa",v=>{S.a=v/100;document.getElementById("rAa").textContent="a = "+S.a.toFixed(2);});
+bind("sN",v=>{S.N=v;document.getElementById("rN").textContent="×"+S.N;});
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",function(){
+  document.querySelectorAll(".seg button").forEach(x=>x.classList.remove("on"));this.classList.add("on");
+  S.view=this.dataset.v;
+  document.getElementById("ctlA").style.display=S.view==="A"?"":"none";
+  document.getElementById("ctlB").style.display=S.view==="B"?"":"none";
+  draw();
+}));
+window.addEventListener("resize",draw);
+if(location.hash==="#B")document.querySelector('.seg button[data-v="B"]').click();else draw();
+</script>
+</body>
+</html>

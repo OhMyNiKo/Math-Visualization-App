@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Higher Derivatives and Concavity · Physics Intuition App</title>
+<script src="theme.js"></script>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:6px;margin-bottom:10px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:14px var(--mono);padding:8px 10px;min-width:0}
+.fin input:focus{outline:none;border-color:var(--acc)}
+.fin button{background:var(--panel2);border:1px solid var(--acc);color:var(--acc);
+  font:600 12px var(--mono);padding:0 12px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+.v.violet{color:#c792ea}
+html[data-theme="light"] .v.violet{color:#7c3fb8}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · CONCAVITY · MODULE 20 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Higher Derivatives and Concavity</h1>
+    <p class="sub">Pick a function or type your own, and see \( f \), \( f' \) and \( f'' \) drawn together.
+    The background is tinted where the curve bends upward (\( f''>0 \)) and where it bends downward
+    (\( f''<0 \)); the violet dots are the inflection points, where the bending switches. Drag the probe
+    \( x^\ast \) along the curve to watch the tangent line and the osculating circle flip sides.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining test</span>
+        <span class="fx">\(\displaystyle f''(x)>0 \Rightarrow \) concave up, \(\displaystyle f''(x)<0 \Rightarrow \) concave down
+        <span class="mutx">· inflection where \(\displaystyle f'' \) changes sign · radius of curvature
+        \(\displaystyle \rho = \dfrac{(1+f'^2)^{3/2}}{|f''|} \)</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="fin"><input type="text" id="fIn" value="x^3-3x" spellcheck="false">
+          <button id="bGo">Plot</button></div>
+        <div class="err" id="err"></div>
+        <div class="seg">
+          <button data-f="x^3-3x" data-l="2.5" class="on">x³ − 3x</button>
+          <button data-f="sin(x)" data-l="6.5">sin x</button>
+          <button data-f="exp(-x^2)" data-l="3">e^(−x²)</button>
+          <button data-f="x^4-2x^2" data-l="2">x⁴ − 2x²</button>
+          <button data-f="x^4" data-l="1.6">x⁴ (the trap)</button>
+        </div>
+        <div class="ctl"><label><span>probe (drag on the canvas)</span><b id="rX">x✱ = 0.80</b></label>
+          <input type="range" id="sX" min="-650" max="650" value="80"></div>
+        <div class="ctl"><label><span>window half-width</span><b id="rL">L = 2.5</b></label>
+          <input type="range" id="sL" min="10" max="80" value="25"></div>
+        <p class="hint">Supported: + − * / ^ ( ), implicit products like 2x or x&thinsp;sin(x),
+        and sin cos tan atan exp ln sqrt sinh cosh tanh, with pi and e.</p>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"\( f''(c)=0 \) means an inflection point at \( c \)." It does not. Zero second derivative is
+        <b>necessary</b> for a smooth inflection, never sufficient: the sign of \( f'' \) must actually
+        <b>change</b>. Load x⁴: \( f''=12x^2 \) is zero at the origin but positive on both sides, so the
+        curve stays concave up straight through. For the current function the scan finds
+        <span class="live" id="oLive">?</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: \( f' \) and \( f'' \) by central differences with \( h=10^{-3} \) on the parsed expression
+    (truncation error \( O(h^2) \)); zeros of \( f' \) and \( f'' \) found by a sign-change scan over 900
+    samples and refined by bisection, a zero of \( f'' \) with no sign change refined by ternary search on
+    \( |f''| \); stationary points classified by the second-derivative test. One file of vanilla JavaScript,
+    no libraries beyond the shared KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>{if(!isFinite(v))return"—";const r=Math.abs(v).toFixed(d);return(v<0&&+r!==0?"−":"")+r;};
+const MONO="11px ui-monospace,Menlo,monospace";
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    `<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+
+/* ---------- tiny expression parser (shared with the Taylor module) ---------- */
+function tokenize(s){
+  const T=[];let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(c===" "||c==="\t"){i++;continue;}
+    if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      const v=parseFloat(s.slice(i,j));if(!isFinite(v))throw new Error("bad number");
+      T.push({t:"num",v});i=j;continue;}
+    if(/[a-zA-Z_]/.test(c)){let j=i;while(j<s.length&&/[a-zA-Z_]/.test(s[j]))j++;
+      T.push({t:"id",v:s.slice(i,j)});i=j;continue;}
+    if("+-*/^(),".includes(c)){T.push({t:c});i++;continue;}
+    throw new Error("unexpected character '"+c+"'");
+  }
+  return T;
+}
+const FNS=["sin","cos","tan","atan","exp","ln","log","sqrt","sinh","cosh","tanh"];
+function parse(s){
+  const T=tokenize(s);let p=0;
+  const peek=()=>T[p];
+  const eat=t=>{if(!T[p]||T[p].t!==t)throw new Error("expected '"+t+"'");return T[p++];};
+  function expr(){let a=term();
+    while(peek()&&(peek().t==="+"||peek().t==="-")){const op=T[p++].t;a={t:"bin",op,a,b:term()};}
+    return a;}
+  function term(){let a=factor();
+    for(;;){const n=peek();
+      if(n&&(n.t==="*"||n.t==="/")){const op=T[p++].t;a={t:"bin",op,a,b:factor()};}
+      else if(n&&(n.t==="num"||n.t==="id"||n.t==="(")){a={t:"bin",op:"*",a,b:factor()};}
+      else break;}
+    return a;}
+  function factor(){
+    if(peek()&&peek().t==="-"){p++;return{t:"neg",a:factor()};}
+    if(peek()&&peek().t==="+"){p++;return factor();}
+    return power();}
+  function power(){const a=atom();
+    if(peek()&&peek().t==="^"){p++;return{t:"bin",op:"^",a,b:factor()};}
+    return a;}
+  function atom(){
+    const n=peek();
+    if(!n)throw new Error("expression ends too early");
+    if(n.t==="num"){p++;return{t:"num",v:n.v};}
+    if(n.t==="("){p++;const e=expr();eat(")");return e;}
+    if(n.t==="id"){p++;const name=n.v.toLowerCase();
+      if(peek()&&peek().t==="("){
+        if(!FNS.includes(name))throw new Error("unknown function '"+name+"'");
+        p++;const e=expr();eat(")");return{t:"call",fn:name,a:e};}
+      if(name==="x")return{t:"var"};
+      if(name==="pi")return{t:"num",v:Math.PI};
+      if(name==="e")return{t:"num",v:Math.E};
+      if(FNS.includes(name))throw new Error("'"+name+"' needs parentheses: "+name+"(x)");
+      throw new Error("unknown name '"+n.v+"'");}
+    throw new Error("unexpected '"+n.t+"'");}
+  const e=expr();
+  if(p<T.length)throw new Error("could not parse the whole expression");
+  return e;
+}
+const NF={sin:Math.sin,cos:Math.cos,tan:Math.tan,atan:Math.atan,exp:Math.exp,ln:Math.log,
+  log:Math.log,sqrt:Math.sqrt,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh};
+function evalNum(n,x){
+  switch(n.t){
+    case "num":return n.v;
+    case "var":return x;
+    case "neg":return -evalNum(n.a,x);
+    case "bin":{const a=evalNum(n.a,x),b=evalNum(n.b,x);
+      return n.op==="+"?a+b:n.op==="-"?a-b:n.op==="*"?a*b:n.op==="/"?a/b:Math.pow(a,b);}
+    case "call":return NF[n.fn](evalNum(n.a,x));
+  }
+}
+
+/* ---------- state and numerics ---------- */
+const S={txt:"x^3-3x",ast:null,err:"",probe:0.8,L:2.5,drag:false,
+  infl:[],touch:[],stat:[],ymax:4};
+const H0=1e-3;
+function F(x){try{const v=evalNum(S.ast,x);return isFinite(v)&&Math.abs(v)<1e9?v:NaN;}catch(e){return NaN;}}
+function D1(x){return (F(x+H0)-F(x-H0))/(2*H0);}
+function D2(x){return (F(x+H0)-2*F(x)+F(x-H0))/(H0*H0);}
+const sgn=v=>v>0?1:v<0?-1:0;
+
+function bisect(fn,a,b){
+  let fa=fn(a);
+  for(let i=0;i<50;i++){const m=0.5*(a+b),fm=fn(m);
+    if(sgn(fm)===sgn(fa)){a=m;fa=fm;}else b=m;}
+  return 0.5*(a+b);
+}
+function argminAbs(fn,a,b){
+  for(let i=0;i<60;i++){const m1=a+(b-a)/3,m2=b-(b-a)/3;
+    if(Math.abs(fn(m1))<Math.abs(fn(m2)))b=m2;else a=m1;}
+  return 0.5*(a+b);
+}
+function analyse(){
+  S.infl=[];S.touch=[];S.stat=[];S.ymax=1;
+  if(!S.ast)return;
+  const N=900,x0=-S.L,dx=2*S.L/N;
+  const xs=[],f1=[],f2=[];let m=0;
+  for(let i=0;i<=N;i++){const x=x0+i*dx;xs.push(x);
+    const v=F(x);if(isFinite(v))m=Math.max(m,Math.abs(v));
+    f1.push(D1(x));f2.push(D2(x));}
+  S.ymax=Math.max(1,Math.min(12,m))*1.12;
+  /* sign changes of f'' -> inflections; of f' -> stationary points */
+  const scan=(arr,fn,out,tol)=>{
+    let li=-1,ls=0;
+    for(let i=0;i<=N;i++){const v=arr[i];if(!isFinite(v))continue;
+      const s=Math.abs(v)<tol?0:sgn(v);
+      if(s===0)continue;
+      if(ls!==0&&s!==ls&&i-li<=40)out.push(bisect(fn,xs[li],xs[i]));
+      ls=s;li=i;}
+  };
+  scan(f2,D2,S.infl,1e-7);
+  const st=[];scan(f1,D1,st,1e-9);
+  S.stat=st.map(x=>{const c=D2(x);return{x,c,kind:c>1e-3?"min":c<-1e-3?"max":"inconclusive"};});
+  /* zeros of f'' that are NOT sign changes: local minima of |f''| that touch zero */
+  for(let i=2;i<N-1;i++){
+    const a=Math.abs(f2[i]);if(!isFinite(a)||a>0.05)continue;
+    if(a<=Math.abs(f2[i-1])&&a<Math.abs(f2[i+1])&&sgn(f2[i-2])===sgn(f2[i+2])&&f2[i-2]!==0){
+      const x=argminAbs(D2,xs[i-1],xs[i+1]);
+      if(Math.abs(D2(x))<1e-4&&!S.infl.some(q=>Math.abs(q-x)<3*dx))S.touch.push(x);}
+  }
+}
+function recompile(){
+  S.err="";
+  try{S.ast=parse(S.txt);}
+  catch(e){S.ast=null;S.err=e.message;}
+  analyse();
+}
+
+/* ---------- drawing ---------- */
+function draw(){
+  const{g,W,H}=fit();
+  const xmin=-S.L,xmax=S.L,ymax=S.ymax,ymin=-ymax;
+  const X=x=>(x-xmin)/(xmax-xmin)*W;
+  const Y=y=>H-(y-ymin)/(ymax-ymin)*H;
+  const XI=px=>xmin+(xmax-xmin)*px/W;
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+
+  /* concavity tint: faint full-height wash + a solid band along the bottom */
+  const band=12,runs=[];
+  if(S.ast){
+    let run=0,rs=0;
+    for(let px=0;px<=W;px++){
+      const v=D2(XI(px));const s=!isFinite(v)?0:Math.abs(v)<1e-7?0:sgn(v);
+      if(s!==rs){if(rs)runs.push([run,px,rs]);run=px;rs=s;}
+    }
+    if(rs)runs.push([run,W+1,rs]);
+    runs.forEach(([a,b,s])=>{g.fillStyle=(s>0?C.accA:C.hotA)+"0.07)";g.fillRect(a,0,b-a,H);});
+  }
+
+  /* grid + axes */
+  const step=S.L>4?2:S.L>1.6?1:0.5;
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  for(let x=Math.ceil(xmin/step)*step;x<=xmax;x+=step){g.beginPath();g.moveTo(X(x),0);g.lineTo(X(x),H);g.stroke();}
+  const ys=ymax>6?2:ymax>2.5?1:0.5;
+  for(let y=Math.ceil(ymin/ys)*ys;y<=ymax;y+=ys){g.beginPath();g.moveTo(0,Y(y));g.lineTo(W,Y(y));g.stroke();}
+  g.strokeStyle=C.axis;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(X(0),0);g.lineTo(X(0),H);g.stroke();
+  g.beginPath();g.moveTo(0,Y(0));g.lineTo(W,Y(0));g.stroke();
+  g.font=MONO;g.fillStyle=C.dim;g.textAlign="left";
+  for(let x=Math.ceil(xmin/step)*step;x<=xmax;x+=step)if(Math.abs(x)>1e-9)g.fillText(+x.toFixed(2),X(x)+3,Y(0)+14);
+  for(let y=Math.ceil(ymin/ys)*ys;y<=ymax;y+=ys)if(Math.abs(y)>1e-9)g.fillText(+y.toFixed(2),X(0)+4,Y(y)-3);
+
+  const plot=(fn,color,width,dash)=>{
+    g.strokeStyle=color;g.lineWidth=width;g.setLineDash(dash||[]);
+    g.beginPath();let pen=false,prev=0;
+    for(let px=0;px<=W;px++){
+      const y=fn(XI(px));
+      if(!isFinite(y)||Math.abs(y)>40*ymax){pen=false;continue;}
+      const sy=Y(Math.max(ymin*3,Math.min(ymax*3,y)));
+      if(pen&&Math.abs(sy-prev)>H*0.9){pen=false;}
+      pen?g.lineTo(px,sy):g.moveTo(px,sy);pen=true;prev=sy;
+    }
+    g.stroke();g.setLineDash([]);
+  };
+  if(S.ast){plot(D2,C.amber,1.6);plot(D1,C.acc,1.8);plot(F,C.ink,2.8);}
+  runs.forEach(([a,b,s])=>{g.fillStyle=(s>0?C.accA:C.hotA)+"0.75)";g.fillRect(a,H-band,b-a,band);});
+
+  /* inflection points: violet dots + dashed verticals */
+  S.infl.forEach(x=>{
+    g.setLineDash([5,4]);g.strokeStyle=C.violet;g.lineWidth=1;
+    g.beginPath();g.moveTo(X(x),0);g.lineTo(X(x),H-band);g.stroke();g.setLineDash([]);
+    const y=F(x);
+    if(isFinite(y)&&Math.abs(y)<ymax){g.fillStyle=C.violet;g.beginPath();g.arc(X(x),Y(y),6,0,7);g.fill();
+      g.strokeStyle=C.edge;g.lineWidth=1.5;g.stroke();}
+  });
+  /* zeros of f'' that are not inflections: hollow hot rings */
+  S.touch.forEach(x=>{
+    const y=F(x);if(!isFinite(y)||Math.abs(y)>ymax)return;
+    g.strokeStyle=C.hot;g.lineWidth=2.2;g.beginPath();g.arc(X(x),Y(y),7,0,7);g.stroke();
+    g.fillStyle=C.hot;g.textAlign="center";g.fillText("f″=0, no inflection",X(x),Y(y)-14);
+  });
+  /* stationary points */
+  S.stat.forEach(p=>{
+    const y=F(p.x);if(!isFinite(y)||Math.abs(y)>ymax)return;
+    g.fillStyle=C.bg2;g.beginPath();g.arc(X(p.x),Y(y),5,0,7);g.fill();
+    g.strokeStyle=C.blue;g.lineWidth=2;g.stroke();
+    g.fillStyle=C.blue;g.textAlign="center";
+    g.fillText(p.kind==="min"?"min":p.kind==="max"?"max":"f″=0: test inconclusive",X(p.x),Y(y)+(p.kind==="max"?-12:18));
+  });
+
+  /* probe: tangent line and osculating arc */
+  const xp=S.probe,yp=F(xp),d1=D1(xp),d2=D2(xp);
+  g.setLineDash([5,4]);g.strokeStyle=C.dim;g.lineWidth=1;
+  g.beginPath();g.moveTo(X(xp),0);g.lineTo(X(xp),H-band);g.stroke();g.setLineDash([]);
+  g.fillStyle=C.ink;g.textAlign="center";g.fillText("x✱",X(xp),14);
+  if(isFinite(yp)&&Math.abs(yp)<ymax*1.5&&isFinite(d1)&&isFinite(d2)){
+    /* osculating circle: centre at (x - f' k, y + k), k=(1+f'^2)/f'' */
+    if(Math.abs(d2)>1e-6){
+      const k=(1+d1*d1)/d2,cx=xp-d1*k,cy=yp+k,R=Math.abs(k)*Math.sqrt(1+d1*d1);
+      if(R<8*S.L){
+        const th0=Math.atan2(yp-cy,xp-cx),span=Math.min(1.1,0.45*S.L/R);
+        g.beginPath();
+        for(let i=0;i<=60;i++){const t=th0-span+2*span*i/60;
+          const px=X(cx+R*Math.cos(t)),py=Y(cy+R*Math.sin(t));i?g.lineTo(px,py):g.moveTo(px,py);}
+        g.strokeStyle=d2>0?C.acc:C.hot;g.lineWidth=1.4;g.setLineDash([3,3]);g.stroke();g.setLineDash([]);
+        g.fillStyle=d2>0?C.acc:C.hot;g.beginPath();g.arc(X(cx),Y(cy),2.5,0,7);g.fill();
+        g.setLineDash([2,4]);g.strokeStyle=C.dim;g.lineWidth=1;
+        g.beginPath();g.moveTo(X(xp),Y(yp));g.lineTo(X(cx),Y(cy));g.stroke();g.setLineDash([]);
+      }
+    }
+    const dxl=0.9*S.L/2.5;
+    g.strokeStyle=C.blue;g.lineWidth=1.8;
+    g.beginPath();g.moveTo(X(xp-dxl),Y(yp-d1*dxl));g.lineTo(X(xp+dxl),Y(yp+d1*dxl));g.stroke();
+    g.fillStyle=C.ink;g.beginPath();g.arc(X(xp),Y(yp),6,0,7);g.fill();
+    g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+  }
+
+  /* legend */
+  g.textAlign="left";g.font=MONO;
+  const leg=[[C.ink,"— f(x)"],[C.acc,"— f′(x)"],[C.amber,"— f″(x)"],[C.blue,"— tangent at x✱"],
+    [C.violet,"● inflection"],[C.acc,"▮ concave up"],[C.hot,"▮ concave down"]];
+  let lx=12;leg.forEach(([c,t])=>{g.fillStyle=c;g.fillText(t,lx,H-band-8);lx+=g.measureText(t).width+16;});
+
+  /* readouts */
+  document.getElementById("err").textContent=S.err;
+  const conc=!isFinite(d2)?"—":Math.abs(d2)<1e-6?"f″ ≈ 0 (flat bend)":d2>0?"concave up ∪":"concave down ∩";
+  const rho=Math.abs(d2)>1e-9?Math.pow(1+d1*d1,1.5)/Math.abs(d2):Infinity;
+  const infl=S.infl.length?S.infl.map(x=>fmt(x,3)).join(", "):"none";
+  const stat=S.stat.length?S.stat.map(p=>p.kind+" @ "+fmt(p.x,2)).join("<br>"):"none in window";
+  rows([
+    ["x✱",fmt(xp,3)],
+    ["f(x✱)",fmt(yp,4)],
+    ["f′(x✱)",fmt(d1,4),"acc"],
+    ["f″(x✱)",fmt(d2,4),"amber"],
+    ["concavity at x✱",conc,d2>0?"acc":"hot"],
+    ["radius of curvature ρ",isFinite(rho)?fmt(rho,3):"∞"],
+    ["inflection points x",infl,"violet"],
+    ["f″=0, not inflection",S.touch.length?S.touch.map(x=>fmt(x,2)).join(", "):"none","hot"],
+    ["stationary points",stat,"blue"]
+  ]);
+  const nz=S.infl.length+S.touch.length;
+  document.getElementById("oLive").textContent=
+    nz+" zero"+(nz===1?"":"s")+" of f″, "+S.infl.length+" inflection"+(S.infl.length===1?"":"s");
+}
+
+/* ---------- interaction ---------- */
+function setProbe(x){
+  S.probe=Math.max(-S.L,Math.min(S.L,x));
+  document.getElementById("sX").value=Math.round(S.probe/S.L*650);
+  document.getElementById("rX").textContent="x✱ = "+fmt(S.probe,2);
+}
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+cv.addEventListener("pointerdown",e=>{S.drag=true;cv.setPointerCapture(e.pointerId);move(e);});
+function move(e){
+  if(!S.drag)return;
+  const p=pos(e),W=cv.clientWidth||760;
+  setProbe(-S.L+2*S.L*p.x/W);draw();
+}
+cv.addEventListener("pointermove",move);
+cv.addEventListener("pointerup",()=>{S.drag=false;});
+cv.addEventListener("pointercancel",()=>{S.drag=false;});
+
+document.getElementById("sX").addEventListener("input",e=>{
+  S.probe=e.target.value/650*S.L;
+  document.getElementById("rX").textContent="x✱ = "+fmt(S.probe,2);draw();});
+document.getElementById("sL").addEventListener("input",e=>{
+  S.L=e.target.value/10;document.getElementById("rL").textContent="L = "+S.L.toFixed(1);
+  analyse();setProbe(S.probe);draw();});
+function apply(){
+  S.txt=document.getElementById("fIn").value;
+  document.querySelectorAll(".seg button").forEach(b=>b.classList.remove("on"));
+  recompile();draw();
+}
+document.getElementById("bGo").addEventListener("click",apply);
+document.getElementById("fIn").addEventListener("keydown",e=>{if(e.key==="Enter")apply();});
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",function(){
+  document.getElementById("fIn").value=this.dataset.f;
+  S.txt=this.dataset.f;
+  S.L=+this.dataset.l;document.getElementById("sL").value=Math.round(S.L*10);
+  document.getElementById("rL").textContent="L = "+S.L.toFixed(1);
+  document.querySelectorAll(".seg button").forEach(x=>x.classList.remove("on"));
+  this.classList.add("on");
+  recompile();setProbe(S.probe);draw();
+}));
+window.addEventListener("resize",draw);
+recompile();draw();
+</script>
+</body>
+</html>

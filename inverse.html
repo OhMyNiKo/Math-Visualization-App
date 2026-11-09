@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Inverse Functions · Physics Intuition App</title>
+<script src="theme.js"></script>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:6px;margin-bottom:10px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:14px var(--mono);padding:8px 10px;min-width:0}
+.fin input:focus{outline:none;border-color:var(--acc)}
+.fin button{background:var(--panel2);border:1px solid var(--acc);color:var(--acc);
+  font:600 12px var(--mono);padding:0 12px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · INVERSE FUNCTIONS · MODULE 17 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Inverse Functions and the Mirror y = x</h1>
+    <p class="sub">Choose a function, then drag the fold slider (or press Replay) to watch every point
+    of f swing over the line y = x and land on the graph of f&#8315;&sup1;. Drag the green point along f:
+    its mirror image (a, b) &rarr; (b, a), both derivatives and the swapped domain and range recompute
+    live. Type your own f and the module checks whether it is one-to-one before inverting it.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equations</span>
+        <span class="fx" id="eqF">\(\displaystyle f^{-1}(f(x)) = x \)</span>
+        <span class="mutx">\(\displaystyle \big(f^{-1}\big)'(b) = \dfrac{1}{f'(a)} \) where \(\displaystyle b = f(a) \)</span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="seg" id="segF">
+          <button data-k="exp" class="on">e&#7511; / ln x</button>
+          <button data-k="sq">x&sup2; (x&ge;0) / &radic;x</button>
+          <button data-k="sin">sin / arcsin</button>
+          <button data-k="lin">2x+3</button>
+          <button data-k="cube">x&sup3;</button>
+          <button data-k="custom">custom f</button>
+        </div>
+        <div class="fin"><input type="text" id="fIn" value="x^3-2x" spellcheck="false">
+          <button id="bGo">Plot</button></div>
+        <div class="err" id="err"></div>
+        <div class="ctl"><label><span>fold over y = x</span><b id="rF">fold = 1.00</b></label>
+          <input type="range" id="sF" min="0" max="100" value="100"></div>
+        <div class="ctl"><label><span>point on f (drag the dot)</span><b id="rA">a = 1.00</b></label>
+          <input type="range" id="sA" min="-400" max="400" value="100"></div>
+        <button class="btn" id="bRe">&#8635; Replay the fold</button>
+        <p class="hint">Custom f: + &minus; * / ^ ( ), implicit products like 2x, and sin cos tan atan
+        exp ln sqrt sinh cosh tanh, with pi and e. A custom f is inverted numerically by bisection on
+        its longest monotone stretch inside the window.</p>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"f&#8315;&sup1; means 1/f" is <b>false</b>. The &minus;1 is a functional inverse, the undo
+        button, not a reciprocal: f&#8315;&sup1;(f(a)) gives a back, while 1/f(a) is just another
+        number. Right now <span class="live" id="oLive">?</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: the fold is the true 3-D rotation of the plane about the line y = x, projected back
+    (each point keeps its component along the mirror and its perpendicular component scales by cos &pi;t);
+    preset inverses and derivatives are analytic, a custom f is inverted by 60 steps of bisection on its
+    longest monotone run and differentiated by a central difference. One file of vanilla JavaScript,
+    no libraries beyond the shared KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>!isFinite(v)?"—":(v<0?"−":"")+Math.abs(v).toFixed(d);
+const MONO="11px ui-monospace,Menlo,monospace";
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    `<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+
+/* ---------- tiny expression parser (shared with the Taylor lab) ---------- */
+function tokenize(s){
+  const T=[];let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(c===" "||c==="\t"){i++;continue;}
+    if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      const v=parseFloat(s.slice(i,j));if(!isFinite(v))throw new Error("bad number");
+      T.push({t:"num",v});i=j;continue;}
+    if(/[a-zA-Z_]/.test(c)){let j=i;while(j<s.length&&/[a-zA-Z_]/.test(s[j]))j++;
+      T.push({t:"id",v:s.slice(i,j)});i=j;continue;}
+    if("+-*/^(),".includes(c)){T.push({t:c});i++;continue;}
+    throw new Error("unexpected character '"+c+"'");
+  }
+  return T;
+}
+const FNS=["sin","cos","tan","atan","exp","ln","log","sqrt","sinh","cosh","tanh","abs"];
+function parse(s){
+  const T=tokenize(s);let p=0;
+  const peek=()=>T[p];
+  const eat=t=>{if(!T[p]||T[p].t!==t)throw new Error("expected '"+t+"'");return T[p++];};
+  function expr(){let a=term();
+    while(peek()&&(peek().t==="+"||peek().t==="-")){const op=T[p++].t;a={t:"bin",op,a,b:term()};}
+    return a;}
+  function term(){let a=factor();
+    for(;;){const n=peek();
+      if(n&&(n.t==="*"||n.t==="/")){const op=T[p++].t;a={t:"bin",op,a,b:factor()};}
+      else if(n&&(n.t==="num"||n.t==="id"||n.t==="(")){a={t:"bin",op:"*",a,b:factor()};}
+      else break;}
+    return a;}
+  function factor(){
+    if(peek()&&peek().t==="-"){p++;return{t:"neg",a:factor()};}
+    if(peek()&&peek().t==="+"){p++;return factor();}
+    return power();}
+  function power(){const a=atom();
+    if(peek()&&peek().t==="^"){p++;return{t:"bin",op:"^",a,b:factor()};}
+    return a;}
+  function atom(){
+    const n=peek();
+    if(!n)throw new Error("expression ends too early");
+    if(n.t==="num"){p++;return{t:"num",v:n.v};}
+    if(n.t==="("){p++;const e=expr();eat(")");return e;}
+    if(n.t==="id"){p++;const name=n.v.toLowerCase();
+      if(peek()&&peek().t==="("){
+        if(!FNS.includes(name))throw new Error("unknown function '"+name+"'");
+        p++;const e=expr();eat(")");return{t:"call",fn:name,a:e};}
+      if(name==="x")return{t:"var"};
+      if(name==="pi")return{t:"num",v:Math.PI};
+      if(name==="e")return{t:"num",v:Math.E};
+      if(FNS.includes(name))throw new Error("'"+name+"' needs parentheses: "+name+"(x)");
+      throw new Error("unknown name '"+n.v+"'");}
+    throw new Error("unexpected '"+n.t+"'");}
+  const e=expr();
+  if(p<T.length)throw new Error("could not parse the whole expression");
+  return e;
+}
+const NF={sin:Math.sin,cos:Math.cos,tan:Math.tan,atan:Math.atan,exp:Math.exp,ln:Math.log,
+  log:Math.log,sqrt:Math.sqrt,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,abs:Math.abs};
+function evalNum(n,x){
+  switch(n.t){
+    case "num":return n.v;
+    case "var":return x;
+    case "neg":return -evalNum(n.a,x);
+    case "bin":{const a=evalNum(n.a,x),b=evalNum(n.b,x);
+      return n.op==="+"?a+b:n.op==="-"?a-b:n.op==="*"?a*b:n.op==="/"?a/b:Math.pow(a,b);}
+    case "call":return NF[n.fn](evalNum(n.a,x));
+  }
+}
+
+/* ---------- the window: equal scale on both axes so y = x is a true 45° mirror ---------- */
+const V={xmin:-5.6,xmax:5.6,ymin:-5.6*520/760,ymax:5.6*520/760};
+const PI2=Math.PI/2;
+
+/* ---------- presets: f, analytic inverse and derivative, domain to sample, text ---------- */
+const PRE={
+  exp:{tex:"f(x)=e^{x},\\quad f^{-1}(x)=\\ln x",name:"e^x",iname:"ln x",
+    f:Math.exp,inv:Math.log,df:Math.exp,lo:V.xmin,hi:V.xmax,dom:"ℝ",ran:"(0, ∞)"},
+  sq:{tex:"f(x)=x^{2}\\ (x\\ge 0),\\quad f^{-1}(x)=\\sqrt{x}",name:"x²",iname:"√x",
+    f:x=>x*x,inv:Math.sqrt,df:x=>2*x,lo:0,hi:V.xmax,dom:"[0, ∞)",ran:"[0, ∞)"},
+  sin:{tex:"f(x)=\\sin x\\ \\text{on}\\ [-\\tfrac{\\pi}{2},\\tfrac{\\pi}{2}],\\quad f^{-1}(x)=\\arcsin x",name:"sin x",iname:"arcsin x",
+    f:Math.sin,inv:Math.asin,df:Math.cos,lo:-PI2,hi:PI2,dom:"[−π/2, π/2]",ran:"[−1, 1]"},
+  lin:{tex:"f(x)=2x+3,\\quad f^{-1}(x)=\\dfrac{x-3}{2}",name:"2x+3",iname:"(x−3)/2",
+    f:x=>2*x+3,inv:y=>(y-3)/2,df:()=>2,lo:V.xmin,hi:V.xmax,dom:"ℝ",ran:"ℝ"},
+  cube:{tex:"f(x)=x^{3},\\quad f^{-1}(x)=\\sqrt[3]{x}",name:"x³",iname:"∛x",
+    f:x=>x*x*x,inv:Math.cbrt,df:x=>3*x*x,lo:V.xmin,hi:V.xmax,dom:"ℝ",ran:"ℝ"}
+};
+
+const S={key:"exp",txt:"x^3-2x",ast:null,err:"",a:1,fold:1,playing:false,t:0,last:0,drag:null,
+  cur:null,pts:[],runs:[],inj:true};
+
+/* build the current function object S.cur = {f, inv, df, lo, hi, dom, ran, tex} */
+function build(){
+  S.err="";S.runs=[];S.inj=true;
+  if(S.key!=="custom"){S.cur=PRE[S.key];}
+  else{
+    try{S.ast=parse(S.txt);}catch(e){S.ast=null;S.err=e.message;}
+    const F=x=>{try{return S.ast?evalNum(S.ast,x):NaN;}catch(e){return NaN;}};
+    /* sample, split into monotone runs, keep the longest */
+    const N=560,xs=[],ys=[];
+    for(let i=0;i<=N;i++){const x=V.xmin+(V.xmax-V.xmin)*i/N;const y=F(x);xs.push(x);ys.push(y);}
+    let runs=[],i0=null,dir=0;
+    const closeRun=(i1)=>{if(i0!==null&&i1>i0)runs.push({i0,i1,dir,ylo:Math.min(ys[i0],ys[i1]),yhi:Math.max(ys[i0],ys[i1])});};
+    for(let i=0;i<=N;i++){
+      const ok=isFinite(ys[i])&&Math.abs(ys[i])<1e6;
+      if(!ok){closeRun(i-1);i0=null;dir=0;continue;}
+      if(i0===null){i0=i;dir=0;continue;}
+      const d=ys[i]-ys[i-1];
+      if(Math.abs(d)>40){closeRun(i-1);i0=i;dir=0;continue;}       /* a jump: treat as a break */
+      const s=Math.abs(d)<1e-12?0:Math.sign(d);
+      if(s!==0&&dir!==0&&s!==dir){closeRun(i-1);i0=i-1;dir=s;continue;}
+      if(s!==0)dir=s;
+    }
+    closeRun(N);
+    S.runs=runs;
+    /* one-to-one on the window: all runs the same direction with non-overlapping images */
+    let inj=runs.length>0;
+    if(runs.length>1){
+      const d0=runs[0].dir;
+      if(runs.some(r=>r.dir!==d0&&r.dir!==0))inj=false;
+      const sorted=runs.slice().sort((p,q)=>p.ylo-q.ylo);
+      for(let k=1;k<sorted.length;k++)if(sorted[k].ylo<sorted[k-1].yhi-1e-9)inj=false;
+    }
+    S.inj=inj;
+    let best=runs[0]||{i0:0,i1:N,dir:1};
+    for(const r of runs)if(r.i1-r.i0>best.i1-best.i0)best=r;
+    const lo=xs[best.i0],hi=xs[best.i1];
+    const inv=y=>{
+      let l=lo,h=hi,fl=F(l),fh=F(h);
+      if(!isFinite(fl)||!isFinite(fh))return NaN;
+      if((y-fl)*(y-fh)>0)return NaN;
+      for(let k=0;k<60;k++){const m=(l+h)/2,fm=F(m);if((fm-y)*(fl-y)<=0){h=m;fh=fm;}else{l=m;fl=fm;}}
+      return(l+h)/2;
+    };
+    const df=x=>{const h=1e-4;return(F(x+h)-F(x-h))/(2*h);};
+    const flo=F(lo),fhi=F(hi);
+    S.cur={f:F,inv,df,lo,hi,
+      dom:"["+fmt(lo)+", "+fmt(hi)+"]",
+      ran:"["+fmt(Math.min(flo,fhi))+", "+fmt(Math.max(flo,fhi))+"]",
+      tex:"f(x)="+texOf(S.txt)+",\\quad f^{-1}\\ \\text{by bisection on}\\ ["+fmt(lo)+","+fmt(hi)+"]",
+      name:S.txt,iname:"f⁻¹"};
+    if(!S.ast)S.cur.tex="f(x)=\\text{?}";
+  }
+  S.a=Math.max(S.cur.lo,Math.min(S.cur.hi,S.a));
+  syncA();
+  /* the sample points of f that will fold */
+  S.pts=[];
+  const M=300;
+  for(let i=0;i<=M;i++){
+    const x=S.cur.lo+(S.cur.hi-S.cur.lo)*i/M,y=S.cur.f(x);
+    S.pts.push(isFinite(y)&&Math.abs(y)<1e4?{x,y}:null);
+  }
+  const e=document.getElementById("eqF");
+  e.innerHTML="\\( "+S.cur.tex+" \\)";
+  if(window.piaRenderMath)window.piaRenderMath(e);
+}
+/* light TeX-ification of a typed expression for the strip: enough for the common cases */
+function texOf(s){
+  return s.replace(/\s+/g,"").replace(/\*/g,"\\cdot ").replace(/(sin|cos|tan|exp|ln|sqrt|sinh|cosh|tanh|atan|abs)\(/g,"\\$1(")
+    .replace(/\\sqrt\(([^()]*)\)/g,"\\sqrt{$1}").replace(/\^(\d+|\([^()]*\))/g,(m,p)=>"^{"+p.replace(/^\(|\)$/g,"")+"}")
+    .replace(/\\abs\(([^()]*)\)/g,"\\left|$1\\right|").replace(/pi/g,"\\pi ");
+}
+function syncA(){
+  document.getElementById("sA").value=Math.round(S.a*100);
+  document.getElementById("rA").textContent="a = "+fmt(S.a);
+}
+
+/* ---------- drawing ---------- */
+function draw(){
+  const{g,W,H}=fit();
+  const X=x=>(x-V.xmin)/(V.xmax-V.xmin)*W;
+  const Y=y=>H-(y-V.ymin)/(V.ymax-V.ymin)*H;
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  for(let x=Math.ceil(V.xmin);x<=V.xmax;x++){g.beginPath();g.moveTo(X(x),0);g.lineTo(X(x),H);g.stroke();}
+  for(let y=Math.ceil(V.ymin);y<=V.ymax;y++){g.beginPath();g.moveTo(0,Y(y));g.lineTo(W,Y(y));g.stroke();}
+  g.strokeStyle=C.axis;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(X(0),0);g.lineTo(X(0),H);g.stroke();
+  g.beginPath();g.moveTo(0,Y(0));g.lineTo(W,Y(0));g.stroke();
+  g.font=MONO;g.fillStyle=C.dim;g.textAlign="left";
+  for(let x=Math.ceil(V.xmin);x<=V.xmax;x++)if(x)g.fillText(x,X(x)+3,Y(0)+14);
+  for(let y=Math.ceil(V.ymin);y<=V.ymax;y++)if(y)g.fillText(y,X(0)+4,Y(y)-3);
+
+  /* the mirror y = x */
+  g.setLineDash([7,5]);g.strokeStyle=C.amber;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(X(V.xmin),Y(V.xmin));g.lineTo(X(V.xmax),Y(V.xmax));g.stroke();g.setLineDash([]);
+  g.fillStyle=C.amber;g.textAlign="left";g.fillText("y = x",X(V.ymax)+8,Y(V.ymax)+14);
+
+  /* rotation about y = x, projected: keep the component along the mirror, scale the rest by cos(πt) */
+  const c=Math.cos(Math.PI*S.fold);
+  const foldPt=p=>{const m=(p.x+p.y)/2,d=(p.x-p.y)/2;return{x:m+d*c,y:m-d*c};};
+  const poly=(pts,map,color,width,dash)=>{
+    g.strokeStyle=color;g.lineWidth=width;g.setLineDash(dash||[]);g.beginPath();let pen=false;
+    for(const p of pts){
+      if(!p){pen=false;continue;}
+      const q=map(p);
+      if(Math.abs(q.x)>40||Math.abs(q.y)>40){pen=false;continue;}
+      pen?g.lineTo(X(q.x),Y(q.y)):g.moveTo(X(q.x),Y(q.y));pen=true;
+    }
+    g.stroke();g.setLineDash([]);
+  };
+  /* the whole typed f across the window, faint, so the non-monotone parts are visible */
+  if(S.key==="custom"&&S.ast){
+    const all=[];for(let px=0;px<=W;px+=2){const x=V.xmin+(V.xmax-V.xmin)*px/W;const y=S.cur.f(x);
+      all.push(isFinite(y)&&Math.abs(y)<1e4?{x,y}:null);}
+    poly(all,p=>p,C.dim,1.5,[3,4]);
+  }
+  poly(S.pts,p=>p,C.acc,2.6);                                   /* f */
+  if(S.fold<1)poly(S.pts,p=>({x:p.y,y:p.x}),C.blueA+"0.35)",1.5,[4,4]); /* where the mirror will land */
+  poly(S.pts,foldPt,C.blue,2.4);                                /* the folding copy, = f⁻¹ at t = 1 */
+
+  /* the dragged point and its mirror */
+  const a=S.a,b=S.cur.f(a);
+  const P={x:a,y:b},Q={x:b,y:a},Qt=foldPt(P);
+  const dot=(p,r,fill)=>{g.fillStyle=fill;g.beginPath();g.arc(X(p.x),Y(p.y),r,0,7);g.fill();
+    g.strokeStyle=C.edge;g.lineWidth=1.8;g.stroke();};
+  /* horizontal-line test through P: count crossings of f across the whole window */
+  let cross=0;
+  if(isFinite(b)){
+    const F=S.cur.f,N=800;let prev=F(V.xmin)-b;
+    for(let i=1;i<=N;i++){const x=V.xmin+(V.xmax-V.xmin)*i/N;const v=F(x)-b;
+      if(isFinite(v)&&isFinite(prev)&&Math.abs(v)<1e4&&Math.abs(prev)<1e4&&(v===0||v*prev<0))cross++;prev=v;}
+    if(S.key!=="custom")cross=1;
+    g.setLineDash([3,4]);g.strokeStyle=cross>1?C.hot:C.dim;g.lineWidth=cross>1?1.8:1;
+    g.beginPath();g.moveTo(0,Y(b));g.lineTo(W,Y(b));g.stroke();g.setLineDash([]);
+    if(cross>1){g.fillStyle=C.hot;g.textAlign="left";
+      g.fillText("horizontal line y = "+fmt(b)+" meets f "+cross+" times: not one-to-one here",12,Y(b)-6);}
+    /* mirror connector, perpendicular to y = x */
+    g.setLineDash([3,3]);g.strokeStyle=C.amber;g.lineWidth=1;
+    g.beginPath();g.moveTo(X(P.x),Y(P.y));g.lineTo(X(Q.x),Y(Q.y));g.stroke();g.setLineDash([]);
+    if(S.fold<1){g.strokeStyle=C.blue;g.lineWidth=1.5;g.beginPath();g.arc(X(Q.x),Y(Q.y),6,0,7);g.stroke();}
+    dot(Qt,6,C.blue);dot(P,6.5,C.acc);
+    g.textAlign="left";g.fillStyle=C.acc;g.fillText("(a, b) = ("+fmt(a)+", "+fmt(b)+")",X(P.x)+10,Y(P.y)-8);
+    g.fillStyle=C.blue;g.fillText("(b, a) = ("+fmt(b)+", "+fmt(a)+")",X(Q.x)+10,Y(Q.y)+16);
+  }
+
+  /* legend */
+  g.textAlign="left";g.fillStyle=C.acc;g.fillText("— f",12,18);
+  g.fillStyle=C.blue;g.fillText("— f⁻¹ (fold "+fmt(S.fold)+")",44,18);
+  g.fillStyle=C.amber;g.fillText("- - y = x, the mirror",150,18);
+
+  /* readouts */
+  document.getElementById("err").textContent=S.err||(S.key==="custom"&&!S.inj?"not one-to-one on the window: inverting the longest monotone stretch "+S.cur.dom:"");
+  const dfa=S.cur.df(a),recip=isFinite(b)&&b!==0?1/b:NaN,back=S.cur.inv(b);
+  rows([
+    ["point on f","("+fmt(a)+", "+fmt(b)+")","acc"],
+    ["its mirror on f⁻¹","("+fmt(b)+", "+fmt(a)+")","blue"],
+    ["f′(a)",fmt(dfa,3),"acc"],
+    ["(f⁻¹)′(b) = 1/f′(a)",Math.abs(dfa)<1e-9?"∞ (vertical tangent)":fmt(1/dfa,3),"blue"],
+    ["f maps",S.cur.dom+" → "+S.cur.ran,""],
+    ["f⁻¹ maps",S.cur.ran+" → "+S.cur.dom,"blue"],
+    ["1/f(a), the reciprocal",fmt(recip,3),"hot"],
+    ["f⁻¹(f(a)), the undo",fmt(back,3),"blue"],
+    ["horizontal-line test",S.key==="custom"?(cross>1?cross+" crossings: fails":"1 crossing: passes"):"passes (1 crossing)",cross>1?"hot":"acc"]
+  ]);
+  document.getElementById("oLive").textContent="1/f(a) = "+fmt(recip,2)+" but f⁻¹(f(a)) = "+fmt(back,2)+" = a";
+}
+
+/* ---------- animation of the fold ---------- */
+let raf=null;
+function loop(ts){
+  if(!S.last)S.last=ts;
+  S.t+=Math.min(0.05,(ts-S.last)/1000);S.last=ts;
+  const u=Math.min(1,S.t/1.8);
+  S.fold=0.5-0.5*Math.cos(Math.PI*u);          /* ease in and out */
+  syncFold();draw();
+  if(u<1)raf=requestAnimationFrame(loop);else{S.playing=false;raf=null;}
+}
+function syncFold(){
+  document.getElementById("sF").value=Math.round(S.fold*100);
+  document.getElementById("rF").textContent="fold = "+fmt(S.fold);
+}
+function replay(){
+  if(raf)cancelAnimationFrame(raf);
+  S.t=0;S.last=0;S.fold=0;S.playing=true;syncFold();
+  raf=requestAnimationFrame(loop);
+}
+function stopAnim(){if(raf){cancelAnimationFrame(raf);raf=null;}S.playing=false;}
+
+/* ---------- interaction ---------- */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+function toWorld(p){const W=cv.clientWidth||cv.width,H=Math.round(W*(520/760));
+  return{x:V.xmin+(V.xmax-V.xmin)*p.x/W,y:V.ymin+(V.ymax-V.ymin)*(H-p.y)/H};}
+cv.addEventListener("pointerdown",e=>{
+  const w=toWorld(pos(e)),b=S.cur.f(S.a);
+  const dP=Math.hypot(w.x-S.a,w.y-b),dQ=Math.hypot(w.x-b,w.y-S.a);
+  S.drag=(dQ<dP&&dQ<0.8)?"mirror":"point";
+  cv.setPointerCapture(e.pointerId);move(e);
+});
+function move(e){
+  if(!S.drag)return;
+  const w=toWorld(pos(e));
+  const v=S.drag==="mirror"?w.y:w.x;            /* the mirror point has y = a */
+  S.a=Math.max(S.cur.lo,Math.min(S.cur.hi,v));
+  syncA();draw();
+}
+cv.addEventListener("pointermove",move);
+cv.addEventListener("pointerup",()=>{S.drag=null;});
+cv.addEventListener("pointercancel",()=>{S.drag=null;});
+
+document.getElementById("sF").addEventListener("input",e=>{stopAnim();S.fold=e.target.value/100;syncFold();draw();});
+document.getElementById("sA").addEventListener("input",e=>{
+  S.a=Math.max(S.cur.lo,Math.min(S.cur.hi,e.target.value/100));syncA();draw();});
+document.getElementById("bRe").addEventListener("click",replay);
+document.querySelectorAll("#segF button").forEach(b=>b.addEventListener("click",function(){
+  document.querySelectorAll("#segF button").forEach(x=>x.classList.remove("on"));this.classList.add("on");
+  S.key=this.dataset.k;if(S.key==="custom")S.txt=document.getElementById("fIn").value;
+  build();replay();
+}));
+function apply(){
+  S.txt=document.getElementById("fIn").value;S.key="custom";
+  document.querySelectorAll("#segF button").forEach(x=>x.classList.toggle("on",x.dataset.k==="custom"));
+  build();replay();
+}
+document.getElementById("bGo").addEventListener("click",apply);
+document.getElementById("fIn").addEventListener("keydown",e=>{if(e.key==="Enter")apply();});
+window.addEventListener("resize",draw);
+build();draw();
+</script>
+</body>
+</html>

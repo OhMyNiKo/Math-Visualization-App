@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Function Transformations · Physics Intuition App</title>
+<script src="theme.js"></script>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:6px;margin-bottom:10px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:14px var(--mono);padding:8px 10px;min-width:0}
+.fin input:focus{outline:none;border-color:var(--acc)}
+.fin button{background:var(--panel2);border:1px solid var(--acc);color:var(--acc);
+  font:600 12px var(--mono);padding:0 12px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · FUNCTION TRANSFORMATIONS · MODULE 16 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Function Transformations</h1>
+    <p class="sub">Pick a base function f, then slide it sideways, stretch it up, squash it in and fold it
+    over the axis with four transformations that compose. The faint curve is the original f, the bold one
+    is the transformed g. Drag the amber probe x&#8727; to read both at one x and to watch where a single
+    point of f lands.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The transformed function</span>
+        <span class="fx" id="eqG">\(\displaystyle g(x) = f(x) \)</span>
+        <span class="mutx" id="eqM">\(\displaystyle (x,\,y)\mapsto(x,\,y) \)</span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="seg" id="segF">
+          <button data-f="x^2" data-k="sq" class="on">x&sup2;</button>
+          <button data-f="2x+1" data-k="lin">2x+1</button>
+          <button data-f="sin(x)" data-k="sin">sin x</button>
+          <button data-f="cos(x)" data-k="cos">cos x</button>
+        </div>
+        <div class="fin"><input type="text" id="fIn" value="x^2" spellcheck="false">
+          <button id="bGo">Plot</button></div>
+        <div class="err" id="err"></div>
+        <div class="seg" id="segO">
+          <button data-o="ss" class="on">shift then scale</button>
+          <button data-o="sc">scale then shift</button>
+        </div>
+        <div class="ctl"><label><span>horizontal shift f(x+a)</span><b id="rA">a = 1.00</b></label>
+          <input type="range" id="sA" min="-400" max="400" value="100"></div>
+        <div class="ctl"><label><span>vertical scale A&middot;f(x)</span><b id="rK">A = 1.00</b></label>
+          <input type="range" id="sK" min="-300" max="300" value="100"></div>
+        <div class="ctl"><label><span>horizontal scale f(bx)</span><b id="rB">b = 1.00</b></label>
+          <input type="range" id="sB" min="25" max="400" value="100"></div>
+        <div class="seg" id="segAbs">
+          <button data-abs="0" class="on">|f| off</button>
+          <button data-abs="1">|f| on</button>
+        </div>
+        <p class="hint">Custom f: + &minus; * / ^ ( ), implicit products like 2x, and sin cos tan atan
+        exp ln sqrt sinh cosh tanh, with pi and e. The absolute value is always applied last.</p>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"f(x+a) moves the graph to the right by a" is <b>false</b>. Adding inside the bracket
+        moves the graph the <b>other</b> way: g(x) = f(x+a) already has at x the value f used to
+        have at x+a, so every feature arrives a units <b>earlier</b>, to the left. Right now
+        <span class="live" id="oLive">?</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: g is evaluated exactly as the displayed composition, g(x) = A&middot;f(bx+a) or
+    A&middot;f(b(x+a)) with |&middot;| last; the point map is the inverse substitution
+    x&prime; = (x&minus;a)/b or x/b&minus;a, y&prime; = Ay. One file of vanilla JavaScript,
+    no libraries beyond the shared KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>!isFinite(v)?"—":(v<0?"−":"")+Math.abs(v).toFixed(d);
+const MONO="11px ui-monospace,Menlo,monospace";
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    `<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+
+/* ---------- tiny expression parser (shared with the Taylor lab) ---------- */
+function tokenize(s){
+  const T=[];let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(c===" "||c==="\t"){i++;continue;}
+    if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      const v=parseFloat(s.slice(i,j));if(!isFinite(v))throw new Error("bad number");
+      T.push({t:"num",v});i=j;continue;}
+    if(/[a-zA-Z_]/.test(c)){let j=i;while(j<s.length&&/[a-zA-Z_]/.test(s[j]))j++;
+      T.push({t:"id",v:s.slice(i,j)});i=j;continue;}
+    if("+-*/^(),".includes(c)){T.push({t:c});i++;continue;}
+    throw new Error("unexpected character '"+c+"'");
+  }
+  return T;
+}
+const FNS=["sin","cos","tan","atan","exp","ln","log","sqrt","sinh","cosh","tanh","abs"];
+function parse(s){
+  const T=tokenize(s);let p=0;
+  const peek=()=>T[p];
+  const eat=t=>{if(!T[p]||T[p].t!==t)throw new Error("expected '"+t+"'");return T[p++];};
+  function expr(){let a=term();
+    while(peek()&&(peek().t==="+"||peek().t==="-")){const op=T[p++].t;a={t:"bin",op,a,b:term()};}
+    return a;}
+  function term(){let a=factor();
+    for(;;){const n=peek();
+      if(n&&(n.t==="*"||n.t==="/")){const op=T[p++].t;a={t:"bin",op,a,b:factor()};}
+      else if(n&&(n.t==="num"||n.t==="id"||n.t==="(")){a={t:"bin",op:"*",a,b:factor()};}
+      else break;}
+    return a;}
+  function factor(){
+    if(peek()&&peek().t==="-"){p++;return{t:"neg",a:factor()};}
+    if(peek()&&peek().t==="+"){p++;return factor();}
+    return power();}
+  function power(){const a=atom();
+    if(peek()&&peek().t==="^"){p++;return{t:"bin",op:"^",a,b:factor()};}
+    return a;}
+  function atom(){
+    const n=peek();
+    if(!n)throw new Error("expression ends too early");
+    if(n.t==="num"){p++;return{t:"num",v:n.v};}
+    if(n.t==="("){p++;const e=expr();eat(")");return e;}
+    if(n.t==="id"){p++;const name=n.v.toLowerCase();
+      if(peek()&&peek().t==="("){
+        if(!FNS.includes(name))throw new Error("unknown function '"+name+"'");
+        p++;const e=expr();eat(")");return{t:"call",fn:name,a:e};}
+      if(name==="x")return{t:"var"};
+      if(name==="pi")return{t:"num",v:Math.PI};
+      if(name==="e")return{t:"num",v:Math.E};
+      if(FNS.includes(name))throw new Error("'"+name+"' needs parentheses: "+name+"(x)");
+      throw new Error("unknown name '"+n.v+"'");}
+    throw new Error("unexpected '"+n.t+"'");}
+  const e=expr();
+  if(p<T.length)throw new Error("could not parse the whole expression");
+  return e;
+}
+const NF={sin:Math.sin,cos:Math.cos,tan:Math.tan,atan:Math.atan,exp:Math.exp,ln:Math.log,
+  log:Math.log,sqrt:Math.sqrt,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,abs:Math.abs};
+function evalNum(n,x){
+  switch(n.t){
+    case "num":return n.v;
+    case "var":return x;
+    case "neg":return -evalNum(n.a,x);
+    case "bin":{const a=evalNum(n.a,x),b=evalNum(n.b,x);
+      return n.op==="+"?a+b:n.op==="-"?a-b:n.op==="*"?a*b:n.op==="/"?a/b:Math.pow(a,b);}
+    case "call":return NF[n.fn](evalNum(n.a,x));
+  }
+}
+
+/* ---------- state ---------- */
+const S={key:"sq",txt:"x^2",ast:null,a:1,A:1,b:1,abs:false,order:"ss",probe:1.5,drag:false,err:""};
+const V={xmin:-6.3,xmax:6.3,ymin:-4.2,ymax:4.2};
+
+function recompile(){
+  S.err="";
+  try{S.ast=parse(S.txt);}catch(e){S.ast=null;S.err=e.message;}
+}
+function F(x){try{return S.ast?evalNum(S.ast,x):NaN;}catch(e){return NaN;}}
+/* the composition, exactly as displayed */
+function inner(x){return S.order==="ss"?S.b*x+S.a:S.b*(x+S.a);}
+function G(x){const y=S.A*F(inner(x));return S.abs?Math.abs(y):y;}
+/* where a point (x,y) of f lands on g */
+function mapPt(x,y){
+  const xp=S.order==="ss"?(x-S.a)/S.b:x/S.b-S.a;
+  const yp=S.abs?Math.abs(S.A*y):S.A*y;
+  return{x:xp,y:yp};
+}
+
+/* ---------- expression text, TeX and plain ---------- */
+const nice=v=>{const s=Math.abs(v).toFixed(2).replace(/\.?0+$/,"");return s===""?"0":s;};
+function argStr(tex){
+  const a=S.a,b=S.b,mi=tex?"-":"−";
+  const sgn=v=>v>0?" + "+nice(v):v<0?" "+mi+" "+nice(-v):"";
+  if(S.order==="ss")return(b===1?"":nice(b))+"x"+sgn(a);
+  const in_="x"+sgn(a);
+  if(b===1)return in_;
+  if(a===0)return nice(b)+"x";
+  return nice(b)+(tex?"\\left(":"(")+in_+(tex?"\\right)":")");
+}
+function baseStr(u,tex){
+  const bare=u==="x";
+  const P=s=>bare?s:(tex?"\\left("+s+"\\right)":"("+s+")");
+  switch(S.key){
+    case "sq":return tex?P(u)+"^{2}":P(u)+"²";
+    case "lin":return "2"+(bare?"x":P(u))+"+1";
+    case "sin":return tex?"\\sin"+(bare?" x":P(u)):"sin("+u+")";
+    case "cos":return tex?"\\cos"+(bare?" x":P(u)):"cos("+u+")";
+    default:return tex?"f"+(bare?"(x)":P(u)):"f("+u+")";
+  }
+}
+function exprStr(tex){
+  const u=argStr(tex);
+  let s=baseStr(u,tex);
+  const needWrap=S.key==="lin";
+  if(S.A!==1){
+    const core=needWrap?(tex?"\\left("+s+"\\right)":"("+s+")"):s;
+    if(S.A===-1)s=(tex?"-":"−")+core;
+    else s=(S.A<0?(tex?"-":"−"):"")+nice(S.A)+(tex?"\\,":"·")+core;
+  }
+  if(S.abs)s=tex?"\\left|"+s+"\\right|":"|"+s+"|";
+  return s;
+}
+function mapStr(){
+  const a=S.a,b=S.b;
+  const sgn=v=>v>0?" + "+nice(v):v<0?" - "+nice(-v):"";
+  let xs;
+  if(S.order==="ss"){const num="x"+sgn(-a);xs=b===1?num:"\\frac{"+num+"}{"+nice(b)+"}";}
+  else{xs=(b===1?"x":"\\frac{x}{"+nice(b)+"}")+sgn(-a);}
+  let ys=S.A===1?"y":S.A===-1?"-y":(S.A<0?"-":"")+nice(S.A)+"\\,y";
+  if(S.abs)ys="\\left|"+ys+"\\right|";
+  return "\\( (x,\\,y)\\mapsto\\left("+xs+",\\ "+ys+"\\right) \\)";
+}
+let lastEq="";
+function updateEq(){
+  const t="\\( g(x) = "+exprStr(true)+" \\)";
+  const m=mapStr();
+  if(t+m===lastEq)return;lastEq=t+m;
+  const e=document.getElementById("eqG"),mm=document.getElementById("eqM");
+  e.innerHTML=t;mm.innerHTML=m;
+  if(window.piaRenderMath){window.piaRenderMath(e);window.piaRenderMath(mm);}
+}
+
+/* ---------- drawing ---------- */
+function draw(){
+  const{g,W,H}=fit();
+  const X=x=>(x-V.xmin)/(V.xmax-V.xmin)*W;
+  const Y=y=>H-(y-V.ymin)/(V.ymax-V.ymin)*H;
+  const XI=px=>V.xmin+(V.xmax-V.xmin)*px/W;
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  for(let x=Math.ceil(V.xmin);x<=V.xmax;x++){g.beginPath();g.moveTo(X(x),0);g.lineTo(X(x),H);g.stroke();}
+  for(let y=Math.ceil(V.ymin);y<=V.ymax;y++){g.beginPath();g.moveTo(0,Y(y));g.lineTo(W,Y(y));g.stroke();}
+  g.strokeStyle=C.axis;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(X(0),0);g.lineTo(X(0),H);g.stroke();
+  g.beginPath();g.moveTo(0,Y(0));g.lineTo(W,Y(0));g.stroke();
+  g.font=MONO;g.fillStyle=C.dim;g.textAlign="left";
+  for(let x=Math.ceil(V.xmin);x<=V.xmax;x++)if(x&&!(x%2))g.fillText(x,X(x)+3,Y(0)+14);
+  for(let y=Math.ceil(V.ymin);y<=V.ymax;y++)if(y&&!(y%2))g.fillText(y,X(0)+4,Y(y)-3);
+
+  const plot=(fn,color,width,dash)=>{
+    g.strokeStyle=color;g.lineWidth=width;g.setLineDash(dash||[]);
+    g.beginPath();let pen=false,prev=0;
+    for(let px=0;px<=W;px++){
+      const y=fn(XI(px));
+      if(!isFinite(y)||Math.abs(y)>60){pen=false;continue;}
+      const sy=Y(Math.max(V.ymin-8,Math.min(V.ymax+8,y)));
+      if(pen&&Math.abs(sy-prev)>H*0.9){pen=false;}
+      pen?g.lineTo(px,sy):g.moveTo(px,sy);pen=true;prev=sy;
+    }
+    g.stroke();g.setLineDash([]);
+  };
+  if(S.ast){plot(F,C.dim,2);plot(G,C.acc,2.6);}
+
+  /* probe x*, both values, and where the point of f lands */
+  const x0=S.probe,yf=F(x0),yg=G(x0),P=mapPt(x0,yf);
+  g.setLineDash([5,4]);g.strokeStyle=C.amber;g.lineWidth=1;
+  g.beginPath();g.moveTo(X(x0),0);g.lineTo(X(x0),H);g.stroke();g.setLineDash([]);
+  g.fillStyle=C.amber;g.textAlign="center";g.fillText("x✱",X(x0),14);
+  const inView=(x,y)=>isFinite(x)&&isFinite(y)&&Math.abs(y)<60;
+  const dot=(x,y,r,fill)=>{g.fillStyle=fill;g.beginPath();g.arc(X(x),Y(y),r,0,7);g.fill();
+    g.strokeStyle=C.edge;g.lineWidth=1.5;g.stroke();};
+  if(inView(x0,yf)&&inView(P.x,P.y)){
+    /* arrow from (x*, f(x*)) to its image on g */
+    const ax=X(x0),ay=Y(yf),bx=X(P.x),by=Y(P.y);
+    const L=Math.hypot(bx-ax,by-ay);
+    if(L>6){
+      g.strokeStyle=C.amber;g.lineWidth=2;g.beginPath();g.moveTo(ax,ay);g.lineTo(bx,by);g.stroke();
+      const ang=Math.atan2(by-ay,bx-ax);
+      g.fillStyle=C.amber;g.beginPath();g.moveTo(bx,by);
+      g.lineTo(bx-11*Math.cos(ang-0.42),by-11*Math.sin(ang-0.42));
+      g.lineTo(bx-11*Math.cos(ang+0.42),by-11*Math.sin(ang+0.42));g.closePath();g.fill();
+    }
+    /* horizontal component along the axis: the shift/scale of x alone */
+    if(Math.abs(bx-ax)>3){
+      g.strokeStyle=C.amberA+"0.55)";g.lineWidth=4;g.beginPath();g.moveTo(ax,Y(0));g.lineTo(bx,Y(0));g.stroke();
+    }
+    dot(P.x,P.y,6,C.amber);
+    g.fillStyle=C.amber;g.textAlign="left";g.fillText("(x′, y′)",X(P.x)+9,Y(P.y)-8);
+  }
+  if(inView(x0,yf)){dot(x0,yf,5.5,C.ink);g.fillStyle=C.ink;g.textAlign="left";g.fillText("f(x✱)",X(x0)+9,Y(yf)+14);}
+  if(inView(x0,yg)){dot(x0,yg,5.5,C.acc);g.fillStyle=C.acc;g.textAlign="left";g.fillText("g(x✱)",X(x0)+9,Y(yg)-6);}
+
+  /* legend */
+  g.textAlign="left";g.fillStyle=C.dim;g.fillText("— f(x), the original",12,18);
+  g.fillStyle=C.acc;g.fillText("— g(x) = "+exprStr(false),150,18);
+  g.fillStyle=C.amber;g.fillText("→ where the point (x✱, f(x✱)) lands",12,34);
+
+  /* readouts */
+  document.getElementById("err").textContent=S.err;
+  const dir=S.a>0?"left by "+fmt(S.a):S.a<0?"right by "+fmt(-S.a):"none (a = 0)";
+  const ordTxt=S.order==="ss"?"shift · b · A · abs":"b · shift · A · abs";
+  rows([
+    ["g(x)",exprStr(false),"acc"],
+    ["order applied",ordTxt,""],
+    ["probe x✱",fmt(x0),"amber"],
+    ["f(x✱)",fmt(yf),""],
+    ["g(x✱)",fmt(yg),"acc"],
+    ["point of f","("+fmt(x0)+", "+fmt(yf)+")",""],
+    ["lands on g at","("+fmt(P.x)+", "+fmt(P.y)+")","amber"],
+    ["horizontal shift",dir,S.a>0?"hot":""],
+    ["horizontal scale",S.b>1?"squashed by "+fmt(S.b):S.b<1?"stretched by "+fmt(1/S.b):"none",""],
+    ["vertical scale",(S.A<0?"flipped, ":"")+"factor "+fmt(Math.abs(S.A)),""]
+  ]);
+  document.getElementById("oLive").textContent="a = "+fmt(S.a)+", so the graph moves "+dir;
+  updateEq();
+}
+
+/* ---------- interaction ---------- */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+function move(e){
+  if(!S.drag)return;
+  const p=pos(e),W=cv.clientWidth||cv.width;
+  S.probe=Math.max(V.xmin,Math.min(V.xmax,V.xmin+(V.xmax-V.xmin)*p.x/W));
+  draw();
+}
+cv.addEventListener("pointerdown",e=>{S.drag=true;cv.setPointerCapture(e.pointerId);move(e);});
+cv.addEventListener("pointermove",move);
+cv.addEventListener("pointerup",()=>{S.drag=false;});
+cv.addEventListener("pointercancel",()=>{S.drag=false;});
+
+function bind(id,set){document.getElementById(id).addEventListener("input",e=>{set(+e.target.value);draw();});}
+bind("sA",v=>{S.a=v/100;document.getElementById("rA").textContent="a = "+fmt(S.a);});
+bind("sK",v=>{S.A=v/100;document.getElementById("rK").textContent="A = "+fmt(S.A);});
+bind("sB",v=>{S.b=v/100;document.getElementById("rB").textContent="b = "+fmt(S.b);});
+function segOn(sel,btn){document.querySelectorAll(sel+" button").forEach(x=>x.classList.remove("on"));btn.classList.add("on");}
+document.querySelectorAll("#segF button").forEach(b=>b.addEventListener("click",function(){
+  segOn("#segF",this);S.key=this.dataset.k;S.txt=this.dataset.f;
+  document.getElementById("fIn").value=S.txt;recompile();draw();
+}));
+document.querySelectorAll("#segO button").forEach(b=>b.addEventListener("click",function(){
+  segOn("#segO",this);S.order=this.dataset.o;draw();
+}));
+document.querySelectorAll("#segAbs button").forEach(b=>b.addEventListener("click",function(){
+  segOn("#segAbs",this);S.abs=this.dataset.abs==="1";draw();
+}));
+function apply(){
+  S.txt=document.getElementById("fIn").value;
+  const preset=[...document.querySelectorAll("#segF button")].find(b=>b.dataset.f.replace(/\s/g,"")===S.txt.replace(/\s/g,""));
+  document.querySelectorAll("#segF button").forEach(x=>x.classList.remove("on"));
+  if(preset){preset.classList.add("on");S.key=preset.dataset.k;}else S.key="custom";
+  recompile();draw();
+}
+document.getElementById("bGo").addEventListener("click",apply);
+document.getElementById("fIn").addEventListener("keydown",e=>{if(e.key==="Enter")apply();});
+window.addEventListener("resize",draw);
+recompile();draw();
+</script>
+</body>
+</html>

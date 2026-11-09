@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<title>Wavefunction in 3D · Physics Intuition App</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.tog{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);
+  font-family:var(--mono);cursor:pointer;user-select:none;margin-top:10px}
+.tog input{accent-color:var(--amber);width:15px;height:15px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center;line-height:1.2}
+.eq .frac .nu{display:block;padding:0 5px;border-bottom:1px solid var(--mut)}
+.eq .frac .de{display:block;padding:0 5px}
+.eq sub,.eq sup{font-size:10px}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · WAVEFUNCTION IN 3D · MODULE 6 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Wavefunction in 3D</h1>
+    <p class="sub">A quantum particle in a two-dimensional box, drawn as the standing wave it
+    actually is. Grab the surface and drag to spin the camera to any angle; raise the quantum
+    numbers and watch nodal lines appear that never, ever move.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The solutions</span>
+        <span class="fx">\(\displaystyle \psi_{n_x n_y}(x,y)=\frac{2}{L}\,\sin\!\left(\frac{n_x\pi x}{L}\right)\sin\!\left(\frac{n_y\pi y}{L}\right) \)
+        <span class="mutx">&nbsp;·&nbsp;</span>
+        \(\displaystyle E=(n_x^{2}+n_y^{2})\,\frac{\pi^{2}\hbar^{2}}{2mL^{2}} \)</span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="ctl"><label><span>quantum number n<sub>x</sub></span><b id="rNx">n&#8339; = 2</b></label>
+          <input type="range" id="sNx" min="1" max="4" value="2" step="1"></div>
+        <div class="ctl"><label><span>quantum number n<sub>y</sub></span><b id="rNy">n&#8340; = 1</b></label>
+          <input type="range" id="sNy" min="1" max="4" value="1" step="1"></div>
+        <div class="ctl"><label class="tog"><input type="checkbox" id="tP2"> show |&psi;|&sup2; instead of &psi;</label></div>
+        <div class="ctl"><label class="tog"><input type="checkbox" id="tAn" checked> animate (time phase)</label></div>
+        <button class="btn" id="bView">Reset the camera</button>
+        <p class="hint">Drag anywhere on the plot to orbit the camera, from any angle you like.
+        The wave is clamped to zero on all four walls; that constraint is the whole story.</p>
+      </div>
+      <div class="card">
+        <h3>Readout</h3>
+        <div class="read">
+          <div class="r"><span class="k">energy E / E&#8321;&#8321;</span><span class="v acc" id="oE">2.50</span></div>
+          <div class="r"><span class="k">nodal lines, x direction</span><span class="v blue" id="oNx">1</span></div>
+          <div class="r"><span class="k">nodal lines, y direction</span><span class="v blue" id="oNy">0</span></div>
+          <div class="r"><span class="k">degenerate partner</span><span class="v amber" id="oDeg">(1,2)</span></div>
+        </div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>A wavefunction is not a fuzzy picture of "where the particle orbits". It is a
+        <b>standing wave</b>. Spin the camera: the nodal lines you see from above are real
+        places where the particle is simply never found, and while the surface breathes in
+        time, those lines <span class="live">never move</span>. Swap n&#8339; and n&#8340;
+        and the energy stays exactly the same: that is degeneracy, made visible.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Physics: particle in a 2-D infinite square well, &psi; = (2/L)&thinsp;sin(n&#8339;&pi;x/L)&thinsp;sin(n&#8340;&pi;y/L),
+    E &prop; n&#8339;&sup2;+n&#8340;&sup2; (&#8463;=m=L=1); surface animated by the time phase cos(Et).
+    Painter-sorted quads, perspective projection, orbit camera; no libraries, no network:
+    one file of vanilla JavaScript.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const S={nx:2,ny:1,p2:false,anim:true,t:0,yaw:-0.62,pitch:0.46,drag:null};
+const M=34;               // mesh resolution
+const AMP=0.62;           // display amplitude
+const CAM=3.4;            // camera distance for perspective
+
+function psi(x,y){ return 2*Math.sin(S.nx*Math.PI*x)*Math.sin(S.ny*Math.PI*y); }
+
+function project(X,Y,Z,W,H){
+  // orbit: yaw about vertical, then pitch; camera looks along +depth
+  const cy=Math.cos(S.yaw),sy=Math.sin(S.yaw),cp=Math.cos(S.pitch),sp=Math.sin(S.pitch);
+  const x1=X*cy - Y*sy, y1=X*sy + Y*cy, z1=Z;
+  const d = y1*cp + z1*sp;              // depth
+  const v = -y1*sp + z1*cp;             // view-up component
+  const f = CAM/(CAM + d);
+  const s = Math.min(W,H)*0.62;
+  return {px: W/2 + s*x1*f, py: H*0.54 - s*v*f, d};
+}
+
+function draw(){
+  const {g,W,H}=fit();
+  g.fillStyle=C.bg2; g.fillRect(0,0,W,H);
+  const phase = S.anim ? Math.cos(S.t*2.0) : 1;
+  const val=(x,y)=>{ const p=psi(x,y); return S.p2 ? p*p*0.30 : p*0.5*phase; };
+
+  // floor + box frame (drawn first; the surface overpaints where in front)
+  g.strokeStyle=C.hair; g.lineWidth=1;
+  const corners=[[-.5,-.5],[.5,-.5],[.5,.5],[-.5,.5]];
+  g.beginPath();
+  corners.forEach((c,i)=>{
+    const p=project(c[0],c[1],0,W,H);
+    i?g.lineTo(p.px,p.py):g.moveTo(p.px,p.py);
+  });
+  g.closePath(); g.stroke();
+  // wall verticals to hint the box
+  for(const c of corners){
+    const a=project(c[0],c[1],0,W,H), b=project(c[0],c[1],AMP*0.55,W,H);
+    g.strokeStyle="rgba(38,49,60,.9)"; g.beginPath(); g.moveTo(a.px,a.py); g.lineTo(b.px,b.py); g.stroke();
+  }
+  // axis labels on the floor
+  g.font="11px ui-monospace,Menlo,monospace"; g.fillStyle=C.dim;
+  const ax=project(0.62,-0.5,0,W,H); g.fillText("x",ax.px,ax.py);
+  const ay=project(-0.5,0.62,0,W,H); g.fillText("y",ay.px,ay.py);
+
+  // build quads
+  const quads=[];
+  for(let i=0;i<M;i++)for(let j=0;j<M;j++){
+    const x0=i/M,x1=(i+1)/M,y0=j/M,y1=(j+1)/M;
+    const z00=val(x0,y0),z10=val(x1,y0),z11=val(x1,y1),z01=val(x0,y1);
+    const p00=project(x0-.5,y0-.5,z00*AMP,W,H), p10=project(x1-.5,y0-.5,z10*AMP,W,H),
+          p11=project(x1-.5,y1-.5,z11*AMP,W,H), p01=project(x0-.5,y1-.5,z01*AMP,W,H);
+    const zm=(z00+z10+z11+z01)/4, dm=(p00.d+p10.d+p11.d+p01.d)/4;
+    quads.push({p00,p10,p11,p01,zm,dm});
+  }
+  quads.sort((a,b)=>b.dm-a.dm);           // painter: farthest first
+
+  for(const q of quads){
+    const v=q.zm;
+    let col;
+    if(S.p2){
+      const t=Math.min(1,Math.abs(v)/0.9);
+      col=`rgba(${Math.round(240*t+22*(1-t))},${Math.round(180*t+27*(1-t))},${Math.round(41*t+38*(1-t))},.96)`; // dark → amber
+    }else if(v>=0){
+      const t=Math.min(1,v/0.9);
+      col=`rgba(${Math.round(19+58*t)},${Math.round(46+162*t)},${Math.round(48+133*t)},.96)`;   // dark → teal
+    }else{
+      const t=Math.min(1,-v/0.9);
+      col=`rgba(${Math.round(19+89*t)},${Math.round(36+146*t)},${Math.round(58+197*t)},.96)`;   // dark → blue
+    }
+    g.fillStyle=col;
+    g.beginPath();
+    g.moveTo(q.p00.px,q.p00.py); g.lineTo(q.p10.px,q.p10.py);
+    g.lineTo(q.p11.px,q.p11.py); g.lineTo(q.p01.px,q.p01.py);
+    g.closePath(); g.fill();
+    g.strokeStyle="rgba(13,17,23,.55)"; g.lineWidth=0.6; g.stroke();
+  }
+
+  // legend
+  g.font="11px ui-monospace,Menlo,monospace"; g.textAlign="left";
+  g.fillStyle=C.mut;
+  g.fillText(S.p2 ? "|ψ|²  (never negative; peaks = where you find it)"
+                  : "ψ  (teal = +, blue = −; the sign is real physics)",12,18);
+  g.fillText("drag to orbit the camera",12,H-12);
+
+  // readouts
+  const E=(S.nx*S.nx+S.ny*S.ny)/2;
+  document.getElementById("oE").textContent=E.toFixed(2);
+  document.getElementById("oNx").textContent=S.nx-1;
+  document.getElementById("oNy").textContent=S.ny-1;
+  document.getElementById("oDeg").textContent = S.nx===S.ny ? "none (nₓ=nₔ)" : `(${S.ny},${S.nx}) same E`;
+}
+
+function loop(ts){ S.t=ts/1000; if(S.anim && !S.p2) draw(); requestAnimationFrame(loop); }
+
+/* orbit drag */
+cv.addEventListener("pointerdown",e=>{S.drag={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);cv.style.cursor="grabbing";});
+cv.addEventListener("pointermove",e=>{
+  if(!S.drag) return;
+  S.yaw   += (e.clientX-S.drag.x)*0.010;
+  S.pitch += (e.clientY-S.drag.y)*0.008;
+  S.pitch = Math.max(0.05,Math.min(1.45,S.pitch));
+  S.drag={x:e.clientX,y:e.clientY};
+  draw();
+});
+cv.addEventListener("pointerup",()=>{S.drag=null;cv.style.cursor="grab";});
+
+document.getElementById("sNx").addEventListener("input",e=>{S.nx=+e.target.value;
+  document.getElementById("rNx").textContent="nₓ = "+S.nx;draw();});
+document.getElementById("sNy").addEventListener("input",e=>{S.ny=+e.target.value;
+  document.getElementById("rNy").textContent="nₔ = "+S.ny;draw();});
+document.getElementById("tP2").addEventListener("input",e=>{S.p2=e.target.checked;draw();});
+document.getElementById("tAn").addEventListener("input",e=>{S.anim=e.target.checked;draw();});
+document.getElementById("bView").addEventListener("click",()=>{S.yaw=-0.62;S.pitch=0.46;draw();});
+window.addEventListener("resize",draw);
+draw(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>

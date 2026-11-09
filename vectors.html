@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Dot Product, Cross Product · Physics Intuition App</title>
+<script src="theme.js"></script>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:6px;margin-bottom:10px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:14px var(--mono);padding:8px 10px;min-width:0}
+.fin input:focus{outline:none;border-color:var(--acc)}
+.fin button{background:var(--panel2);border:1px solid var(--acc);color:var(--acc);
+  font:600 12px var(--mono);padding:0 12px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+.seg.three button{flex:1 1 30%;min-width:30%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.v.violet{color:#c792ea}
+html[data-theme="light"] .v.violet{color:#7c3fb8}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · DOT PRODUCT, CROSS PRODUCT · MODULE 23 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Dot Product, Cross Product</h1>
+    <p class="sub">Two vectors, two very different products. Drag the tips of \( \mathbf a \) and
+    \( \mathbf b \) in the plane on the left: the amber shadow is the projection of \( \mathbf a \) onto
+    \( \mathbf b \) and the arc colour is the sign of \( \mathbf a\cdot\mathbf b \). On the right the same
+    two vectors sit in 3-D with their cross product standing on the parallelogram they span; drag there
+    to turn the view, and use the z sliders to lift the vectors out of the plane.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equations</span>
+        <span class="fx">\(\displaystyle \mathbf a\cdot\mathbf b=|\mathbf a||\mathbf b|\cos\theta,\quad
+        \mathbf a\times\mathbf b = |\mathbf a||\mathbf b|\sin\theta\,\hat{\mathbf n} \)
+        <span class="mutx">· a number and a vector: \(\displaystyle \mathbf a\cdot\mathbf b = a_xb_x+a_yb_y+a_zb_z \),
+        \(\displaystyle \mathbf a\times\mathbf b=(a_yb_z-a_zb_y,\ a_zb_x-a_xb_z,\ a_xb_y-a_yb_x) \)</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="seg three">
+          <button data-v="both" class="on">Both views</button>
+          <button data-v="dot">Dot product</button>
+          <button data-v="cross">Cross product</button>
+        </div>
+        <div class="two">
+          <div class="ctl"><label><span>aₓ</span><b id="rAx">3.00</b></label>
+            <input type="range" id="sAx" min="-500" max="500" value="300"></div>
+          <div class="ctl"><label><span>a_y</span><b id="rAy">1.00</b></label>
+            <input type="range" id="sAy" min="-500" max="500" value="100"></div>
+          <div class="ctl"><label><span>bₓ</span><b id="rBx">1.50</b></label>
+            <input type="range" id="sBx" min="-500" max="500" value="150"></div>
+          <div class="ctl"><label><span>b_y</span><b id="rBy">3.00</b></label>
+            <input type="range" id="sBy" min="-500" max="500" value="300"></div>
+          <div class="ctl"><label><span>a_z (3-D only)</span><b id="rAz">0.00</b></label>
+            <input type="range" id="sAz" min="-500" max="500" value="0"></div>
+          <div class="ctl"><label><span>b_z (3-D only)</span><b id="rBz">0.00</b></label>
+            <input type="range" id="sBz" min="-500" max="500" value="0"></div>
+        </div>
+        <div class="ctl"><label><span>view yaw (drag 3-D panel)</span><b id="rY">ψ = −35°</b></label>
+          <input type="range" id="sY" min="-180" max="180" value="-35" step="1"></div>
+        <p class="hint">Drag the arrowheads in the left panel to move a and b; the sliders do the same
+        thing with numbers. z-components only show in the 3-D panel.</p>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"The dot product and the cross product are two ways of multiplying vectors to get another
+        vector." No. \( \mathbf a\cdot\mathbf b \) is a <b>number</b> (a scalar, no direction);
+        \( \mathbf a\times\mathbf b \) is a <b>vector</b> perpendicular to both. And
+        \( \mathbf a\cdot\mathbf b=0 \) does not make either vector zero: it makes them perpendicular.
+        Drag the arc to blue and check: right now <span class="live" id="oLive">?</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: dot product by components, angle by \( \theta=\operatorname{atan2}(|\mathbf a\times\mathbf b|,\ \mathbf a\cdot\mathbf b) \)
+    (well-conditioned near 0° and 180°), projection \( (\mathbf a\cdot\mathbf b)/|\mathbf b| \), full 3-D cross product
+    by the determinant formula; the 3-D panel is an orthographic projection with yaw ψ and 28° elevation.
+    One file of vanilla JavaScript, no libraries beyond the shared KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>{if(!isFinite(v))return"—";const r=Math.abs(v).toFixed(d);return(v<0&&+r!==0?"−":"")+r;};
+const MONO="11px ui-monospace,Menlo,monospace";
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    `<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+
+const S={a:[3,1,0],b:[1.5,3,0],view:"both",yaw:-35,elev:28,drag:null,lay:null};
+const dot=(u,v)=>u[0]*v[0]+u[1]*v[1]+u[2]*v[2];
+const cross=(u,v)=>[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
+const norm=u=>Math.sqrt(dot(u,u));
+
+function arrow(g,x0,y0,x1,y1,col,wd,head){
+  const dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy);if(L<1e-6)return;
+  const ux=dx/L,uy=dy/L,h=head||11;
+  g.strokeStyle=col;g.lineWidth=wd;g.beginPath();g.moveTo(x0,y0);g.lineTo(x1-ux*h*0.6,y1-uy*h*0.6);g.stroke();
+  g.fillStyle=col;g.beginPath();g.moveTo(x1,y1);g.lineTo(x1-ux*h-uy*h*0.45,y1-uy*h+ux*h*0.45);
+  g.lineTo(x1-ux*h+uy*h*0.45,y1-uy*h-ux*h*0.45);g.closePath();g.fill();
+}
+
+/* ---------- the dot-product panel (plane) ---------- */
+function drawDot(g,x0,y0,w,h){
+  const s=Math.min(w,h)/13,cx=x0+w/2,cy=y0+h/2;
+  const X=x=>cx+x*s,Y=y=>cy-y*s;
+  g.save();g.beginPath();g.rect(x0,y0,w,h);g.clip();
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  for(let i=-6;i<=6;i++){g.beginPath();g.moveTo(X(i),y0);g.lineTo(X(i),y0+h);g.stroke();
+    g.beginPath();g.moveTo(x0,Y(i));g.lineTo(x0+w,Y(i));g.stroke();}
+  g.strokeStyle=C.axis;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(X(0),y0);g.lineTo(X(0),y0+h);g.stroke();
+  g.beginPath();g.moveTo(x0,Y(0));g.lineTo(x0+w,Y(0));g.stroke();
+  g.font=MONO;g.fillStyle=C.dim;g.textAlign="left";
+  for(let i=-5;i<=5;i++)if(i){g.fillText(i,X(i)+2,Y(0)+12);g.fillText(i,X(0)+3,Y(i)-2);}
+
+  const a=[S.a[0],S.a[1]],b=[S.b[0],S.b[1]];
+  const ab=a[0]*b[0]+a[1]*b[1],na=Math.hypot(a[0],a[1]),nb=Math.hypot(b[0],b[1]);
+  const crz=a[0]*b[1]-a[1]*b[0];
+  const th=Math.atan2(Math.abs(crz),ab);
+  const right=na>1e-9&&nb>1e-9&&Math.abs(th-Math.PI/2)<0.5*Math.PI/180;
+  const col=right?C.blue:ab>0?C.acc:ab<0?C.hot:C.blue;
+
+  /* projection of a onto b */
+  if(nb>1e-9){
+    const k=ab/(nb*nb),p=[k*b[0],k*b[1]];
+    const e=[b[0]/nb,b[1]/nb];
+    g.setLineDash([4,4]);g.strokeStyle=C.dim;g.lineWidth=1;
+    g.beginPath();g.moveTo(X(-e[0]*9),Y(-e[1]*9));g.lineTo(X(e[0]*9),Y(e[1]*9));g.stroke();
+    g.strokeStyle=C.amber;g.beginPath();g.moveTo(X(a[0]),Y(a[1]));g.lineTo(X(p[0]),Y(p[1]));g.stroke();g.setLineDash([]);
+    g.strokeStyle=C.amber;g.lineWidth=5;g.beginPath();g.moveTo(X(0),Y(0));g.lineTo(X(p[0]),Y(p[1]));g.stroke();
+    /* right-angle marker at the foot of the drop line */
+    const q=0.3,n=[-e[1],e[0]],sg=(a[0]*n[0]+a[1]*n[1])>=0?1:-1,d=k>=0?1:-1;
+    g.strokeStyle=C.amber;g.lineWidth=1;g.beginPath();
+    g.moveTo(X(p[0]-e[0]*q*d),Y(p[1]-e[1]*q*d));g.lineTo(X(p[0]-e[0]*q*d+n[0]*q*sg),Y(p[1]-e[1]*q*d+n[1]*q*sg));
+    g.lineTo(X(p[0]+n[0]*q*sg),Y(p[1]+n[1]*q*sg));g.stroke();
+    g.fillStyle=C.amber;g.textAlign="center";
+    const lp=[p[0]/2-n[0]*sg*0.7,p[1]/2-n[1]*sg*0.7];
+    g.fillText("proj = "+fmt(ab/nb,2),X(lp[0]),Y(lp[1])+4);
+  }
+  /* the angle arc */
+  if(na>1e-9&&nb>1e-9){
+    const ta=Math.atan2(a[1],a[0]),tb=Math.atan2(b[1],b[0]);
+    let d=tb-ta;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;
+    const r=34;
+    if(right){const e1=[a[0]/na,a[1]/na],e2=[b[0]/nb,b[1]/nb],q=0.55;
+      g.strokeStyle=C.blue;g.lineWidth=2;g.beginPath();g.moveTo(X(e1[0]*q),Y(e1[1]*q));
+      g.lineTo(X((e1[0]+e2[0])*q),Y((e1[1]+e2[1])*q));g.lineTo(X(e2[0]*q),Y(e2[1]*q));g.stroke();
+      g.fillStyle=C.blueA+"0.25)";g.beginPath();g.moveTo(X(0),Y(0));g.lineTo(X(e1[0]*q),Y(e1[1]*q));
+      g.lineTo(X((e1[0]+e2[0])*q),Y((e1[1]+e2[1])*q));g.lineTo(X(e2[0]*q),Y(e2[1]*q));g.closePath();g.fill();}
+    else{
+      g.beginPath();g.moveTo(X(0),Y(0));g.arc(X(0),Y(0),r,-ta,-ta-d,d>0);g.closePath();
+      g.fillStyle=(ab>0?C.accA:C.hotA)+"0.25)";g.fill();
+      g.strokeStyle=col;g.lineWidth=2.2;g.beginPath();g.arc(X(0),Y(0),r,-ta,-ta-d,d>0);g.stroke();}
+    const mid=ta+d/2;g.fillStyle=col;g.textAlign="center";
+    g.fillText("θ = "+fmt(th*180/Math.PI,1)+"°",X(0)+(r+26)*Math.cos(mid),Y(0)-(r+26)*Math.sin(mid)+4);
+  }
+  /* the vectors */
+  arrow(g,X(0),Y(0),X(a[0]),Y(a[1]),C.acc,3);
+  arrow(g,X(0),Y(0),X(b[0]),Y(b[1]),C.ink,3);
+  g.fillStyle=C.acc;g.textAlign="left";g.fillText("a",X(a[0])+8,Y(a[1])-6);
+  g.fillStyle=C.ink;g.fillText("b",X(b[0])+8,Y(b[1])-6);
+  /* drag handles */
+  [[a,C.acc],[b,C.ink]].forEach(([v,c])=>{g.strokeStyle=c;g.lineWidth=1;g.setLineDash([2,2]);
+    g.beginPath();g.arc(X(v[0]),Y(v[1]),14,0,7);g.stroke();g.setLineDash([]);});
+  g.fillStyle=C.dim;g.textAlign="left";g.fillText("dot product · plane view (drag the tips)",x0+8,y0+14);
+  g.fillStyle=col;g.fillText("a·b = "+fmt(ab,2)+(right?"  right angle":ab>0?"  acute":ab<0?"  obtuse":""),x0+8,y0+28);
+  g.restore();
+  S.lay=Object.assign(S.lay||{},{dot:{x0,y0,w,h,s,cx,cy}});
+  return{ab,na,nb,th};
+}
+
+/* ---------- the cross-product panel (3-D orthographic) ---------- */
+function drawCross(g,x0,y0,w,h){
+  const s=Math.min(w,h)/14,cx=x0+w/2,cy=y0+h/2+h*0.06;
+  const ps=S.yaw*Math.PI/180,el=S.elev*Math.PI/180;
+  const P=v=>{const u=v[0]*Math.cos(ps)-v[1]*Math.sin(ps),d=v[0]*Math.sin(ps)+v[1]*Math.cos(ps);
+    return[cx+u*s,cy-(v[2]*Math.cos(el)+d*Math.sin(el))*s];};
+  g.save();g.beginPath();g.rect(x0,y0,w,h);g.clip();
+  /* the xy-plane grid */
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  for(let i=-5;i<=5;i++){let p=P([i,-5,0]),q=P([i,5,0]);g.beginPath();g.moveTo(p[0],p[1]);g.lineTo(q[0],q[1]);g.stroke();
+    p=P([-5,i,0]);q=P([5,i,0]);g.beginPath();g.moveTo(p[0],p[1]);g.lineTo(q[0],q[1]);g.stroke();}
+  /* axes */
+  const ax=[[[5.6,0,0],"x"],[[0,5.6,0],"y"],[[0,0,5.6],"z"]];
+  ax.forEach(([v,n])=>{const o=P([0,0,0]),p=P(v);arrow(g,o[0],o[1],p[0],p[1],C.axis,1.3,8);
+    g.fillStyle=C.dim;g.font=MONO;g.textAlign="center";g.fillText(n,p[0]+(n==="z"?0:8),p[1]+(n==="z"?-6:4));});
+  const a=S.a,b=S.b,c=cross(a,b),na=norm(a),nb=norm(b),nc=norm(c),ab=dot(a,b);
+  /* parallelogram spanned by a and b */
+  const O=P([0,0,0]),A=P(a),B=P(b),AB=P([a[0]+b[0],a[1]+b[1],a[2]+b[2]]);
+  g.fillStyle=C.blueA+"0.25)";g.beginPath();g.moveTo(O[0],O[1]);g.lineTo(A[0],A[1]);g.lineTo(AB[0],AB[1]);g.lineTo(B[0],B[1]);g.closePath();g.fill();
+  g.strokeStyle=C.blue;g.lineWidth=1;g.setLineDash([3,3]);g.stroke();g.setLineDash([]);
+  /* drop lines from lifted tips to the plane */
+  [a,b].forEach(v=>{if(Math.abs(v[2])>1e-6){const p=P(v),q=P([v[0],v[1],0]);g.setLineDash([2,3]);g.strokeStyle=C.dim;g.lineWidth=1;
+    g.beginPath();g.moveTo(p[0],p[1]);g.lineTo(q[0],q[1]);g.stroke();g.setLineDash([]);}});
+  /* vectors and the cross product */
+  arrow(g,O[0],O[1],A[0],A[1],C.acc,3);
+  arrow(g,O[0],O[1],B[0],B[1],C.ink,3);
+  const Cp=P(c);
+  if(nc>1e-9){
+    /* scale the cross product for display if it would leave the panel, but say so */
+    const cap=7,k=nc>cap?cap/nc:1,Cd=P([c[0]*k,c[1]*k,c[2]*k]);
+    arrow(g,O[0],O[1],Cd[0],Cd[1],C.violet,3.2);
+    g.fillStyle=C.violet;g.font=MONO;g.textAlign="left";
+    g.fillText("a×b"+(k<1?" (drawn at "+fmt(k,2)+"× scale)":""),Cd[0]+8,Cd[1]-4);
+    /* small perpendicular markers at the origin */
+  }
+  g.fillStyle=C.acc;g.textAlign="left";g.fillText("a",A[0]+8,A[1]-4);
+  g.fillStyle=C.ink;g.fillText("b",B[0]+8,B[1]-4);
+  g.fillStyle=C.blue;g.textAlign="center";g.fillText("area = |a×b| = "+fmt(nc,2),(O[0]+AB[0])/2,Math.max(O[1],A[1],B[1],AB[1])+16);
+  g.fillStyle=C.dim;g.textAlign="left";g.fillText("cross product · 3-D view (drag to turn)",x0+8,y0+14);
+  g.fillStyle=C.violet;g.fillText("a×b = ("+fmt(c[0],2)+", "+fmt(c[1],2)+", "+fmt(c[2],2)+")",x0+8,y0+28);
+  g.restore();
+  S.lay=Object.assign(S.lay||{},{cross:{x0,y0,w,h}});
+  return{c,nc,na,nb,ab};
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  S.lay={};
+  let d=null,cr=null;
+  if(S.view==="both"){
+    d=drawDot(g,0,0,W/2,H);cr=drawCross(g,W/2,0,W/2,H);
+    g.strokeStyle=C.hair;g.lineWidth=1;g.beginPath();g.moveTo(W/2,0);g.lineTo(W/2,H);g.stroke();
+  }else if(S.view==="dot"){d=drawDot(g,0,0,W,H);}
+  else{cr=drawCross(g,0,0,W,H);}
+
+  const a=S.a,b=S.b,ab=dot(a,b),na=norm(a),nb=norm(b),c=cross(a,b),nc=norm(c);
+  const th=(na>1e-9&&nb>1e-9)?Math.atan2(nc,ab):NaN,deg=th*180/Math.PI;
+  const kind=!isFinite(th)?"undefined (zero vector)":Math.abs(deg-90)<0.5?"right angle":ab>0?"acute":"obtuse";
+  rows([
+    ["a",`(${fmt(a[0],2)}, ${fmt(a[1],2)}, ${fmt(a[2],2)})`,"acc"],
+    ["b",`(${fmt(b[0],2)}, ${fmt(b[1],2)}, ${fmt(b[2],2)})`],
+    ["a·b (a scalar)",fmt(ab,3),kind==="right angle"?"blue":ab>0?"acc":"hot"],
+    ["|a|, |b|",fmt(na,3)+", "+fmt(nb,3)],
+    ["|a||b|cos θ",isFinite(th)?fmt(na*nb*Math.cos(th),3):"—"],
+    ["θ",isFinite(th)?fmt(deg,2)+"° ("+kind+")":"—",kind==="right angle"?"blue":ab>0?"acc":"hot"],
+    ["projection (a·b)/|b|",nb>1e-9?fmt(ab/nb,3):"—","amber"],
+    ["a×b (a vector)",`(${fmt(c[0],2)}, ${fmt(c[1],2)}, ${fmt(c[2],2)})`,"violet"],
+    ["|a×b| = area = |a||b|sin θ",fmt(nc,3),"blue"],
+    ["(a×b)·a, (a×b)·b",fmt(dot(c,a),2)+", "+fmt(dot(c,b),2)]
+  ]);
+  document.getElementById("oLive").textContent=isFinite(th)?
+    "θ = "+fmt(deg,1)+"°, a·b = "+fmt(ab,2)+", |a| = "+fmt(na,2)+", |b| = "+fmt(nb,2):"a or b is the zero vector";
+}
+
+/* ---------- interaction ---------- */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+function setSlider(id,lab,v){document.getElementById(id).value=Math.round(v*100);document.getElementById(lab).textContent=fmt(v,2);}
+cv.addEventListener("pointerdown",e=>{
+  const p=pos(e);
+  const L=S.lay||{};
+  if(L.dot&&p.x>=L.dot.x0&&p.x<L.dot.x0+L.dot.w){
+    const d=L.dot,X=x=>d.cx+x*d.s,Y=y=>d.cy-y*d.s;
+    const da=Math.hypot(p.x-X(S.a[0]),p.y-Y(S.a[1])),db=Math.hypot(p.x-X(S.b[0]),p.y-Y(S.b[1]));
+    if(da<26||db<26)S.drag=(da<=db)?"a":"b";else S.drag=null;
+  }else if(L.cross&&p.x>=L.cross.x0){S.drag="yaw";S.dx=p.x;S.y0=S.yaw;}
+  if(S.drag){cv.setPointerCapture(e.pointerId);move(e);}
+});
+function move(e){
+  if(!S.drag)return;
+  const p=pos(e),d=S.lay.dot;
+  if(S.drag==="yaw"){
+    S.yaw=Math.round(((S.y0+(p.x-S.dx)*0.6+180)%360+360)%360-180);
+    document.getElementById("sY").value=S.yaw;document.getElementById("rY").textContent="ψ = "+fmt(S.yaw,0)+"°";
+  }else if(d){
+    const x=Math.max(-5,Math.min(5,(p.x-d.cx)/d.s)),y=Math.max(-5,Math.min(5,(d.cy-p.y)/d.s));
+    const v=S.drag==="a"?S.a:S.b;v[0]=Math.round(x*20)/20;v[1]=Math.round(y*20)/20;
+    if(S.drag==="a"){setSlider("sAx","rAx",v[0]);setSlider("sAy","rAy",v[1]);}
+    else{setSlider("sBx","rBx",v[0]);setSlider("sBy","rBy",v[1]);}
+  }
+  draw();
+}
+cv.addEventListener("pointermove",move);
+cv.addEventListener("pointerup",()=>{S.drag=null;});
+cv.addEventListener("pointercancel",()=>{S.drag=null;});
+
+function bind(id,lab,set){document.getElementById(id).addEventListener("input",e=>{
+  const v=+e.target.value/100;set(v);document.getElementById(lab).textContent=fmt(v,2);draw();});}
+bind("sAx","rAx",v=>S.a[0]=v);bind("sAy","rAy",v=>S.a[1]=v);bind("sAz","rAz",v=>S.a[2]=v);
+bind("sBx","rBx",v=>S.b[0]=v);bind("sBy","rBy",v=>S.b[1]=v);bind("sBz","rBz",v=>S.b[2]=v);
+document.getElementById("sY").addEventListener("input",e=>{S.yaw=+e.target.value;
+  document.getElementById("rY").textContent="ψ = "+fmt(S.yaw,0)+"°";draw();});
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",function(){
+  document.querySelectorAll(".seg button").forEach(x=>x.classList.remove("on"));this.classList.add("on");
+  S.view=this.dataset.v;draw();
+}));
+window.addEventListener("resize",draw);
+draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<title>The Mechanics Bench · Physics Intuition App</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.seg .gh{flex:1 1 100%;min-width:100%;background:var(--panel);color:var(--amber);cursor:default;
+  font:600 9.5px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;padding:6px 4px;text-align:left}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.read .hd{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);padding-top:6px;border-bottom:0}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · THE MECHANICS BENCH · MODULE 15 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>The Mechanics Bench</h1>
+    <p class="sub">The CIE Mechanics setups, alive: a block on a slope, five connected-particle rigs
+    (slope, twin slopes, table, table with two hanging masses, Atwood), three collisions and a
+    projectile. Every force arrow is drawn to scale in newtons, the acceleration is solved live,
+    and in every rope rig the string length is designed so that when one particle lands the other
+    keeps moving on its own momentum, slows, stops short of the pulley, and (where it can) slides
+    back until the string snaps taut again. The clock prints each of those moments.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equations</span>
+        <span class="fx" id="eqTxt"></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Scenario</h3>
+        <div class="seg">
+          <span class="gh">Slopes and connected particles</span>
+          <button data-sc="A" class="on">Slope</button>
+          <button data-sc="B">Slope + hanging mass</button>
+          <button data-sc="C">Twin slopes</button>
+          <button data-sc="E">Table + hanging mass</button>
+          <button data-sc="F">Table + two hanging</button>
+          <button data-sc="G">Atwood (vertical)</button>
+          <span class="gh">Collisions and projectiles</span>
+          <button data-sc="D">Collision, track</button>
+          <button data-sc="H">Collision on a slope</button>
+          <button data-sc="I">Three balls</button>
+          <button data-sc="J">Projectile</button>
+        </div>
+        <div class="ctl" id="cM1"><label><span>mass m&#8321;</span><b id="rM1">m&#8321; = 2.0 kg</b></label>
+          <input type="range" id="sM1" min="5" max="100" value="20"></div>
+        <div class="ctl" id="cM2"><label><span>mass m&#8322;</span><b id="rM2">m&#8322; = 1.5 kg</b></label>
+          <input type="range" id="sM2" min="5" max="100" value="15"></div>
+        <div class="ctl" id="cM3"><label><span>mass m&#8323;</span><b id="rM3">m&#8323; = 3.0 kg</b></label>
+          <input type="range" id="sM3" min="5" max="100" value="30"></div>
+        <div class="ctl" id="cTh1"><label><span>slope angle &theta;&#8321;</span><b id="rTh1">&theta;&#8321; = 30&deg;</b></label>
+          <input type="range" id="sTh1" min="10" max="70" value="30"></div>
+        <div class="ctl" id="cTh2"><label><span>slope angle &theta;&#8322;</span><b id="rTh2">&theta;&#8322; = 45&deg;</b></label>
+          <input type="range" id="sTh2" min="10" max="70" value="45"></div>
+        <div class="ctl" id="cMu"><label><span>friction &mu;</span><b id="rMu">&mu; = 0.20</b></label>
+          <input type="range" id="sMu" min="0" max="80" value="20"></div>
+        <div class="ctl" id="cE"><label><span>restitution e (1 = bouncy)</span><b id="rE">e = 0.80</b></label>
+          <input type="range" id="sE" min="0" max="100" value="80"></div>
+        <div class="ctl" id="cU1"><label><span id="lU1">initial u&#8321; (&rarr;)</span><b id="rU1">u&#8321; = 4.0 m/s</b></label>
+          <input type="range" id="sU1" min="0" max="120" value="40"></div>
+        <div class="ctl" id="cU2"><label><span>initial u&#8322;</span><b id="rU2">u&#8322; = &minus;1.0 m/s</b></label>
+          <input type="range" id="sU2" min="-50" max="50" value="-10"></div>
+        <div class="ctl" id="cU3"><label><span>initial u&#8323;</span><b id="rU3">u&#8323; = 0.0 m/s</b></label>
+          <input type="range" id="sU3" min="-50" max="50" value="0"></div>
+        <div class="ctl" id="cU"><label><span>launch speed u</span><b id="rU">u = 16 m/s</b></label>
+          <input type="range" id="sU" min="20" max="300" value="160"></div>
+        <div class="ctl" id="cAl"><label><span>launch angle &alpha;</span><b id="rAl">&alpha; = 45&deg;</b></label>
+          <input type="range" id="sAl" min="0" max="85" value="45"></div>
+        <div class="ctl" id="cH0"><label><span>launch height h&#8320;</span><b id="rH0">h&#8320; = 0.0 m</b></label>
+          <input type="range" id="sH0" min="0" max="100" value="0"></div>
+        <button class="btn" id="bRe">&#8635; Replay</button>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p id="misTxt"></p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Physics: g = 9.8 m/s&sup2;, &mu;&#8347; = &mu;&#8342;; statics checked before kinetics (nothing moves
+    unless the driving force exceeds &mu;N). Rope rigs: the taut phase, the slack phase (free
+    particle decelerating under gravity and friction alone) and the return phase are all closed-form
+    s = ut + &frac12;at&sup2;, so the printed times are exact; the string length is chosen per
+    scenario so the free particle stops at least 0.40 m short of the pulley. Collisions: Newton's
+    experimental law with restitution e; the slope collision is integrated at 1200 steps per second
+    with static/kinetic friction. Force arrows share one scale in newtons.
+    One file of vanilla JavaScript, no libraries beyond the shared KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const G=9.8, CLR=0.40, HB=0.45, R=Math.PI/180;   /* CLR: designed clearance to the pulley; HB: height of a hanging block (m) */
+const fmt=(v,d=2)=>!isFinite(v)?"—":(v<0?"−":"")+Math.abs(v).toFixed(d);
+const MONO="11px ui-monospace,Menlo,monospace";
+const S={sc:"A",m1:2.0,m2:1.5,m3:3.0,th1:30,th2:45,mu:0.20,e:0.80,u1:4.0,u2:-1.0,u3:0,u:16,al:45,h0:0,t:0,last:0,cache:null};
+
+/* which controls each scenario shows */
+const SHOW={
+  A:["cM1","cTh1","cMu"],
+  B:["cM1","cM2","cTh1","cMu"],
+  C:["cM1","cM2","cTh1","cTh2","cMu"],
+  E:["cM1","cM2","cMu"],
+  F:["cM1","cM2","cM3","cMu"],
+  G:["cM1","cM2"],
+  D:["cM1","cM2","cE","cU1","cU2"],
+  H:["cM1","cM2","cTh1","cMu","cE","cU1"],
+  I:["cM1","cM2","cM3","cE","cU1","cU2","cU3"],
+  J:["cU","cAl","cH0"]
+};
+const ALLC=["cM1","cM2","cM3","cTh1","cTh2","cMu","cE","cU1","cU2","cU3","cU","cAl","cH0"];
+function refreshCtls(){
+  ALLC.forEach(id=>document.getElementById(id).style.display=SHOW[S.sc].includes(id)?"block":"none");
+  document.getElementById("lU1").innerHTML=S.sc==="H"?"projection speed u&#8321; (up the slope)":"initial u&#8321; (&rarr;)";
+}
+
+/* equations and misconception text per scenario (TeX rendered by the shared layer) */
+const EQ={
+  A:'\\(\\displaystyle ma = mg\\sin\\theta-\\mu mg\\cos\\theta \\) <span class="mutx">·</span> \\(\\displaystyle N=mg\\cos\\theta \\) <span class="mutx">· so \\(\\displaystyle a=g(\\sin\\theta-\\mu\\cos\\theta) \\), no m</span>',
+  B:'\\(\\displaystyle m_2 g - T = m_2 a \\) <span class="mutx">·</span> \\(\\displaystyle T - m_1 g\\sin\\theta - \\mu m_1 g\\cos\\theta = m_1 a \\) <span class="mutx">· after \\(\\displaystyle m_2 \\) lands: \\(\\displaystyle m_1 a\' = -m_1 g(\\sin\\theta+\\mu\\cos\\theta) \\)</span>',
+  C:'\\(\\displaystyle m_1 g\\sin\\theta_1 - T - F_1 = m_1 a \\) <span class="mutx">·</span> \\(\\displaystyle T - m_2 g\\sin\\theta_2 - F_2 = m_2 a \\) <span class="mutx">· \\(\\displaystyle F_i=\\mu m_i g\\cos\\theta_i \\)</span>',
+  E:'\\(\\displaystyle m_2 g - T = m_2 a \\) <span class="mutx">·</span> \\(\\displaystyle T-\\mu m_1 g = m_1 a \\) <span class="mutx">· slack: \\(\\displaystyle a\' = -\\mu g \\), \\(\\displaystyle s=\\dfrac{v^2}{2\\mu g} \\)</span>',
+  F:'\\(\\displaystyle m_3 g - T_3 = m_3 a \\) <span class="mutx">·</span> \\(\\displaystyle T_3 - T_2 - \\mu m_1 g = m_1 a \\) <span class="mutx">·</span> \\(\\displaystyle T_2 - m_2 g = m_2 a \\)',
+  G:'\\(\\displaystyle m_1 g - T = m_1 a \\) <span class="mutx">·</span> \\(\\displaystyle T - m_2 g = m_2 a \\) <span class="mutx">· so \\(\\displaystyle a=\\dfrac{(m_1-m_2)g}{m_1+m_2},\\ T=\\dfrac{2m_1 m_2 g}{m_1+m_2} \\)</span>',
+  D:'\\(\\displaystyle m_1u_1+m_2u_2=m_1v_1+m_2v_2 \\) <span class="mutx">·</span> \\(\\displaystyle e=\\dfrac{v_2-v_1}{u_1-u_2} \\) <span class="mutx">·</span> \\(\\displaystyle J=m_1(v_1-u_1) \\)',
+  H:'<span class="mutx">along the slope:</span> \\(\\displaystyle m\\ddot s = -mg\\sin\\theta \\mp \\mu mg\\cos\\theta \\) <span class="mutx">· at impact</span> \\(\\displaystyle e=\\dfrac{v_2-v_1}{u_1-u_2} \\)',
+  I:'<span class="mutx">each impact:</span> \\(\\displaystyle m_iu_i+m_ju_j=m_iv_i+m_jv_j \\) <span class="mutx">·</span> \\(\\displaystyle e=\\dfrac{v_j-v_i}{u_i-u_j} \\) <span class="mutx">· total momentum never changes</span>',
+  J:'\\(\\displaystyle x=u\\cos\\alpha\\,t \\) <span class="mutx">·</span> \\(\\displaystyle y=h_0+u\\sin\\alpha\\,t-\\tfrac12 gt^2 \\) <span class="mutx">·</span> \\(\\displaystyle R=\\dfrac{u^2\\sin 2\\alpha}{g} \\) <span class="mutx">(from ground level)</span>'
+};
+const MIS={
+  A:'Heavier does <b>not</b> slide faster. On a bare slope the mass cancels: a = g(sin&theta; &minus; &mu;cos&theta;), so doubling m&#8321; changes <span class="live">nothing</span>. Mass only starts to matter when something <i>else</i> joins the system (a rope, a second block).',
+  B:'When the hanging mass hits the floor the block does <b>not</b> stop. The string goes slack, nothing pulls it any more, and it carries on up the slope on its own momentum, slowed only by gravity and friction: <span class="live" id="oLive">?</span> further. That extra distance, height and time is the classic CIE follow-up question.',
+  C:'The tension is <b>not</b> the weight of either block and it is <b>not</b> what "wins". Both blocks share one acceleration; the string only transmits the difference. After one lands the other runs on freely for <span class="live" id="oLive">?</span>.',
+  E:'A smooth table does not mean the block stops when the string slackens: with nothing to slow it, it keeps its speed all the way to the pulley. Friction is what limits the run-on; right now it is <span class="live" id="oLive">?</span>.',
+  F:'Two hanging masses do <b>not</b> cancel unless they are equal, and the two tensions are <b>different</b>: each string only knows about the mass it holds. Free run-on after the heavier one lands: <span class="live" id="oLive">?</span>.',
+  G:'In an Atwood machine the tension is <b>not</b> the weight of either mass; it sits strictly between the two weights. After the heavier mass lands the lighter one keeps rising freely by <span class="live" id="oLive">?</span>, stops, then falls until the string jerks taut.',
+  D:'Momentum is conserved to the last decimal even while kinetic energy is destroyed; check both readouts. Restitution e is a property of the impact, not of the speeds: lost KE this time is <span class="live" id="oLive">?</span>.',
+  H:'On a slope both particles feel the <b>same</b> acceleration, whatever their masses, so their gap closes at a constant rate until impact. After the bounce each one is slowed by friction and gravity in its own direction. Closing speed now: <span class="live" id="oLive">?</span>.',
+  I:'A collision is never "one event": momentum passes down the line one impact at a time, and the total never changes. Impacts so far: <span class="live" id="oLive">?</span>.',
+  J:'At the top of the flight the velocity is <b>not</b> zero: the horizontal part never changes. Only the vertical part goes through zero. Speed at the apex right now: <span class="live" id="oLive">?</span>.'
+};
+function setTexts(){
+  const e=document.getElementById("eqTxt");e.innerHTML=EQ[S.sc];window.piaRenderMath&&piaRenderMath(e);
+  document.getElementById("misTxt").innerHTML=MIS[S.sc];
+}
+
+/* ---------- the rope-rig planner (closed form) ----------
+   a   : acceleration of the connected system while the string is taut
+   a2  : deceleration of the free particle after the string goes slack (0 = it runs on at constant speed)
+   a3  : its acceleration back toward the landing point once it has stopped (0 = it stays put)
+   Lland: the most the landing particle may travel; Lfree: room on the free side before the clearance */
+function plan(a,a2,a3,Lland,Lfree){
+  let X,runsOff=false;
+  if(a2<=1e-9){X=Math.min(Lland,Lfree*0.5);runsOff=true;}
+  else X=Math.min(Lland,Lfree/(1+a/a2));
+  X=Math.max(0.3,X);
+  const t1=Math.sqrt(2*X/a),v1=a*t1;
+  const d2=runsOff?(Lfree-X):v1*v1/(2*a2);
+  const t2=runsOff?d2/v1:v1/a2;
+  const ret=!runsOff&&a3>1e-9;
+  const t3=ret?Math.sqrt(2*d2/a3):0,v3=ret?a3*t3:0;
+  return{a,a2,a3,X,t1,v1,d2,t2,ret,t3,v3,runsOff,tEnd:t1+t2+t3};
+}
+/* distance moved by the landing particle and by the free particle (in its rising direction) at time t */
+function sLand(p,t){return t<p.t1?0.5*p.a*t*t:p.X;}
+function sFree(p,t){
+  if(t<p.t1)return 0.5*p.a*t*t;
+  const u=t-p.t1;
+  if(u<p.t2)return p.runsOff?p.X+p.v1*u:p.X+p.v1*u-0.5*p.a2*u*u;
+  if(!p.ret)return p.X+p.d2;
+  const w=u-p.t2;
+  if(w<p.t3)return p.X+p.d2-0.5*p.a3*w*w;
+  return p.X;
+}
+function phaseOf(p,t){
+  if(t<p.t1)return 0;               // taut
+  if(t-p.t1<p.t2)return 1;          // slack, running on
+  if(p.ret&&t-p.t1-p.t2<p.t3)return 2; // returning
+  return 3;                          // done
+}
+const vFree=(p,t)=>{ if(t<p.t1)return p.a*t; const u=t-p.t1; if(u<p.t2)return p.runsOff?p.v1:p.v1-p.a2*u;
+  if(!p.ret)return 0; const w=u-p.t2; return w<p.t3?-p.a3*w:0; };
+
+/* ---------- scenario solvers ---------- */
+function solve(){
+  const t1=S.th1*R,t2=S.th2*R,mu=S.mu;
+  if(S.sc==="A"){
+    const W=S.m1*G,N=W*Math.cos(t1),drive=W*Math.sin(t1),fmax=mu*N;
+    if(drive<=fmax)return{stat:true,N,W,f:drive,a:0};
+    const a=G*(Math.sin(t1)-mu*Math.cos(t1));
+    return{stat:false,N,W,f:fmax,a,L:6,tEnd:Math.sqrt(12/a),vEnd:a*Math.sqrt(12/a)};
+  }
+  if(S.sc==="B"){
+    const Hv=Math.max(6*Math.sin(t1),3.4), plinth=Hv-6*Math.sin(t1);
+    const N=S.m1*G*Math.cos(t1),pull=S.m2*G,hold=S.m1*G*Math.sin(t1),fmax=mu*N;
+    const geo={Hv,plinth,run:6*Math.cos(t1)};
+    if(pull>hold+fmax){                                   // m2 descends, m1 climbs
+      const a=(pull-hold-fmax)/(S.m1+S.m2);
+      const p=plan(a,G*Math.sin(t1)+mu*G*Math.cos(t1),Math.max(0,G*(Math.sin(t1)-mu*Math.cos(t1))),Hv-HB-CLR,5.2);
+      return{stat:false,dir:+1,N,T:S.m2*(G-a),f:fmax,p,geo,rise:Math.sin(t1),
+        s0:p.X+p.d2+CLR,D0:Hv-HB-p.X};
+    }
+    if(hold>pull+fmax){                                   // m1 slides down, m2 rises
+      const a=(hold-pull-fmax)/(S.m1+S.m2);
+      const p=plan(a,G,G,5.3,Hv-0.7);
+      return{stat:false,dir:-1,N,T:S.m2*(G+a),f:fmax,p,geo,rise:1,s0:5.7-p.X,D0:p.X+p.d2+CLR};
+    }
+    return{stat:true,dir:0,N,T:S.m2*G,f:Math.abs(pull-hold),geo,s0:3,D0:Hv/2-HB/2};
+  }
+  if(S.sc==="C"){
+    const H=Math.min(6*Math.sin(t1),6*Math.sin(t2)),L1=H/Math.sin(t1),L2=H/Math.sin(t2);
+    const geo={H,L1,L2,run1:H/Math.tan(t1),run2:H/Math.tan(t2)};
+    const net=S.m1*G*Math.sin(t1)-S.m2*G*Math.sin(t2);
+    const fmax=mu*G*(S.m1*Math.cos(t1)+S.m2*Math.cos(t2));
+    if(Math.abs(net)<=fmax)return{stat:true,a:0,net,fmax,geo,s1:L1/2,s2:L2/2};
+    const dir=net>0?+1:-1;                                // +1: m1 descends
+    const a=(Math.abs(net)-fmax)/(S.m1+S.m2);
+    const [mr,tr,Ld,Lr]=dir>0?[S.m2,t2,L1,L2]:[S.m1,t1,L2,L1];
+    const T=mr*(G*Math.sin(tr)+mu*G*Math.cos(tr)+a);
+    const p=plan(a,G*Math.sin(tr)+mu*G*Math.cos(tr),Math.max(0,G*(Math.sin(tr)-mu*Math.cos(tr))),Ld-0.7,Lr-0.7);
+    const sd0=Ld-0.3-p.X,sr0=p.X+p.d2+CLR;
+    return{stat:false,dir,a,T,p,geo,net,fmax,rise:Math.sin(tr),
+      s1:dir>0?sd0:sr0,s2:dir>0?sr0:sd0};
+  }
+  if(S.sc==="E"){
+    const Ht=3.2,geo={Ht,L:6};
+    const pull=S.m2*G,hold=mu*S.m1*G;
+    if(pull<=hold)return{stat:true,T:pull,f:pull,geo,s0:3,D0:Ht/2-HB/2};
+    const a=(pull-hold)/(S.m1+S.m2);
+    const p=plan(a,mu*G,0,Ht-HB-CLR,5.2);
+    return{stat:false,a,T:S.m2*(G-a),f:hold,p,geo,rise:0,s0:p.runsOff?5.6:p.X+p.d2+CLR,D0:Ht-HB-p.X};
+  }
+  if(S.sc==="F"){
+    const Ht=3.2,geo={Ht,L:6};
+    const heavyRight=S.m3>=S.m2, mh=heavyRight?S.m3:S.m2, ml=heavyRight?S.m2:S.m3;
+    const net=(mh-ml)*G,fmax=mu*S.m1*G;
+    if(net<=fmax)return{stat:true,T2:S.m2*G,T3:S.m3*G,f:net,geo,heavyRight,s0:3,Dh0:Ht/2-HB/2,Dl0:Ht/2-HB/2};
+    const a=(net-fmax)/(S.m1+S.m2+S.m3);
+    const Th=mh*(G-a),Tl=ml*(G+a);
+    const a2=(ml*G+mu*S.m1*G)/(S.m1+ml), a3=Math.max(0,(ml*G-mu*S.m1*G)/(S.m1+ml));
+    const p=plan(a,a2,a3,Ht-HB-CLR,Math.min(Ht-HB-CLR,5.2));
+    return{stat:false,a,Th,Tl,T2:heavyRight?Tl:Th,T3:heavyRight?Th:Tl,f:fmax,p,geo,heavyRight,rise:1,
+      Tl2:ml*(G-a2),s0:p.X+p.d2+CLR,Dh0:Ht-HB-p.X,Dl0:p.X+p.d2+CLR};
+  }
+  if(S.sc==="G"){
+    const Hp=4.2,geo={Hp};
+    if(Math.abs(S.m1-S.m2)<1e-9)return{stat:true,T:S.m1*G,geo,heavyLeft:true,Dh0:Hp/2-HB/2,Dl0:Hp/2-HB/2};
+    const heavyLeft=S.m1>S.m2,mh=Math.max(S.m1,S.m2),ml=Math.min(S.m1,S.m2);
+    const a=(mh-ml)*G/(mh+ml),T=mh*(G-a);
+    const p=plan(a,G,G,Hp-HB-CLR,Hp-HB-CLR);
+    return{stat:false,a,T,p,geo,heavyLeft,rise:1,Dh0:Hp-HB-p.X,Dl0:p.X+p.d2+CLR};
+  }
+  if(S.sc==="D"){
+    const close=S.u1-S.u2, gap=5.5-0.6;
+    if(close<=0.01)return{meet:false};
+    const tS=gap/close, P=S.m1*S.u1+S.m2*S.u2;
+    const v1=(P-S.m2*S.e*close)/(S.m1+S.m2), v2=(P+S.m1*S.e*close)/(S.m1+S.m2);
+    const KE0=0.5*S.m1*S.u1*S.u1+0.5*S.m2*S.u2*S.u2, KE1=0.5*S.m1*v1*v1+0.5*S.m2*v2*v2;
+    return{meet:true,tS,v1,v2,P,KE0,KE1,J:S.m1*(v1-S.u1)};
+  }
+  if(S.sc==="H")return S.cache||(S.cache=simSlope());
+  if(S.sc==="I")return S.cache||(S.cache=simThree());
+  if(S.sc==="J"){
+    const al=S.al*R,ux=S.u*Math.cos(al),uy=S.u*Math.sin(al);
+    const tf=(uy+Math.sqrt(uy*uy+2*G*S.h0))/G, Rn=ux*tf, tA=uy/G, hA=S.h0+uy*uy/(2*G);
+    const vyf=uy-G*tf, vf=Math.hypot(ux,vyf), angF=Math.atan2(-vyf,ux)/R;
+    const al2=(90-S.al)*R, uy2=S.u*Math.sin(al2), ux2=S.u*Math.cos(al2);
+    const tf2=(uy2+Math.sqrt(uy2*uy2+2*G*S.h0))/G, R2=ux2*tf2, h2=S.h0+uy2*uy2/(2*G);
+    return{ux,uy,tf,Rn,tA,hA,vf,angF,al2:90-S.al,R2,h2,tf2};
+  }
+}
+
+/* numeric: two particles on a rough slope, m1 projected up from below, m2 above (at rest or sliding) */
+function simSlope(){
+  const th=S.th1*R,mu=S.mu,sin=Math.sin(th),cos=Math.cos(th);
+  const L=6, dt=1/1200, samples=[], events=[];
+  let s=[1.5,4.5], v=[S.u1,0], alive=[true,true], t=0;
+  const rad=[0.17,0.17];
+  const accel=(vi)=>{                                   // along the slope, up positive
+    if(Math.abs(vi)>1e-6)return -G*sin-Math.sign(vi)*mu*G*cos;
+    return (sin>mu*cos)?-(G*sin-mu*G*cos):0;             // static friction holds if tanθ ≤ μ
+  };
+  let n=0, collided=0, done=false, tRest=[null,null], tBottom=[null,null];
+  while(t<14&&!done){
+    if(n%10===0)samples.push([t,s[0],s[1],v[0],v[1]]);
+    for(let i=0;i<2;i++){
+      if(!alive[i])continue;
+      const a=accel(v[i]);
+      let vn=v[i]+a*dt;
+      if(Math.abs(v[i])>1e-6&&Math.sign(vn)!==Math.sign(v[i])&&Math.sign(v[i])!==0){vn=0;}     // came to rest this step
+      if(Math.abs(vn)<1e-6&&sin<=mu*cos){vn=0;}
+      s[i]+=0.5*(v[i]+vn)*dt; v[i]=vn;
+      if(s[i]<=rad[i]){s[i]=rad[i];v[i]=0;alive[i]=false;tBottom[i]=t;events.push({t,k:"bottom",i});}
+      if(s[i]>=L-0.2){s[i]=L-0.2;v[i]=0;alive[i]=false;events.push({t,k:"top",i});}
+    }
+    if(alive[0]&&alive[1]&&s[0]+rad[0]>=s[1]-rad[1]&&v[0]>v[1]){
+      const P=S.m1*v[0]+S.m2*v[1],close=v[0]-v[1];
+      const n1=(P-S.m2*S.e*close)/(S.m1+S.m2),n2=(P+S.m1*S.e*close)/(S.m1+S.m2);
+      events.push({t,k:"hit",u1:v[0],u2:v[1],v1:n1,v2:n2,J:S.m1*(n1-v[0])});
+      v[0]=n1;v[1]=n2;s[0]=s[1]-rad[0]-rad[1]-1e-4;collided++;
+    }
+    t+=dt;n++;
+    const still=(i)=>!alive[i]||(Math.abs(v[i])<1e-6&&(sin<=mu*cos));
+    if(still(0)&&still(1)&&t>0.3)done=true;
+  }
+  samples.push([t,s[0],s[1],v[0],v[1]]);
+  return{samples,events,tEnd:t,static2:sin<=mu*cos};
+}
+/* exact event-driven: three balls on a smooth track */
+function simThree(){
+  const m=[S.m1,S.m2,S.m3];let x=[1.5,5,8.5],v=[S.u1,S.u2,S.u3];
+  const r=m.map(mm=>0.16*Math.pow(mm/2,1/3));
+  const P0=m[0]*v[0]+m[1]*v[1]+m[2]*v[2],KE0=0.5*(m[0]*v[0]**2+m[1]*v[1]**2+m[2]*v[2]**2);
+  const segs=[];let t=0;const events=[];
+  for(let k=0;k<12;k++){
+    let best=Infinity,pair=-1;
+    for(let i=0;i<2;i++){const cl=v[i]-v[i+1];if(cl>1e-9){const g=x[i+1]-x[i]-r[i]-r[i+1];const tc=g/cl;if(tc<best){best=tc;pair=i;}}}
+    if(pair<0||t+best>14){segs.push({t0:t,t1:14,x:x.slice(),v:v.slice()});break;}
+    segs.push({t0:t,t1:t+best,x:x.slice(),v:v.slice()});
+    x=x.map((xi,i)=>xi+v[i]*best);t+=best;
+    const i=pair,j=pair+1,P=m[i]*v[i]+m[j]*v[j],cl=v[i]-v[j];
+    const vi=(P-m[j]*S.e*cl)/(m[i]+m[j]),vj=(P+m[i]*S.e*cl)/(m[i]+m[j]);
+    events.push({t,i,j,ui:v[i],uj:v[j],vi,vj});v[i]=vi;v[j]=vj;
+  }
+  const KE1=0.5*(m[0]*v[0]**2+m[1]*v[1]**2+m[2]*v[2]**2),P1=m[0]*v[0]+m[1]*v[1]+m[2]*v[2];
+  return{segs,events,r,P0,P1,KE0,KE1,vEnd:v,tEnd:events.length?events[events.length-1].t+1.5:3};
+}
+
+/* ---------- drawing helpers ---------- */
+function arrow(g,x,y,dx,dy,color,label,lw=2.4){
+  const L=Math.hypot(dx,dy);if(L<3)return;
+  const ux=dx/L,uy=dy/L;
+  g.strokeStyle=color;g.lineWidth=lw;
+  g.beginPath();g.moveTo(x,y);g.lineTo(x+dx,y+dy);g.stroke();
+  g.beginPath();
+  g.moveTo(x+dx,y+dy);g.lineTo(x+dx-ux*8-uy*4.5,y+dy-uy*8+ux*4.5);
+  g.moveTo(x+dx,y+dy);g.lineTo(x+dx-ux*8+uy*4.5,y+dy-uy*8-ux*4.5);
+  g.stroke();
+  if(label){
+    g.font=MONO;g.fillStyle=color;g.textAlign="left";
+    g.fillText(label,x+dx+(ux>=0?6:-6-g.measureText(label).width),y+dy+(uy>0?12:-6));
+  }
+}
+function blockOn(g,x,y,ang,size,color,tag){
+  g.save();g.translate(x,y);g.rotate(ang);
+  g.fillStyle=color;g.fillRect(-size/2,-size,size,size);
+  g.strokeStyle=C.edge;g.lineWidth=2;g.strokeRect(-size/2,-size,size,size);
+  if(tag){g.fillStyle=C.edge;g.font="bold 11px ui-monospace,Menlo,monospace";g.textAlign="center";g.fillText(tag,0,-size/2+4);}
+  g.restore();
+}
+function pulley(g,x,y,r=9){g.fillStyle=C.mut;g.beginPath();g.arc(x,y,r,0,7);g.fill();g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+  g.fillStyle=C.edge;g.beginPath();g.arc(x,y,2,0,7);g.fill();}
+function rope(g,pts,slack){g.strokeStyle=slack?C.mutA+"0.55)":C.amber;g.lineWidth=1.6;if(slack)g.setLineDash([4,4]);
+  g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.stroke();g.setLineDash([]);}
+function hang(g,x,yTop,size,color,tag){g.fillStyle=color;g.fillRect(x-size/2,yTop,size,size);g.strokeStyle=C.edge;g.lineWidth=2;g.strokeRect(x-size/2,yTop,size,size);
+  if(tag){g.fillStyle=C.edge;g.font="bold 11px ui-monospace,Menlo,monospace";g.textAlign="center";g.fillText(tag,x,yTop+size/2+4);}}
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    k==="#"?`<div class="r hd">${v}</div>`:`<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+function live(txt){const e=document.getElementById("oLive");if(e)e.textContent=txt;}
+/* world (metres, y up, floor at 0) to pixels, fitted to the canvas: fixes the "big angle runs off screen" bug */
+function view(W,H,xmin,xmax,ymin,ymax){
+  const pxm=Math.min((W-80)/(xmax-xmin),(H-96)/(ymax-ymin));
+  const ox=(W-(xmax-xmin)*pxm)/2-xmin*pxm, floorY=H-52;
+  return{pxm,X:x=>ox+x*pxm,Y:y=>floorY-(y-ymin)*pxm,floorY};
+}
+function floorLine(g,W,y){g.strokeStyle=C.axis;g.lineWidth=2;g.beginPath();g.moveTo(20,y);g.lineTo(W-20,y);g.stroke();}
+function ropeReadout(p,riseK,unitH){
+  const out=[["#","after the landing (string slack)"],
+    ["speed when it lands",fmt(p.v1)+" m/s","acc"]];
+  if(p.runsOff)out.push(["run-on","constant speed, reaches the pulley","hot"],["time to the pulley",fmt(p.t2)+" s after landing","amber"]);
+  else{
+    out.push(["further distance",fmt(p.d2)+" m","amber"]);
+    if(riseK>0)out.push(["further height gained",fmt(p.d2*riseK)+" m","amber"]);
+    out.push(["time to stop",fmt(p.t2)+" s after landing","blue"],["stops at t",fmt(p.t1+p.t2)+" s",""]);
+    if(p.ret)out.push(["string taut again at t",fmt(p.t1+p.t2+p.t3)+" s","hot"],["speed at the jerk",fmt(p.v3)+" m/s",""]);
+    else out.push(["then","stays at rest (held by friction)",""]);
+    out.push(["clearance to the pulley",fmt(CLR)+" m by design","acc"]);
+  }
+  return out;
+}
+function phaseMsg(p,t,nameLand,nameFree){
+  const ph=phaseOf(p,t);
+  if(ph===0)return null;
+  if(ph===1)return p.runsOff?nameLand+" landed at t = "+fmt(p.t1)+" s; string slack, "+nameFree+" runs on at constant speed":
+    nameLand+" landed at t = "+fmt(p.t1)+" s; string slack, "+nameFree+" runs on";
+  if(ph===2)return nameFree+" stopped at t = "+fmt(p.t1+p.t2)+" s, now sliding back";
+  if(p.runsOff)return nameFree+" reached the pulley at t = "+fmt(p.t1+p.t2)+" s";
+  return p.ret?"string taut again at t = "+fmt(p.t1+p.t2+p.t3)+" s (jerk at "+fmt(p.v3)+" m/s)":nameFree+" stopped at t = "+fmt(p.t1+p.t2)+" s, "+fmt(p.d2)+" m beyond";
+}
+
+/* ---------- scenario painters ---------- */
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  const sol=solve();
+  const t1=S.th1*R,t2=S.th2*R;
+  const mmax=Math.max(S.m1,S.sc==="A"?S.m1:S.m2,(S.sc==="F"||S.sc==="I")?S.m3:0);
+  const FS=46/(G*mmax);                                     // px per newton, one common scale
+  const clock=(txt,warn)=>{
+    g.font="12px ui-monospace,Menlo,monospace";g.textAlign="left";
+    g.fillStyle=C.mut;g.fillText("t = "+S.t.toFixed(2)+" s",12,20);
+    if(txt){g.fillStyle=warn?C.amber:C.acc;g.fillText(txt,12,38);}
+  };
+  const label=(txt,x,y,col,al)=>{g.font=MONO;g.fillStyle=col||C.mut;g.textAlign=al||"left";g.fillText(txt,x,y);};
+
+  /* ===== A: single block on a slope ===== */
+  if(S.sc==="A"){
+    const run=6*Math.cos(t1),rise=6*Math.sin(t1);
+    const v=view(W,H,-0.4,run+1.6,0,Math.max(rise,2.2));
+    floorLine(g,W,v.floorY);
+    g.fillStyle=C.panel;g.strokeStyle=C.mut;g.lineWidth=2.5;
+    g.beginPath();g.moveTo(v.X(0),v.Y(0));g.lineTo(v.X(run),v.Y(rise));g.lineTo(v.X(run),v.Y(0));g.closePath();g.fill();g.stroke();
+    label("θ₁ = "+S.th1+"°",v.X(0)+46,v.Y(0)-8);
+    const s=sol.stat?0:Math.min(6,0.5*sol.a*S.t*S.t), done=!sol.stat&&s>=6;
+    const d=6.15-s;                                          // distance from the bottom along the slope
+    const px=v.X(d*Math.cos(t1)),py=v.Y(d*Math.sin(t1));
+    const bs=Math.max(22,Math.min(34,v.pxm*0.5));
+    blockOn(g,px,py,-t1,bs,C.acc,"m₁");
+    const cx=px,cy=py-bs*0.4,Wn=S.m1*G,up={x:Math.cos(t1),y:-Math.sin(t1)};
+    arrow(g,cx,cy,0,Wn*FS,C.mut,"W = "+fmt(Wn,1)+" N");
+    arrow(g,cx,cy,-Math.sin(t1)*sol.N*FS,-Math.cos(t1)*sol.N*FS,C.blue,"N = "+fmt(sol.N,1)+" N");
+    if(sol.f>0.01)arrow(g,cx,cy,up.x*sol.f*FS,up.y*sol.f*FS,C.hot,"f = "+fmt(sol.f,1)+" N");
+    clock(sol.stat?"tanθ ≤ μ — static, it stays put":(done?"reached the bottom at t = "+fmt(sol.tEnd)+" s":""),sol.stat);
+    rows(sol.stat?[["state","STATIC","amber"],["friction needed",fmt(sol.f,1)+" N",""],["normal force N",fmt(sol.N,1)+" N","blue"],["acceleration","0.00 m/s²","acc"]]
+      :[["acceleration a",fmt(sol.a)+" m/s²","acc"],["friction (kinetic)",fmt(sol.f,1)+" N","hot"],["normal force N",fmt(sol.N,1)+" N","blue"],
+        ["time to bottom (6 m)",fmt(sol.tEnd)+" s","amber"],["speed at the bottom",fmt(sol.vEnd)+" m/s",""]]);
+  }
+
+  /* ===== B: slope + hanging mass over a pulley at the apex ===== */
+  if(S.sc==="B"){
+    const{Hv,plinth,run}=sol.geo, hx=run+0.55;
+    const v=view(W,H,-0.3,run+1.5,0,Hv+0.4);
+    floorLine(g,W,v.floorY);
+    g.fillStyle=C.panel;g.strokeStyle=C.mut;g.lineWidth=2.5;
+    g.beginPath();g.moveTo(v.X(0),v.Y(0));g.lineTo(v.X(0),v.Y(plinth));g.lineTo(v.X(run),v.Y(Hv));g.lineTo(v.X(run),v.Y(0));g.closePath();g.fill();g.stroke();
+    label("θ₁ = "+S.th1+"°",v.X(0)+46,v.Y(plinth)-8);
+    const ax=v.X(run),ay=v.Y(Hv);
+    const p=sol.p, t=S.t;
+    let sM1,dM2,slack=false;
+    if(sol.stat){sM1=sol.s0;dM2=sol.D0;}
+    else if(sol.dir>0){sM1=sol.s0-sFree(p,t);dM2=sol.D0+sLand(p,t);slack=phaseOf(p,t)>0;}
+    else{sM1=sol.s0+sLand(p,t);dM2=sol.D0-sFree(p,t);slack=phaseOf(p,t)>0;}
+    const bs=Math.max(20,Math.min(32,v.pxm*0.45));
+    const px=v.X(run-sM1*Math.cos(t1)),py=v.Y(Hv-sM1*Math.sin(t1));
+    blockOn(g,px,py,-t1,bs,C.acc,"m₁");
+    const m2x=v.X(hx),hb=HB*v.pxm,m2top=v.Y(Hv-dM2);
+    pulley(g,ax+6,ay-8,Math.max(6,Math.min(9,v.pxm*0.12)));
+    rope(g,[[px-Math.sin(t1)*bs*0.5,py-Math.cos(t1)*bs*0.5],[ax+2,ay-14],[m2x,ay-8],[m2x,m2top]],slack);
+    hang(g,m2x,m2top,hb,C.blue,"m₂");
+    /* forces on m1 */
+    const up={x:Math.cos(t1),y:-Math.sin(t1)},cx=px,cy=py-bs*0.4,W1=S.m1*G,W2=S.m2*G;
+    arrow(g,cx,cy,0,W1*FS,C.mut,"W₁ = "+fmt(W1,1)+" N");
+    arrow(g,cx,cy,-Math.sin(t1)*sol.N*FS,-Math.cos(t1)*sol.N*FS,C.blue,"N = "+fmt(sol.N,1)+" N");
+    const ph=sol.stat?0:phaseOf(p,t);
+    if(ph===0)arrow(g,cx,cy,up.x*sol.T*FS,up.y*sol.T*FS,C.amber,"T = "+fmt(sol.T,1)+" N");
+    let fdir=0;
+    if(sol.stat)fdir=0; else if(ph===0)fdir=sol.dir>0?-1:+1; else if(sol.dir>0){const vf=vFree(p,t);fdir=vf>1e-6?-1:(vf<-1e-6?+1:0);}
+    if(sol.f>0.01&&fdir)arrow(g,cx,cy,fdir*up.x*sol.f*FS,fdir*up.y*sol.f*FS,C.hot,"f = "+fmt(sol.f,1)+" N");
+    if(sol.stat&&sol.f>0.01)arrow(g,cx,cy,(sol.T>S.m1*G*Math.sin(t1)?-1:1)*up.x*sol.f*FS,(sol.T>S.m1*G*Math.sin(t1)?-1:1)*up.y*sol.f*FS,C.hot,"f = "+fmt(sol.f,1)+" N");
+    /* forces on m2 */
+    arrow(g,m2x,m2top+hb/2,0,W2*FS,C.mut,"W₂ = "+fmt(W2,1)+" N");
+    if(ph===0)arrow(g,m2x,m2top+hb/2,0,-sol.T*FS,C.amber,"T");
+    if(sol.stat){clock("balanced within friction — static",true);
+      rows([["state","STATIC","amber"],["tension T",fmt(sol.T,1)+" N","amber"],["friction in play",fmt(sol.f,1)+" N",""],["acceleration","0.00 m/s²","acc"]]);live("—");}
+    else{
+      const msg=phaseMsg(p,t,sol.dir>0?"m₂":"m₁",sol.dir>0?"m₁":"m₂");
+      clock(msg||(sol.dir>0?"string taut: m₂ descending, m₁ climbing":"string taut: m₁ sliding down, m₂ rising"),false);
+      rows([["#","string taut"],["acceleration a",fmt(sol.a||p.a)+" m/s²","acc"],["tension T",fmt(sol.T,1)+" N","amber"],
+        ["direction",sol.dir>0?"m₂ falls, m₁ climbs":"m₁ slides down, m₂ rises",""],
+        [sol.dir>0?"m₂ falls":"m₁ slides",fmt(p.X)+" m before landing",""],["lands at t",fmt(p.t1)+" s","blue"],
+        ...ropeReadout(p,sol.rise)]);
+      live(fmt(p.d2)+" m, "+fmt(p.t2)+" s");
+    }
+  }
+
+  /* ===== C: twin slopes, pulley at the shared apex ===== */
+  if(S.sc==="C"){
+    const{H:Hh,L1,L2,run1,run2}=sol.geo;
+    const v=view(W,H,-run1-0.4,run2+0.4,0,Hh+0.5);
+    floorLine(g,W,v.floorY);
+    const ax=v.X(0),ay=v.Y(Hh);
+    g.fillStyle=C.panel;g.strokeStyle=C.mut;g.lineWidth=2.5;
+    g.beginPath();g.moveTo(v.X(-run1),v.Y(0));g.lineTo(ax,ay);g.lineTo(v.X(run2),v.Y(0));g.closePath();g.fill();g.stroke();
+    label("θ₁ = "+S.th1+"°",v.X(-run1)+34,v.Y(0)-8);label("θ₂ = "+S.th2+"°",v.X(run2)-34,v.Y(0)-8,C.mut,"right");
+    pulley(g,ax,ay-9);
+    const p=sol.p,t=S.t;
+    let s1,s2,slack=false;
+    if(sol.stat){s1=sol.s1;s2=sol.s2;}
+    else if(sol.dir>0){s1=sol.s1+sLand(p,t);s2=sol.s2-sFree(p,t);slack=phaseOf(p,t)>0;}
+    else{s2=sol.s2+sLand(p,t);s1=sol.s1-sFree(p,t);slack=phaseOf(p,t)>0;}
+    const bs=Math.max(20,Math.min(32,v.pxm*0.45));
+    const p1={x:v.X(-s1*Math.cos(t1)),y:v.Y(Hh-s1*Math.sin(t1))};
+    const p2={x:v.X(s2*Math.cos(t2)),y:v.Y(Hh-s2*Math.sin(t2))};
+    blockOn(g,p1.x,p1.y,t1,bs,C.acc,"m₁");
+    blockOn(g,p2.x,p2.y,-t2,bs,C.blue,"m₂");
+    rope(g,[[p1.x+Math.sin(t1)*bs*0.5,p1.y-Math.cos(t1)*bs*0.5],[ax-7,ay-12]],slack);
+    rope(g,[[p2.x-Math.sin(t2)*bs*0.5,p2.y-Math.cos(t2)*bs*0.5],[ax+7,ay-12]],slack);
+    const W1=S.m1*G,W2=S.m2*G,u1={x:-Math.cos(t1),y:Math.sin(t1)},u2={x:Math.cos(t2),y:Math.sin(t2)};
+    arrow(g,p1.x,p1.y-bs*0.4,0,W1*FS,C.mut,"W₁ = "+fmt(W1,1)+" N");
+    arrow(g,p2.x,p2.y-bs*0.4,0,W2*FS,C.mut,"W₂ = "+fmt(W2,1)+" N");
+    const ph=sol.stat?0:phaseOf(p,t);
+    if(!sol.stat&&ph===0){
+      arrow(g,p1.x,p1.y-bs*0.4,-u1.x*sol.T*FS,-u1.y*sol.T*FS,C.amber,"T = "+fmt(sol.T,1)+" N");
+      arrow(g,p2.x,p2.y-bs*0.4,-u2.x*sol.T*FS,-u2.y*sol.T*FS,C.amber,"T");
+    }
+    if(sol.stat){clock("|m₁g sinθ₁ − m₂g sinθ₂| ≤ μN total — static",true);
+      rows([["state","STATIC","amber"],["net pull",fmt(Math.abs(sol.net),1)+" N",""],["max static friction",fmt(sol.fmax,1)+" N","hot"],["acceleration","0.00 m/s²","acc"]]);live("—");}
+    else{
+      const msg=phaseMsg(p,t,sol.dir>0?"m₁":"m₂",sol.dir>0?"m₂":"m₁");
+      clock(msg||(sol.dir>0?"string taut: m₁ wins, descending left":"string taut: m₂ wins, descending right"),false);
+      rows([["#","string taut"],["acceleration a",fmt(sol.a)+" m/s²","acc"],["tension T",fmt(sol.T,1)+" N","amber"],
+        ["descending side",sol.dir>0?"m₁ (left)":"m₂ (right)",""],["it slides",fmt(p.X)+" m before landing",""],["lands at t",fmt(p.t1)+" s","blue"],
+        ...ropeReadout(p,sol.rise)]);
+      live(fmt(p.d2)+" m, "+fmt(p.t2)+" s");
+    }
+  }
+
+  /* ===== E: block on a table, one hanging mass over the right edge ===== */
+  if(S.sc==="E"){
+    const{Ht,L}=sol.geo;
+    const v=view(W,H,-0.3,L+1.6,0,Ht+0.6);
+    floorLine(g,W,v.floorY);
+    g.fillStyle=C.panel;g.strokeStyle=C.mut;g.lineWidth=2.5;
+    g.beginPath();g.rect(v.X(0),v.Y(Ht),(v.X(L)-v.X(0)),v.Y(0)-v.Y(Ht));g.fill();g.stroke();
+    label(S.mu>0?"rough table, μ = "+S.mu.toFixed(2):"smooth table (μ = 0)",v.X(0.3),v.Y(Ht)+18,C.dim);
+    const ex=v.X(L),ey=v.Y(Ht);pulley(g,ex+4,ey-8);
+    const p=sol.p,t=S.t;
+    let s0,D,slack=false;
+    if(sol.stat){s0=sol.s0;D=sol.D0;}else{s0=sol.s0-sFree(p,t);D=sol.D0+sLand(p,t);slack=phaseOf(p,t)>0;}
+    const bs=Math.max(22,Math.min(34,v.pxm*0.45));
+    const px=v.X(L-s0),py=ey;
+    blockOn(g,px,py,0,bs,C.acc,"m₁");
+    const m2x=v.X(L+0.55),hb=HB*v.pxm,m2top=v.Y(Ht-D);
+    rope(g,[[px+bs/2,py-bs/2],[ex+4,ey-17],[m2x,ey-8],[m2x,m2top]],slack);
+    hang(g,m2x,m2top,hb,C.blue,"m₂");
+    const W1=S.m1*G,W2=S.m2*G,cx=px,cy=py-bs*0.5;
+    arrow(g,cx,cy,0,W1*FS,C.mut,"W₁ = "+fmt(W1,1)+" N");
+    arrow(g,cx,cy,0,-W1*FS,C.blue,"N = "+fmt(W1,1)+" N");
+    const ph=sol.stat?0:phaseOf(p,t);
+    if(ph===0&&!sol.stat)arrow(g,cx,cy,sol.T*FS,0,C.amber,"T = "+fmt(sol.T,1)+" N");
+    if(sol.stat&&sol.f>0.01)arrow(g,cx,py-3,-sol.f*FS,0,C.hot,"f = "+fmt(sol.f,1)+" N");
+    if(!sol.stat&&sol.f>0.01&&(ph===0||(ph===1&&!p.runsOff)))arrow(g,cx,py-3,-sol.f*FS,0,C.hot,"f = "+fmt(sol.f,1)+" N");
+    arrow(g,m2x,m2top+hb/2,0,W2*FS,C.mut,"W₂ = "+fmt(W2,1)+" N");
+    if(ph===0&&!sol.stat)arrow(g,m2x,m2top+hb/2,0,-sol.T*FS,C.amber,"T");
+    if(sol.stat){clock("m₂g ≤ μm₁g — static",true);rows([["state","STATIC","amber"],["tension T",fmt(sol.T,1)+" N","amber"],["friction in play",fmt(sol.f,1)+" N",""],["acceleration","0.00 m/s²","acc"]]);live("—");}
+    else{
+      const msg=phaseMsg(p,t,"m₂","m₁");
+      clock(msg||"string taut: m₂ descending, m₁ sliding toward the edge",false);
+      rows([["#","string taut"],["acceleration a",fmt(sol.a)+" m/s²","acc"],["tension T",fmt(sol.T,1)+" N","amber"],["friction on m₁",fmt(sol.f,1)+" N","hot"],
+        ["m₂ falls",fmt(p.X)+" m before landing",""],["lands at t",fmt(p.t1)+" s","blue"],...ropeReadout(p,0)]);
+      live(p.runsOff?"zero, it never stops":fmt(p.d2)+" m in "+fmt(p.t2)+" s");
+    }
+  }
+
+  /* ===== F: block on a table, hanging masses over both edges ===== */
+  if(S.sc==="F"){
+    const{Ht,L}=sol.geo,hr=sol.heavyRight;
+    const v=view(W,H,-1.6,L+1.6,0,Ht+0.6);
+    floorLine(g,W,v.floorY);
+    g.fillStyle=C.panel;g.strokeStyle=C.mut;g.lineWidth=2.5;
+    g.beginPath();g.rect(v.X(0),v.Y(Ht),(v.X(L)-v.X(0)),v.Y(0)-v.Y(Ht));g.fill();g.stroke();
+    label(S.mu>0?"rough table, μ = "+S.mu.toFixed(2):"smooth table (μ = 0)",v.X(0.3),v.Y(Ht)+18,C.dim);
+    const ey=v.Y(Ht),lx=v.X(0),rx=v.X(L);pulley(g,lx-4,ey-8);pulley(g,rx+4,ey-8);
+    const p=sol.p,t=S.t;
+    let sH,Dh,Dl,slack=false,ph=0;                          // sH: m1 distance from the heavy-side edge
+    if(sol.stat){sH=sol.s0;Dh=sol.Dh0;Dl=sol.Dl0;}
+    else{sH=sol.s0-sFree(p,t);Dh=sol.Dh0+sLand(p,t);Dl=sol.Dl0-sFree(p,t);ph=phaseOf(p,t);slack=ph>0;}
+    const bs=Math.max(20,Math.min(32,v.pxm*0.45));
+    const px=hr?v.X(L-sH):v.X(sH),py=ey;
+    blockOn(g,px,py,0,bs,C.acc,"m₁");
+    const x2=v.X(-0.55),x3=v.X(L+0.55);
+    const D2=hr?Dl:Dh,D3=hr?Dh:Dl;
+    const hb=HB*v.pxm,top2=v.Y(Ht-D2),top3=v.Y(Ht-D3);
+    rope(g,[[px-bs/2,py-bs/2],[lx-4,ey-17],[x2,ey-8],[x2,top2]],slack&&!hr?false:false);
+    rope(g,[[px+bs/2,py-bs/2],[rx+4,ey-17],[x3,ey-8],[x3,top3]],false);
+    /* the string to the landed mass hangs slack: redraw it dashed */
+    if(slack){ if(hr)rope(g,[[px+bs/2,py-bs/2],[rx+4,ey-17],[x3,ey-8],[x3,top3]],true); else rope(g,[[px-bs/2,py-bs/2],[lx-4,ey-17],[x2,ey-8],[x2,top2]],true); }
+    hang(g,x2,top2,hb,C.blue,"m₂");hang(g,x3,top3,hb,C.violet,"m₃");
+    const W1=S.m1*G,cx=px,cy=py-bs*0.5;
+    arrow(g,cx,cy,0,W1*FS,C.mut,"W₁ = "+fmt(W1,1)+" N");
+    arrow(g,cx,cy,0,-W1*FS,C.blue,"N");
+    if(ph===0&&!sol.stat){arrow(g,cx,cy,-sol.T2*FS,0,C.amber,"T₂ = "+fmt(sol.T2,1)+" N");arrow(g,cx,cy,sol.T3*FS,0,C.amber,"T₃ = "+fmt(sol.T3,1)+" N");}
+    if(sol.stat){arrow(g,cx,cy,-sol.T2*FS,0,C.amber,"T₂ = "+fmt(sol.T2,1)+" N");arrow(g,cx,cy,sol.T3*FS,0,C.amber,"T₃ = "+fmt(sol.T3,1)+" N");
+      if(sol.f>0.01)arrow(g,cx,py-3,(hr?-1:1)*sol.f*FS,0,C.hot,"f = "+fmt(sol.f,1)+" N");}
+    else{
+      if(ph===0&&sol.f>0.01)arrow(g,cx,py-3,(hr?-1:1)*sol.f*FS,0,C.hot,"f = "+fmt(sol.f,1)+" N");
+      if(ph===1){const Tl=sol.Tl2;arrow(g,cx,cy,(hr?-1:1)*Tl*FS,0,C.amber,"T = "+fmt(Tl,1)+" N");if(sol.f>0.01)arrow(g,cx,py-3,(hr?-1:1)*sol.f*FS,0,C.hot,"f");}
+    }
+    arrow(g,x2,top2+hb/2,0,S.m2*G*FS,C.mut,"W₂ = "+fmt(S.m2*G,1)+" N");
+    arrow(g,x3,top3+hb/2,0,S.m3*G*FS,C.mut,"W₃ = "+fmt(S.m3*G,1)+" N");
+    if(ph===0||sol.stat){arrow(g,x2,top2+hb/2,0,-sol.T2*FS,C.amber,"T₂");arrow(g,x3,top3+hb/2,0,-sol.T3*FS,C.amber,"T₃");}
+    const hn=hr?"m₃":"m₂",ln=hr?"m₂":"m₃";
+    if(sol.stat){clock("|m₃ − m₂|g ≤ μm₁g — static",true);
+      rows([["state","STATIC","amber"],["tension T₂",fmt(sol.T2,1)+" N","amber"],["tension T₃",fmt(sol.T3,1)+" N","amber"],["friction in play",fmt(sol.f,1)+" N",""],["acceleration","0.00 m/s²","acc"]]);live("—");}
+    else{
+      const msg=phaseMsg(p,t,hn,"m₁ and "+ln);
+      clock(msg||("string taut: "+hn+" descending, m₁ sliding, "+ln+" rising"),false);
+      rows([["#","both strings taut"],["acceleration a",fmt(sol.a)+" m/s²","acc"],["tension T₂ (left)",fmt(sol.T2,1)+" N","amber"],["tension T₃ (right)",fmt(sol.T3,1)+" N","amber"],
+        ["friction on m₁",fmt(sol.f,1)+" N","hot"],[hn+" falls",fmt(p.X)+" m before landing",""],["lands at t",fmt(p.t1)+" s","blue"],
+        ...ropeReadout(p,1),["tension while running on",fmt(sol.Tl2,1)+" N","amber"]]);
+      live(fmt(p.d2)+" m, "+fmt(p.t2)+" s");
+    }
+  }
+
+  /* ===== G: Atwood machine ===== */
+  if(S.sc==="G"){
+    const{Hp}=sol.geo;
+    const v=view(W,H,-2.2,2.2,0,Hp+0.6);
+    floorLine(g,W,v.floorY);
+    const px0=v.X(0),py0=v.Y(Hp);
+    g.strokeStyle=C.axis;g.lineWidth=3;g.beginPath();g.moveTo(px0,py0-9);g.lineTo(px0,v.Y(Hp+0.55));g.stroke();
+    g.beginPath();g.moveTo(px0-40,v.Y(Hp+0.55));g.lineTo(px0+40,v.Y(Hp+0.55));g.stroke();
+    const pr=Math.max(10,Math.min(16,v.pxm*0.22));pulley(g,px0,py0,pr);
+    const p=sol.p,t=S.t,hl=sol.heavyLeft;
+    let Dh,Dl,ph=0;
+    if(sol.stat){Dh=sol.Dh0;Dl=sol.Dl0;}else{Dh=sol.Dh0+sLand(p,t);Dl=sol.Dl0-sFree(p,t);ph=phaseOf(p,t);}
+    const D1=hl?Dh:Dl,D2=hl?Dl:Dh;
+    const bs=HB*v.pxm;
+    const x1=px0-pr,x2=px0+pr;
+    const top1=v.Y(Hp-D1),top2=v.Y(Hp-D2);
+    rope(g,[[x1,py0],[x1,top1]],ph>0&&hl===false);  // slack side dashed: the landed mass's string
+    rope(g,[[x2,py0],[x2,top2]],ph>0&&hl===true);
+    g.strokeStyle=C.amber;g.lineWidth=1.6;g.beginPath();g.arc(px0,py0,pr,Math.PI,0);g.stroke();
+    hang(g,x1,top1,bs,C.acc,"m₁");hang(g,x2,top2,bs,C.blue,"m₂");
+    arrow(g,x1,top1+bs/2,0,S.m1*G*FS,C.mut,"W₁ = "+fmt(S.m1*G,1)+" N");
+    arrow(g,x2,top2+bs/2,0,S.m2*G*FS,C.mut,"W₂ = "+fmt(S.m2*G,1)+" N");
+    if(ph===0){arrow(g,x1,top1+bs/2,0,-sol.T*FS,C.amber,"T = "+fmt(sol.T,1)+" N");arrow(g,x2,top2+bs/2,0,-sol.T*FS,C.amber,"T");}
+    const hn=hl?"m₁":"m₂",ln=hl?"m₂":"m₁";
+    if(sol.stat){clock("m₁ = m₂ — balanced, static",true);rows([["state","STATIC","amber"],["tension T",fmt(sol.T,1)+" N","amber"],["acceleration","0.00 m/s²","acc"]]);live("—");}
+    else{
+      const msg=phaseMsg(p,t,hn,ln);
+      clock(msg||("string taut: "+hn+" descending, "+ln+" rising"),false);
+      rows([["#","string taut"],["acceleration a",fmt(sol.a)+" m/s²","acc"],["tension T",fmt(sol.T,1)+" N","amber"],
+        ["T sits between",fmt(Math.min(S.m1,S.m2)*G,1)+" and "+fmt(Math.max(S.m1,S.m2)*G,1)+" N",""],
+        [hn+" falls",fmt(p.X)+" m before landing",""],["lands at t",fmt(p.t1)+" s","blue"],...ropeReadout(p,1)]);
+      live(fmt(p.d2)+" m");
+    }
+  }
+
+  /* ===== D: two-ball collision on a smooth track ===== */
+  if(S.sc==="D"){
+    const y=H*0.55,xL=46,xR=W-46,pxm=(xR-xL)/10,Rr=16;
+    g.strokeStyle=C.axis;g.lineWidth=2;g.beginPath();g.moveTo(xL-10,y+Rr);g.lineTo(xR+10,y+Rr);g.stroke();
+    label("smooth track (no friction), 10 m",xL,y+Rr+18,C.dim);
+    let x1,x2,v1,v2,hit=false;
+    if(!sol.meet){x1=1.5+S.u1*Math.min(S.t,3);x2=7+S.u2*Math.min(S.t,3);v1=S.u1;v2=S.u2;}
+    else if(S.t<sol.tS){x1=1.5+S.u1*S.t;x2=7+S.u2*S.t;v1=S.u1;v2=S.u2;}
+    else{hit=true;const dt=S.t-sol.tS;x1=1.5+S.u1*sol.tS+sol.v1*dt;x2=7+S.u2*sol.tS+sol.v2*dt;v1=sol.v1;v2=sol.v2;}
+    x1=Math.max(0.3,Math.min(9.7,x1));x2=Math.max(0.3,Math.min(9.7,x2));
+    const r1=Rr*Math.pow(S.m1/2,1/3),r2=Rr*Math.pow(S.m2/2,1/3);
+    g.fillStyle=C.acc;g.beginPath();g.arc(xL+x1*pxm,y+Rr-r1,r1,0,7);g.fill();g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+    g.fillStyle=C.blue;g.beginPath();g.arc(xL+x2*pxm,y+Rr-r2,r2,0,7);g.fill();g.stroke();
+    label("m₁",xL+x1*pxm,y+Rr-r1*2-24,C.acc,"center");label("m₂",xL+x2*pxm,y+Rr-r2*2-58,C.blue,"center");
+    arrow(g,xL+x1*pxm,y+Rr-r1*2-12,v1*9,0,C.acc,fmt(v1)+" m/s");
+    arrow(g,xL+x2*pxm,y+Rr-r2*2-46,v2*9,0,C.blue,fmt(v2)+" m/s");
+    if(hit&&S.t-sol.tS<0.5){g.fillStyle=C.amber;g.textAlign="center";g.font="bold 13px ui-monospace,Menlo,monospace";
+      g.fillText("BANG — impulse J = "+fmt(sol.J,1)+" N·s",(xL+(x1+x2)/2*pxm),y-70);}
+    clock(!sol.meet?"u₁ ≤ u₂ — they never meet":(S.t<sol.tS?"closing at "+fmt(S.u1-S.u2)+" m/s":"collided at t = "+fmt(sol.tS)+" s"),!sol.meet);
+    rows(!sol.meet?[["state","NO COLLISION","amber"]]:[["collision at t",fmt(sol.tS)+" s","amber"],["v₁, v₂ after",fmt(sol.v1)+", "+fmt(sol.v2)+" m/s","acc"],
+      ["momentum before = after",fmt(sol.P)+" kg·m/s","blue"],["KE before → after",fmt(sol.KE0,1)+" → "+fmt(sol.KE1,1)+" J","hot"],["impulse |J|",fmt(Math.abs(sol.J),1)+" N·s",""]]);
+    live(sol.meet?fmt(sol.KE0-sol.KE1,1)+" J":"—");
+  }
+
+  /* ===== H: collision on a rough slope ===== */
+  if(S.sc==="H"){
+    const run=6*Math.cos(t1),rise=6*Math.sin(t1);
+    const v=view(W,H,-0.4,run+1.2,0,Math.max(rise,2.2));
+    floorLine(g,W,v.floorY);
+    g.fillStyle=C.panel;g.strokeStyle=C.mut;g.lineWidth=2.5;
+    g.beginPath();g.moveTo(v.X(0),v.Y(0));g.lineTo(v.X(run),v.Y(rise));g.lineTo(v.X(run),v.Y(0));g.closePath();g.fill();g.stroke();
+    label("θ₁ = "+S.th1+"°, μ = "+S.mu.toFixed(2),v.X(0)+46,v.Y(0)-8);
+    const sm=sol.samples,tt=Math.min(S.t,sm[sm.length-1][0]);
+    let k=Math.min(sm.length-1,Math.floor(tt*120));const a=sm[k];
+    const r1=Math.max(9,Math.min(14,v.pxm*0.17))*Math.pow(S.m1/2,1/3),r2=Math.max(9,Math.min(14,v.pxm*0.17))*Math.pow(S.m2/2,1/3);
+    const on=(s,r)=>({x:v.X(s*Math.cos(t1))-Math.sin(t1)*r,y:v.Y(s*Math.sin(t1))-Math.cos(t1)*r});
+    const q1=on(a[1],r1),q2=on(a[2],r2);
+    g.fillStyle=C.acc;g.beginPath();g.arc(q1.x,q1.y,r1,0,7);g.fill();g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+    g.fillStyle=C.blue;g.beginPath();g.arc(q2.x,q2.y,r2,0,7);g.fill();g.stroke();
+    label("m₁",q1.x,q1.y-r1-8,C.acc,"center");label("m₂",q2.x,q2.y-r2-8,C.blue,"center");
+    const up={x:Math.cos(t1),y:-Math.sin(t1)};
+    arrow(g,q1.x,q1.y,up.x*a[3]*9,up.y*a[3]*9,C.acc,fmt(a[3])+" m/s");
+    arrow(g,q2.x,q2.y,up.x*a[4]*9,up.y*a[4]*9,C.blue,fmt(a[4])+" m/s");
+    const hit=sol.events.find(e=>e.k==="hit");
+    if(hit&&S.t>=hit.t&&S.t-hit.t<0.5){g.fillStyle=C.amber;g.textAlign="center";g.font="bold 13px ui-monospace,Menlo,monospace";g.fillText("BANG — impulse J = "+fmt(hit.J,1)+" N·s",(q1.x+q2.x)/2,Math.min(q1.y,q2.y)-40);}
+    const past=sol.events.filter(e=>e.t<=S.t);
+    const last=past[past.length-1];
+    const evTxt=e=>e.k==="hit"?"collided at t = "+fmt(e.t)+" s":e.k==="bottom"?"m"+(e.i+1)+" reached the bottom at t = "+fmt(e.t)+" s":"m"+(e.i+1)+" reached the top at t = "+fmt(e.t)+" s";
+    clock(last?evTxt(last):(sol.static2?"m₂ rests (tanθ ≤ μ); m₁ projected up the slope":"tanθ > μ: m₂ is sliding down; m₁ projected up"),!hit);
+    const rr=[["m₂ at the start",sol.static2?"at rest, held by friction":"sliding down","amber"],["deceleration of m₁ (up)",fmt(G*(Math.sin(t1)+S.mu*Math.cos(t1)))+" m/s²","hot"],
+      ["acceleration down the slope",fmt(Math.max(0,G*(Math.sin(t1)-S.mu*Math.cos(t1))))+" m/s²","acc"]];
+    if(hit){rr.push(["#","impact"],["collision at t",fmt(hit.t)+" s","amber"],["u₁, u₂ before",fmt(hit.u1)+", "+fmt(hit.u2)+" m/s",""],["v₁, v₂ after",fmt(hit.v1)+", "+fmt(hit.v2)+" m/s","acc"],["impulse |J|",fmt(Math.abs(hit.J),1)+" N·s","blue"]);}
+    else rr.push(["#","impact"],["collision","none — m₁ stops short (raise u₁)","hot"]);
+    sol.events.filter(e=>e.k!=="hit").forEach(e=>rr.push([e.k==="bottom"?"m"+(e.i+1)+" reaches the bottom":"m"+(e.i+1)+" reaches the top","t = "+fmt(e.t)+" s",""]));
+    rows(rr);live(fmt(a[3]-a[4])+" m/s");
+  }
+
+  /* ===== I: three balls on a smooth track ===== */
+  if(S.sc==="I"){
+    const y=H*0.55,xL=46,xR=W-46,pxm=(xR-xL)/10,Rr=16;
+    g.strokeStyle=C.axis;g.lineWidth=2;g.beginPath();g.moveTo(xL-10,y+Rr);g.lineTo(xR+10,y+Rr);g.stroke();
+    label("smooth track (no friction), 10 m",xL,y+Rr+18,C.dim);
+    const seg=sol.segs.find(s=>S.t>=s.t0&&S.t<s.t1)||sol.segs[sol.segs.length-1];
+    const dt=Math.min(S.t,seg.t1)-seg.t0;
+    const xs=seg.x.map((xi,i)=>Math.max(0.3,Math.min(9.7,xi+seg.v[i]*dt)));
+    const cols=[C.acc,C.blue,C.violet],m=[S.m1,S.m2,S.m3],rads=sol.r.map(r=>r/0.16*Rr);
+    xs.forEach((x,i)=>{g.fillStyle=cols[i];g.beginPath();g.arc(xL+x*pxm,y+Rr-rads[i],rads[i],0,7);g.fill();g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+      label("m"+"₁₂₃"[i],xL+x*pxm,y+Rr-rads[i]*2-24-34*i,cols[i],"center");
+      arrow(g,xL+x*pxm,y+Rr-rads[i]*2-12-34*i,seg.v[i]*9,0,cols[i],fmt(seg.v[i])+" m/s");});
+    const recent=sol.events.find(e=>S.t>=e.t&&S.t-e.t<0.45);
+    if(recent){g.fillStyle=C.amber;g.textAlign="center";g.font="bold 13px ui-monospace,Menlo,monospace";g.fillText("BANG — m"+"₁₂₃"[recent.i]+" hits m"+"₁₂₃"[recent.j],(xL+(xs[recent.i]+xs[recent.j])/2*pxm),y-100);}
+    const past=sol.events.filter(e=>e.t<=S.t);
+    clock(past.length?"impact "+past.length+" at t = "+fmt(past[past.length-1].t)+" s":(sol.events.length?"closing…":"no impacts with these speeds"),!sol.events.length);
+    const rr=[["total momentum",fmt(sol.P0)+" → "+fmt(sol.P1)+" kg·m/s","blue"],["KE before → after all",fmt(sol.KE0,1)+" → "+fmt(sol.KE1,1)+" J","hot"]];
+    sol.events.forEach((e,n)=>rr.push(["#","impact "+(n+1)+" · m"+"₁₂₃"[e.i]+" on m"+"₁₂₃"[e.j]+" at t = "+fmt(e.t)+" s"],["before",fmt(e.ui)+", "+fmt(e.uj)+" m/s",""],["after",fmt(e.vi)+", "+fmt(e.vj)+" m/s","acc"]));
+    rr.push(["#","final velocities"],["v₁, v₂, v₃",sol.vEnd.map(x=>fmt(x)).join(", ")+" m/s","amber"]);
+    rows(rr);live(past.length+" of "+sol.events.length);
+  }
+
+  /* ===== J: projectile ===== */
+  if(S.sc==="J"){
+    const Rmax=Math.max(sol.Rn,sol.R2,4),Hmax=Math.max(sol.hA,sol.h2,S.h0+1,2);
+    const v=view(W,H,-0.6,Rmax*1.06,0,Hmax*1.12);
+    floorLine(g,W,v.floorY);
+    if(S.h0>0){g.fillStyle=C.panel;g.strokeStyle=C.mut;g.lineWidth=2;g.beginPath();g.rect(v.X(-0.6),v.Y(S.h0),v.X(0)-v.X(-0.6),v.Y(0)-v.Y(S.h0));g.fill();g.stroke();}
+    /* ghost: complementary angle */
+    g.strokeStyle=C.mutA+"0.5)";g.lineWidth=1.2;g.setLineDash([4,4]);g.beginPath();
+    const ux2=S.u*Math.cos(sol.al2*R),uy2=S.u*Math.sin(sol.al2*R);
+    for(let i=0;i<=80;i++){const tq=sol.tf2*i/80;const x=ux2*tq,y=S.h0+uy2*tq-0.5*G*tq*tq;i?g.lineTo(v.X(x),v.Y(y)):g.moveTo(v.X(x),v.Y(y));}
+    g.stroke();g.setLineDash([]);
+    if(sol.al2!==S.al)label("dashed: same speed at "+sol.al2+"°, range "+fmt(sol.R2,1)+" m",12,56,C.dim);
+    /* full path, dashed */
+    g.strokeStyle=C.dim;g.lineWidth=1.2;g.setLineDash([5,4]);g.beginPath();
+    for(let i=0;i<=100;i++){const tq=sol.tf*i/100;const x=sol.ux*tq,y=S.h0+sol.uy*tq-0.5*G*tq*tq;i?g.lineTo(v.X(x),v.Y(y)):g.moveTo(v.X(x),v.Y(y));}
+    g.stroke();g.setLineDash([]);
+    /* apex + range markers */
+    const xa=sol.ux*sol.tA;
+    g.strokeStyle=C.amber;g.setLineDash([3,4]);g.lineWidth=1;g.beginPath();g.moveTo(v.X(xa),v.Y(sol.hA));g.lineTo(v.X(xa),v.Y(0));g.stroke();g.setLineDash([]);
+    label("apex h = "+fmt(sol.hA,2)+" m at t = "+fmt(sol.tA)+" s",v.X(xa),v.Y(sol.hA)-10,C.amber,"center");
+    label("R = "+fmt(sol.Rn,2)+" m",v.X(sol.Rn),v.Y(0)+16,C.acc,"center");
+    /* the ball, trail, velocity components */
+    const tq=Math.min(S.t,sol.tf);
+    g.strokeStyle=C.acc;g.lineWidth=2.2;g.beginPath();
+    for(let i=0;i<=100;i++){const tt=tq*i/100;const x=sol.ux*tt,y=S.h0+sol.uy*tt-0.5*G*tt*tt;i?g.lineTo(v.X(x),v.Y(y)):g.moveTo(v.X(x),v.Y(y));}
+    g.stroke();
+    const bx=sol.ux*tq,by=S.h0+sol.uy*tq-0.5*G*tq*tq,vy=sol.uy-G*tq;
+    const vs=Math.min(6,140/S.u);
+    arrow(g,v.X(bx),v.Y(by),sol.ux*vs,0,C.blue,"vₓ = "+fmt(sol.ux,1));
+    arrow(g,v.X(bx),v.Y(by),0,-vy*vs,C.amber,"v_y = "+fmt(vy,1));
+    arrow(g,v.X(bx),v.Y(by),sol.ux*vs,-vy*vs,C.hot,"v = "+fmt(Math.hypot(sol.ux,vy),1)+" m/s");
+    g.fillStyle=C.acc;g.beginPath();g.arc(v.X(bx),v.Y(by),8,0,7);g.fill();g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+    clock(S.t>=sol.tf?"landed at t = "+fmt(sol.tf)+" s, "+fmt(sol.Rn,2)+" m away":(S.t>=sol.tA?"past the apex; vₓ unchanged":"rising"),false);
+    rows([["u cos α, u sin α",fmt(sol.ux)+", "+fmt(sol.uy)+" m/s","blue"],["time to the apex",fmt(sol.tA)+" s","amber"],["greatest height",fmt(sol.hA)+" m","amber"],
+      ["time of flight",fmt(sol.tf)+" s","acc"],["range R",fmt(sol.Rn)+" m","acc"],["speed at impact",fmt(sol.vf)+" m/s at "+fmt(sol.angF,1)+"° below",""],
+      ["#","complementary angle "+sol.al2+"°"],["range",fmt(sol.R2)+" m"+(S.h0===0?" (equal from the ground)":""),""],["greatest height",fmt(sol.h2)+" m",""]]);
+    live(fmt(sol.ux)+" m/s");
+  }
+}
+
+/* ---------- loop & wiring ---------- */
+let raf;
+function loop(ts){
+  if(!S.last)S.last=ts;
+  S.t+=Math.min(0.05,(ts-S.last)/1000);
+  S.last=ts;
+  draw();
+  raf=requestAnimationFrame(loop);
+}
+function reset(){S.t=0;S.last=0;S.cache=null;}
+function pick(sc,btn){
+  S.sc=sc;reset();refreshCtls();setTexts();
+  document.querySelectorAll(".seg button").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+}
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",function(){pick(this.dataset.sc,this);}));
+function bind(id,set){document.getElementById(id).addEventListener("input",e=>{set(+e.target.value);reset();});}
+const txt=(id,s)=>document.getElementById(id).textContent=s;
+bind("sM1",v=>{S.m1=v/10;txt("rM1","m₁ = "+S.m1.toFixed(1)+" kg");});
+bind("sM2",v=>{S.m2=v/10;txt("rM2","m₂ = "+S.m2.toFixed(1)+" kg");});
+bind("sM3",v=>{S.m3=v/10;txt("rM3","m₃ = "+S.m3.toFixed(1)+" kg");});
+bind("sTh1",v=>{S.th1=v;txt("rTh1","θ₁ = "+v+"°");});
+bind("sTh2",v=>{S.th2=v;txt("rTh2","θ₂ = "+v+"°");});
+bind("sMu",v=>{S.mu=v/100;txt("rMu","μ = "+S.mu.toFixed(2));});
+bind("sE",v=>{S.e=v/100;txt("rE","e = "+S.e.toFixed(2));});
+bind("sU1",v=>{S.u1=v/10;txt("rU1","u₁ = "+S.u1.toFixed(1)+" m/s");});
+bind("sU2",v=>{S.u2=v/10;txt("rU2","u₂ = "+(S.u2<0?"−":"")+Math.abs(S.u2).toFixed(1)+" m/s");});
+bind("sU3",v=>{S.u3=v/10;txt("rU3","u₃ = "+(S.u3<0?"−":"")+Math.abs(S.u3).toFixed(1)+" m/s");});
+bind("sU",v=>{S.u=v/10;txt("rU","u = "+S.u.toFixed(0)+" m/s");});
+bind("sAl",v=>{S.al=v;txt("rAl","α = "+v+"°");});
+bind("sH0",v=>{S.h0=v/10;txt("rH0","h₀ = "+S.h0.toFixed(1)+" m");});
+document.getElementById("bRe").addEventListener("click",reset);
+window.addEventListener("resize",draw);
+(function(){const h=(location.hash||"").replace("#","");const b=document.querySelector('.seg button[data-sc="'+h+'"]');if(b)pick(h,b);})();
+refreshCtls();setTexts();
+window.addEventListener("load",setTexts);   /* KaTeX may finish loading after the first pass */
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

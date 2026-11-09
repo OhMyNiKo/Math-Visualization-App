@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Complex Arithmetic as Geometry · Physics Intuition App</title>
+<script src="theme.js"></script>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:6px;margin-bottom:10px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:14px var(--mono);padding:8px 10px;min-width:0}
+.fin input:focus{outline:none;border-color:var(--acc)}
+.fin button{background:var(--panel2);border:1px solid var(--acc);color:var(--acc);
+  font:600 12px var(--mono);padding:0 12px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · COMPLEX ARITHMETIC AS GEOMETRY · MODULE 25 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Complex Arithmetic as Geometry</h1>
+    <p class="sub">Drag the two complex numbers \(z\) (teal) and \(w\) (blue) around the Argand
+    diagram and pick an operation. Adding is a translation; multiplying is a turn by \(\arg w\)
+    followed by a stretch by \(|w|\). Replay animates the turn-then-stretch so you can see the
+    product being built.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">Polar forms, live</span>
+        <span class="fx" id="eqLive">\(\displaystyle z = r e^{i\theta} \)</span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="seg">
+          <button data-k="add">z + w</button>
+          <button data-k="sub">z &minus; w</button>
+          <button data-k="mul" class="on">z &middot; w</button>
+          <button data-k="div">z / w</button>
+          <button data-k="timesi">multiply by i</button>
+        </div>
+        <div class="ctl"><label><span>Re z (or drag z)</span><b id="rZr">Re z = 2.00</b></label>
+          <input type="range" id="sZr" min="-400" max="400" value="200" step="5"></div>
+        <div class="ctl"><label><span>Im z</span><b id="rZi">Im z = 1.00</b></label>
+          <input type="range" id="sZi" min="-400" max="400" value="100" step="5"></div>
+        <div class="ctl"><label><span>Re w (or drag w)</span><b id="rWr">Re w = 1.00</b></label>
+          <input type="range" id="sWr" min="-400" max="400" value="100" step="5"></div>
+        <div class="ctl"><label><span>Im w</span><b id="rWi">Im w = 1.00</b></label>
+          <input type="range" id="sWi" min="-400" max="400" value="100" step="5"></div>
+        <button class="btn" id="bRe">&#8635; Replay</button>
+        <p class="hint">Arcs at the origin are the arguments &theta;z = arg z, &theta;w = arg w; the faint circle is |z| = 1.
+        Result in amber.</p>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"Multiplying makes numbers bigger." Not in \(\mathbb{C}\): multiplying by \(w\) stretches
+        by \(|w|\) and turns by \(\arg w\), and if \(|w| = 1\) (like \(i\)) nothing gets bigger at
+        all, the number only rotates. Press "multiply by i" and watch \(z\) turn a quarter-circle
+        with its length untouched. Right now \(w\) turns \(z\) by
+        <span class="live" id="oLive">?</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: exact Cartesian arithmetic for \(+,\ -,\ \times,\ \div\); modulus by hypot,
+    argument by atan2 in \((-\pi,\pi]\); the animated product draws
+    \( z\,e^{i s\arg w} \) for \(s\) from 0 to 1, then scales the radius from \(|z|\) to \(|z||w|\)
+    (division uses \(-\arg w\) and \(1/|w|\)). Arguments of products are reduced mod \(2\pi\) to the
+    principal branch. One file of vanilla JavaScript, no libraries beyond the shared KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>!isFinite(v)?"—":(v<0?"−":"")+Math.abs(v).toFixed(d);
+const MONO="11px ui-monospace,Menlo,monospace";
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    `<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+
+/* ---------- complex helpers ---------- */
+const S={z:{re:2,im:1},w:{re:1,im:1},k:"mul",t:0,last:0,anim:false,drag:null};
+const RANGE=4;                      /* sliders and drags live in [-4,4]² */
+const cx=(re,im)=>({re,im});
+const cadd=(p,q)=>cx(p.re+q.re,p.im+q.im);
+const csub=(p,q)=>cx(p.re-q.re,p.im-q.im);
+const cmul=(p,q)=>cx(p.re*q.re-p.im*q.im,p.re*q.im+p.im*q.re);
+const cdiv=(p,q)=>{const d=q.re*q.re+q.im*q.im;return cx((p.re*q.re+p.im*q.im)/d,(p.im*q.re-p.re*q.im)/d);};
+const cabs=p=>Math.hypot(p.re,p.im);
+const carg=p=>Math.atan2(p.im,p.re);
+const polar=(r,a)=>cx(r*Math.cos(a),r*Math.sin(a));
+const wrap=a=>{a=(a+Math.PI)%(2*Math.PI);if(a<0)a+=2*Math.PI;return a-Math.PI;}   /* to (−π, π] */
+const deg=a=>a*180/Math.PI;
+const op=()=>S.k==="timesi"?"mul":S.k;
+function result(){const z=S.z,w=S.w;
+  switch(op()){case "add":return cadd(z,w);case "sub":return csub(z,w);case "mul":return cmul(z,w);default:return cdiv(z,w);}}
+const cstr=(p,d=2)=>{const a=fmt(p.re,d),b=fmt(Math.abs(p.im),d);return a+(p.im<0?" − ":" + ")+b+"i";};
+const tex=(v,d=2)=>!isFinite(v)?"?":(v<0?"-":"")+Math.abs(v).toFixed(d);   /* ASCII minus for KaTeX */
+const ease=s=>s*s*(3-2*s);
+
+/* ---------- drawing ---------- */
+function frame(W,H){const u=H/10;return{u,ox:W/2,oy:H/2,X:re=>W/2+re*u,Y:im=>H/2-im*u};}
+function arrow(g,F,p,q,color,width,dash,head=9){
+  const x0=F.X(p.re),y0=F.Y(p.im),x1=F.X(q.re),y1=F.Y(q.im);
+  const L=Math.hypot(x1-x0,y1-y0);if(L<1)return;
+  const ux=(x1-x0)/L,uy=(y1-y0)/L;
+  g.strokeStyle=color;g.fillStyle=color;g.lineWidth=width;g.setLineDash(dash||[]);
+  g.beginPath();g.moveTo(x0,y0);g.lineTo(x1-ux*head*0.6,y1-uy*head*0.6);g.stroke();g.setLineDash([]);
+  g.beginPath();g.moveTo(x1,y1);g.lineTo(x1-ux*head-uy*head*0.45,y1-uy*head+ux*head*0.45);
+  g.lineTo(x1-ux*head+uy*head*0.45,y1-uy*head-ux*head*0.45);g.closePath();g.fill();
+}
+function arcAng(g,F,r,a0,a1,color,label){
+  if(Math.abs(a1-a0)<1e-3)return;
+  g.strokeStyle=color;g.lineWidth=2;g.beginPath();
+  g.arc(F.ox,F.oy,r*F.u,-a0,-a1,a1>a0);g.stroke();
+  if(label){const m=(a0+a1)/2,rr=r*F.u+(r>1?18:11);g.fillStyle=color;g.font=MONO;g.textAlign="center";
+    g.fillText(label,F.ox+rr*Math.cos(m),F.oy-rr*Math.sin(m)+4);}
+}
+function dot(g,F,p,color,label,dx,dy){
+  g.fillStyle=color;g.beginPath();g.arc(F.X(p.re),F.Y(p.im),7,0,7);g.fill();
+  g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+  if(label){g.fillStyle=color;g.font="bold 12px ui-monospace,Menlo,monospace";g.textAlign="left";
+    g.fillText(label,F.X(p.re)+(dx||10),F.Y(p.im)+(dy||-8));}
+}
+function labelAt(g,F,p,text,color){
+  const x=Math.max(8,Math.min(cv.clientWidth-8,F.X(p.re))),y=Math.max(14,Math.min(cv.clientHeight-6,F.Y(p.im)));
+  g.fillStyle=color;g.font="bold 12px ui-monospace,Menlo,monospace";g.textAlign="center";g.fillText(text,x,y-12);
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  const F=frame(W,H);
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  /* grid, axes, unit circle */
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  const nx=Math.ceil(W/2/F.u),ny=Math.ceil(H/2/F.u);
+  for(let i=-nx;i<=nx;i++){g.beginPath();g.moveTo(F.X(i),0);g.lineTo(F.X(i),H);g.stroke();}
+  for(let j=-ny;j<=ny;j++){g.beginPath();g.moveTo(0,F.Y(j));g.lineTo(W,F.Y(j));g.stroke();}
+  g.strokeStyle=C.grid;g.lineWidth=2;g.beginPath();g.arc(F.ox,F.oy,F.u,0,7);g.stroke();
+  g.strokeStyle=C.axis;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(0,F.oy);g.lineTo(W,F.oy);g.stroke();
+  g.beginPath();g.moveTo(F.ox,0);g.lineTo(F.ox,H);g.stroke();
+  g.font=MONO;g.fillStyle=C.dim;g.textAlign="center";
+  for(let i=-nx;i<=nx;i++)if(i)g.fillText(i,F.X(i),F.oy+14);
+  g.textAlign="left";for(let j=-ny;j<=ny;j++)if(j)g.fillText(j+"i",F.ox+4,F.Y(j)-3);
+  g.fillText("Re",W-22,F.oy-6);g.fillText("Im",F.ox+6,12);
+  g.fillText("unit circle",F.ox+F.u*0.72,F.oy+F.u*0.72+12);
+
+  const z=S.z,w=S.w,R=result(),k=op();
+  const rz=cabs(z),rw=cabs(w),az=carg(z),aw=carg(w);
+  const O=cx(0,0);
+  const s=S.anim?Math.min(1,S.t/1.5):1;
+  if(S.anim&&S.t>=1.5)S.anim=false;
+
+  if(k==="add"||k==="sub"){
+    const v=k==="add"?w:cx(-w.re,-w.im);
+    /* parallelogram */
+    g.setLineDash([5,4]);g.strokeStyle=C.dim;g.lineWidth=1;
+    g.beginPath();g.moveTo(F.X(z.re),F.Y(z.im));g.lineTo(F.X(R.re),F.Y(R.im));g.lineTo(F.X(v.re),F.Y(v.im));g.stroke();
+    g.setLineDash([]);
+    if(k==="sub"){
+      arrow(g,F,O,v,C.blue,1.5,[4,4]);labelAt(g,F,v,"−w",C.blue);
+      arrow(g,F,w,z,C.amber,1.5,[4,4]);                         /* z − w as the arrow from w to z */
+      const m=cx((w.re+z.re)/2,(w.im+z.im)/2);labelAt(g,F,m,"z − w",C.amber);
+    }
+    /* sliding copy of v: from the origin to the tip of z */
+    const base=cx(z.re*ease(s),z.im*ease(s));
+    arrow(g,F,base,cadd(base,v),C.blue,2,s<1?[]:[4,4]);
+    arcAng(g,F,0.6,0,az,C.acc,"θz");
+    arcAng(g,F,0.85,0,aw,C.blue,"θw");
+    arcAng(g,F,1.55,0,carg(R),C.amber,"θ");
+    if(s>=1){arrow(g,F,O,R,C.amber,3,[]);labelAt(g,F,R,k==="add"?"z + w":"z − w",C.amber);}
+  }else{
+    const sign=k==="mul"?1:-1;
+    const rr=k==="mul"?rz*rw:rz/rw,ar=az+sign*aw;
+    /* target circle |result| */
+    g.setLineDash([3,5]);g.strokeStyle=C.amberA+"0.6)";g.lineWidth=1;
+    g.beginPath();g.arc(F.ox,F.oy,rr*F.u,0,7);g.stroke();g.setLineDash([]);
+    /* angle arcs: arg z, then arg w laid end to end */
+    arcAng(g,F,0.6,0,az,C.acc,"θz");
+    arcAng(g,F,0.6,az,ar,C.blue,(sign>0?"+":"−")+"θw");
+    arcAng(g,F,1.55,0,ar,C.amber,"θz"+(sign>0?"+":"−")+"θw");
+    /* moving arrow: rotate then scale */
+    const s1=ease(Math.min(1,s*2)),s2=ease(Math.max(0,s*2-1));
+    const rot=polar(rz,az+sign*aw*s1);
+    if(s<1){
+      arrow(g,F,O,rot,C.amber,1.5,[4,4]);
+      const mv=polar(rz+(rr-rz)*s2,az+sign*aw*s1);
+      arrow(g,F,O,mv,C.amber,3,[]);
+      g.fillStyle=C.amber;g.font=MONO;g.textAlign="left";
+      g.fillText(s<0.5?"1. turn by "+(sign>0?"":"−")+"arg w = "+fmt(deg(sign*aw),1)+"°":"2. stretch by "+(sign>0?"|w| = "+fmt(rw):"1/|w| = "+fmt(1/rw)),12,H-12);
+    }else{
+      if(Math.abs(rr-rz)>0.02){arrow(g,F,O,rot,C.amber,1.5,[4,4]);labelAt(g,F,rot,"z turned",C.amber);}
+      arrow(g,F,O,R,C.amber,3,[]);labelAt(g,F,R,k==="mul"?(S.k==="timesi"?"i·z":"z·w"):"z / w",C.amber);
+    }
+  }
+  /* z and w themselves */
+  arrow(g,F,O,z,C.acc,2.5,[]);arrow(g,F,O,w,C.blue,2.5,[]);
+  dot(g,F,z,C.acc,"z");dot(g,F,w,C.blue,"w");
+
+  /* readouts */
+  const rR=cabs(R),aR=carg(R);
+  const list=[["z",cstr(z),"acc"],["w",cstr(w),"blue"],
+    [k==="add"?"z + w":k==="sub"?"z − w":k==="mul"?"z · w":"z / w",cstr(R),"amber"],
+    ["|z|, arg z",fmt(rz)+", "+fmt(deg(az),1)+"° = "+fmt(az,3)+" rad","acc"],
+    ["|w|, arg w",fmt(rw)+", "+fmt(deg(aw),1)+"° = "+fmt(aw,3)+" rad","blue"]];
+  if(k==="mul")list.push(["|zw| = |z||w|",fmt(rz)+" × "+fmt(rw)+" = "+fmt(rR),"amber"],
+    ["arg(zw) = θz+θw mod 2π",fmt(deg(az),1)+"°+"+fmt(deg(aw),1)+"° ≡ "+fmt(deg(aR),1)+"°","amber"]);
+  else if(k==="div")list.push(["|z/w| = |z|/|w|",fmt(rz)+" / "+fmt(rw)+" = "+fmt(rR),"amber"],
+    ["arg(z/w) = θz−θw mod 2π",fmt(deg(az),1)+"°−"+fmt(deg(aw),1)+"° ≡ "+fmt(deg(aR),1)+"°","amber"]);
+  else list.push(["|result|, arg",fmt(rR)+", "+fmt(deg(aR),1)+"°","amber"],
+    ["triangle inequality",fmt(rR)+" ≤ |z|+|w| = "+fmt(rz+rw)]);
+  rows(list);
+  document.getElementById("oLive").textContent=fmt(deg(aw),1)+"° (and stretches it by |w| = "+fmt(rw)+")";
+}
+
+/* polar forms under the canvas: only on state change, not per frame */
+function eqUpdate(){
+  const z=S.z,w=S.w,R=result(),k=op();
+  const name=k==="add"?"z+w":k==="sub"?"z-w":k==="mul"?"zw":"z/w";
+  const P=p=>tex(cabs(p))+"\\,e^{"+tex(carg(p),3)+"i}";
+  const el=document.getElementById("eqLive");
+  el.innerHTML="\\( z = "+P(z)+",\\quad w = "+P(w)+",\\quad "+name+" = "+P(R)+" \\)"
+    +(k==="mul"?" <span class=\"mutx\">\\( = |z||w|\\,e^{i(\\arg z+\\arg w)} \\)</span>":
+      k==="div"?" <span class=\"mutx\">\\( = \\tfrac{|z|}{|w|}\\,e^{i(\\arg z-\\arg w)} \\)</span>":"");
+  if(window.piaRenderMath)window.piaRenderMath(el);
+}
+
+/* ---------- animation ---------- */
+let raf=0;
+function loop(ts){
+  if(!S.last)S.last=ts;
+  S.t+=Math.min(0.05,(ts-S.last)/1000);
+  S.last=ts;
+  draw();
+  if(S.anim)raf=requestAnimationFrame(loop);else raf=0;
+}
+function reset(){S.t=0;S.last=0;S.anim=false;if(raf){cancelAnimationFrame(raf);raf=0;}}
+function replay(){reset();S.anim=true;raf=requestAnimationFrame(loop);}
+
+/* ---------- controls ---------- */
+const $=id=>document.getElementById(id);
+function labels(){
+  $("rZr").textContent="Re z = "+fmt(S.z.re);$("rZi").textContent="Im z = "+fmt(S.z.im);
+  $("rWr").textContent="Re w = "+fmt(S.w.re);$("rWi").textContent="Im w = "+fmt(S.w.im);
+  $("sZr").value=Math.round(S.z.re*100);$("sZi").value=Math.round(S.z.im*100);
+  $("sWr").value=Math.round(S.w.re*100);$("sWi").value=Math.round(S.w.im*100);
+}
+function segOn(k){document.querySelectorAll(".seg button").forEach(x=>x.classList.toggle("on",x.dataset.k===k));}
+function guardW(){if(cabs(S.w)<1e-9)S.w=cx(0.05,0);}
+function changed(){guardW();labels();eqUpdate();reset();draw();}
+function bind(id,set){$(id).addEventListener("input",e=>{set(+e.target.value/100);changed();});}
+bind("sZr",v=>{S.z.re=v;});bind("sZi",v=>{S.z.im=v;});
+bind("sWr",v=>{S.w.re=v;if(S.k==="timesi"){S.k="mul";segOn("mul");}});
+bind("sWi",v=>{S.w.im=v;if(S.k==="timesi"){S.k="mul";segOn("mul");}});
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",function(){
+  S.k=this.dataset.k;segOn(S.k);
+  if(S.k==="timesi")S.w=cx(0,1);
+  guardW();labels();eqUpdate();replay();
+}));
+$("bRe").addEventListener("click",replay);
+
+/* ---------- dragging z and w ---------- */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+cv.addEventListener("pointerdown",e=>{
+  const p=pos(e),{W,H}=fit();const F=frame(W,H);
+  const dz=Math.hypot(p.x-F.X(S.z.re),p.y-F.Y(S.z.im)),dw=Math.hypot(p.x-F.X(S.w.re),p.y-F.Y(S.w.im));
+  if(Math.min(dz,dw)>30)return;
+  S.drag=dz<=dw?"z":"w";
+  cv.setPointerCapture(e.pointerId);move(e);
+});
+function move(e){
+  if(!S.drag)return;
+  const p=pos(e),{W,H}=fit();const F=frame(W,H);
+  const re=Math.max(-RANGE,Math.min(RANGE,Math.round((p.x-F.ox)/F.u*20)/20));
+  const im=Math.max(-RANGE,Math.min(RANGE,Math.round((F.oy-p.y)/F.u*20)/20));
+  if(S.drag==="z")S.z=cx(re,im);
+  else{S.w=cx(re,im);if(S.k==="timesi"){S.k="mul";segOn("mul");}}
+  changed();
+}
+cv.addEventListener("pointermove",move);
+cv.addEventListener("pointerup",()=>{S.drag=null;});
+cv.addEventListener("pointercancel",()=>{S.drag=null;});
+window.addEventListener("resize",draw);
+labels();eqUpdate();draw();
+</script>
+</body>
+</html>

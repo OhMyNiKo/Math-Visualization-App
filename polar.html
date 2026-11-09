@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Polar Curves r = f(θ) · Physics Intuition App</title>
+<script src="theme.js"></script>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:6px;margin-bottom:10px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:14px var(--mono);padding:8px 10px;min-width:0}
+.fin input:focus{outline:none;border-color:var(--acc)}
+.fin button{background:var(--panel2);border:1px solid var(--acc);color:var(--acc);
+  font:600 12px var(--mono);padding:0 12px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+/* added: the current curve formula under the chooser */
+.cur{font-family:var(--mono);font-size:12.5px;color:var(--ink);margin:2px 0 10px;min-height:20px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · POLAR CURVES r = f(θ) · MODULE 27 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Polar Curves r = f(θ)</h1>
+    <p class="sub">Pick a curve or type your own r(θ), then press Replay: an arm sweeps round from
+    θ = 0 and the traced point leaves the curve behind it. Watch what happens when r goes negative,
+    count the petals of a rose as k changes, and read the enclosed area ½∫r²dθ as it accumulates.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx">\(\displaystyle x = r\cos\theta,\ y = r\sin\theta \)
+        <span class="mutx">· \(\displaystyle A = \tfrac12\int r^2\,d\theta \) · for \(\displaystyle r<0 \) the point sits at distance \(\displaystyle |r| \) on the far side of the pole</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Curve</h3>
+        <div class="seg">
+          <button data-c="rose" class="on">rose</button>
+          <button data-c="card">cardioid</button>
+          <button data-c="lima">limaçon</button>
+          <button data-c="spir">spiral</button>
+          <button data-c="lemn">lemniscate</button>
+          <button data-c="cust">custom r(θ)</button>
+        </div>
+        <div class="fin"><input type="text" id="fIn" value="1 + 2 cos(3 theta)" spellcheck="false">
+          <button id="bGo">Plot</button></div>
+        <div class="err" id="err"></div>
+        <div class="cur" id="rEq"></div>
+        <div class="ctl"><label><span>a (every curve)</span><b id="rA">a = 1.60</b></label>
+          <input type="range" id="sA" min="20" max="400" value="160"></div>
+        <div class="ctl"><label><span>k (rose only, integer)</span><b id="rK">k = 3</b></label>
+          <input type="range" id="sK" min="1" max="8" value="3" step="1"></div>
+        <div class="ctl"><label><span>b (limaçon only)</span><b id="rB">b = 1.00</b></label>
+          <input type="range" id="sB" min="0" max="400" value="100"></div>
+        <div class="ctl"><label><span>sweep range θmax</span><b id="rT">θmax = 2.00π</b></label>
+          <input type="range" id="sT" min="1" max="48" value="24" step="1"></div>
+        <div class="ctl"><label><span>sweep speed</span><b id="rS">2.50 rad/s</b></label>
+          <input type="range" id="sS" min="20" max="800" value="250"></div>
+        <button class="btn" id="bRe">&#8635; Replay</button>
+        <p class="hint">Custom: write r in terms of <b>theta</b> (the names t and x mean the same
+        angle). Supported: + &minus; * / ^ ( ), implicit products like 2theta or 3&thinsp;cos(2t),
+        sin cos tan atan exp ln sqrt abs sinh cosh tanh, pi and e. Where r is undefined
+        (lemniscate between its lobes, sqrt of a negative) the pen lifts.</p>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"A rose r = a cos kθ has k petals" is only half true: k odd gives k petals (the curve
+        closes after θ = π), k <b>even</b> gives <b>2k</b> petals, because the negative-r half of
+        each turn lands on new ground instead of retracing. And negative r is not "nothing to
+        draw": (&minus;r, θ) is a real point, |r| from the pole on the opposite side, which is where
+        the limaçon's inner loop and half of every rose come from. Right now:
+        <span class="live" id="oLive">?</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: r(θ) sampled at 1440 points over [0, θmax]; the area ½∫r²dθ over the swept
+    range by composite Simpson (r² = 0 where r is undefined), checked against the closed form
+    when one exists; the sweep is drawn clockwise on screen (screen y points down, so the angle
+    grows clockwise) while the printed (x, y) are the standard r cos θ, r sin θ. One file of
+    vanilla JavaScript, no libraries beyond the shared KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>{if(!isFinite(v))return "—";const s=Math.abs(v).toFixed(d);return (v<0&&+s!==0?"−":"")+s;};
+let MONO="11px ui-monospace,Menlo,monospace";   /* 9px on a phone-width canvas, set in draw() */
+const setFont=W=>{MONO=(W<560?"9px":"11px")+" ui-monospace,Menlo,monospace";return W<560;};
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    `<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+
+/* ---------- expression parser (taylor.html's, with the variable names generalised) ----------
+   parse(text, VARS) accepts every name in VARS as a variable; evalNum(ast, env) reads env[name].
+   Here VARS = ["theta","t","x"] and all three are bound to the same angle. */
+function tokenize(s){
+  const T=[];let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(c===" "||c==="\t"){i++;continue;}
+    if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      const v=parseFloat(s.slice(i,j));if(!isFinite(v))throw new Error("bad number");
+      T.push({t:"num",v});i=j;continue;}
+    if(/[a-zA-Z_]/.test(c)){let j=i;while(j<s.length&&/[a-zA-Z_]/.test(s[j]))j++;
+      T.push({t:"id",v:s.slice(i,j)});i=j;continue;}
+    if("+-*/^(),".includes(c)){T.push({t:c});i++;continue;}
+    throw new Error("unexpected character '"+c+"'");
+  }
+  return T;
+}
+const FNS=["sin","cos","tan","atan","exp","ln","log","sqrt","abs","sinh","cosh","tanh"];
+function parse(s,VARS){
+  const T=tokenize(s);let p=0;
+  const peek=()=>T[p];
+  const eat=t=>{if(!T[p]||T[p].t!==t)throw new Error("expected '"+t+"'");return T[p++];};
+  function expr(){let a=term();
+    while(peek()&&(peek().t==="+"||peek().t==="-")){const op=T[p++].t;a={t:"bin",op,a,b:term()};}
+    return a;}
+  function term(){let a=factor();
+    for(;;){const n=peek();
+      if(n&&(n.t==="*"||n.t==="/")){const op=T[p++].t;a={t:"bin",op,a,b:factor()};}
+      else if(n&&(n.t==="num"||n.t==="id"||n.t==="(")){a={t:"bin",op:"*",a,b:factor()};}
+      else break;}
+    return a;}
+  function factor(){
+    if(peek()&&peek().t==="-"){p++;return{t:"neg",a:factor()};}
+    if(peek()&&peek().t==="+"){p++;return factor();}
+    return power();}
+  function power(){const a=atom();
+    if(peek()&&peek().t==="^"){p++;return{t:"bin",op:"^",a,b:factor()};}
+    return a;}
+  function atom(){
+    const n=peek();
+    if(!n)throw new Error("expression ends too early");
+    if(n.t==="num"){p++;return{t:"num",v:n.v};}
+    if(n.t==="("){p++;const e=expr();eat(")");return e;}
+    if(n.t==="id"){p++;const name=n.v.toLowerCase();
+      if(peek()&&peek().t==="("){
+        if(!FNS.includes(name))throw new Error("unknown function '"+name+"'");
+        p++;const e=expr();eat(")");return{t:"call",fn:name,a:e};}
+      if(VARS.includes(name))return{t:"var",n:name};
+      if(name==="pi")return{t:"num",v:Math.PI};
+      if(name==="e")return{t:"num",v:Math.E};
+      if(FNS.includes(name))throw new Error("'"+name+"' needs parentheses: "+name+"(theta)");
+      throw new Error("unknown name '"+n.v+"' (the angle is theta, t or x)");}
+    throw new Error("unexpected '"+n.t+"'");}
+  const e=expr();
+  if(p<T.length)throw new Error("could not parse the whole expression");
+  return e;
+}
+const NF={sin:Math.sin,cos:Math.cos,tan:Math.tan,atan:Math.atan,exp:Math.exp,ln:Math.log,
+  log:Math.log,sqrt:Math.sqrt,abs:Math.abs,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh};
+function evalNum(n,env){
+  switch(n.t){
+    case "num":return n.v;
+    case "var":return env[n.n];
+    case "neg":return -evalNum(n.a,env);
+    case "bin":{const a=evalNum(n.a,env),b=evalNum(n.b,env);
+      return n.op==="+"?a+b:n.op==="-"?a-b:n.op==="*"?a*b:n.op==="/"?a/b:Math.pow(a,b);}
+    case "call":return NF[n.fn](evalNum(n.a,env));
+  }
+}
+
+/* ---------- state and curves ---------- */
+const TAU=2*Math.PI, N=1440;
+const S={c:"rose",a:1.6,k:3,b:1.0,thmax:TAU,speed:2.5,t:0,th:0,last:0,running:false,
+  txt:"1 + 2 cos(3 theta)",ast:null,err:"",TH:new Float64Array(N+1),R:new Float64Array(N+1),rmax:1};
+const near=(x,y)=>Math.abs(x-y)<1e-9;
+const CUR={
+  rose:{tex:"r = a\\cos k\\theta",thmax:TAU,f:th=>S.a*Math.cos(S.k*th),
+    exact:()=>near(S.thmax,TAU)?Math.PI*S.a*S.a/2:NaN,name:()=>fmt(S.a)+" cos("+S.k+"θ)"},
+  card:{tex:"r = a(1+\\cos\\theta)",thmax:TAU,f:th=>S.a*(1+Math.cos(th)),
+    exact:()=>near(S.thmax,TAU)?1.5*Math.PI*S.a*S.a:NaN,name:()=>fmt(S.a)+" (1 + cos θ)"},
+  lima:{tex:"r = b + a\\cos\\theta",thmax:TAU,f:th=>S.b+S.a*Math.cos(th),
+    exact:()=>near(S.thmax,TAU)?Math.PI*(S.b*S.b+S.a*S.a/2):NaN,name:()=>fmt(S.b)+" + "+fmt(S.a)+" cos θ"},
+  spir:{tex:"r = a\\theta",thmax:2*TAU,f:th=>S.a*th,
+    exact:()=>S.a*S.a*Math.pow(S.thmax,3)/6,name:()=>fmt(S.a)+" θ"},
+  lemn:{tex:"r^2 = a^2\\cos 2\\theta",thmax:TAU,f:th=>{const c=Math.cos(2*th);return c<0?NaN:S.a*Math.sqrt(c);},
+    exact:()=>near(S.thmax,TAU)?S.a*S.a:NaN,name:()=>"±"+fmt(S.a)+" √cos 2θ"},
+  cust:{tex:"r = r(\\theta)",thmax:TAU,f:th=>{if(!S.ast)return NaN;try{return evalNum(S.ast,{theta:th,t:th,x:th});}catch(e){return NaN;}},
+    exact:()=>NaN,name:()=>S.txt}
+};
+const rOf=th=>{const r=CUR[S.c].f(th);return isFinite(r)?r:NaN;};
+
+function compute(){
+  let m=0;
+  for(let i=0;i<=N;i++){
+    const th=S.thmax*i/N;S.TH[i]=th;const r=rOf(th);S.R[i]=r;
+    if(isFinite(r)&&Math.abs(r)>m)m=Math.abs(r);
+  }
+  S.rmax=m>1e-9?m:1;
+}
+/* composite Simpson on samples 0..i of r^2, then halved; a trapezoid closes an odd last panel */
+function area(i){
+  const h=S.thmax/N,q=j=>{const r=S.R[j];return isFinite(r)?r*r:0;};
+  const m=i-(i%2);let s=0;
+  if(m>=2){s=q(0)+q(m);for(let j=1;j<m;j++)s+=(j%2?4:2)*q(j);s*=h/3;}
+  if(i>m)s+=h*(q(m)+q(i))/2;
+  return s/2;
+}
+function niceStep(x){
+  const p=Math.pow(10,Math.floor(Math.log10(x)));const f=x/p;
+  return (f<1.5?1:f<3.5?2.5:f<7.5?5:10)*p;
+}
+const SPOKES=["0","π/6","π/3","π/2","2π/3","5π/6","π","7π/6","4π/3","3π/2","5π/3","11π/6"];
+
+function setEq(){
+  const el=document.getElementById("rEq");
+  el.innerHTML="\\( "+CUR[S.c].tex+" \\) <span class=\"hint\" style=\"margin:0\">= "+CUR[S.c].name()+"</span>";
+  if(window.piaRenderMath)window.piaRenderMath(el);
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  const nar=setFont(W);
+  const cx=W/2,cy=H/2,Rpx=Math.min(W,H)/2-(nar?26:34);
+  const sc=Rpx/(S.rmax*1.04);
+  const P=(r,th)=>[cx+r*sc*Math.cos(th),cy+r*sc*Math.sin(th)];   /* clockwise sweep: screen y is down */
+
+  /* polar grid: rings and spokes */
+  const step=niceStep(S.rmax/3);
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  for(let r=step;r<=S.rmax*1.04+1e-9;r+=step){g.beginPath();g.arc(cx,cy,r*sc,0,TAU);g.stroke();}
+  for(let i=0;i<12;i++){const th=i*Math.PI/6;g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Rpx*Math.cos(th),cy+Rpx*Math.sin(th));g.stroke();}
+  g.strokeStyle=C.axis;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(cx-Rpx,cy);g.lineTo(cx+Rpx,cy);g.stroke();
+  g.beginPath();g.moveTo(cx,cy-Rpx);g.lineTo(cx,cy+Rpx);g.stroke();
+  g.font=MONO;g.fillStyle=C.dim;g.textAlign="left";g.textBaseline="alphabetic";
+  for(let r=step;r<=S.rmax*1.04+1e-9;r+=step)g.fillText(fmt(r,step<1?2:1),cx+r*sc+3,cy-4);
+  g.textAlign="center";g.textBaseline="middle";
+  for(let i=0;i<12;i+=nar?2:1){const th=i*Math.PI/6;g.fillText(SPOKES[i],cx+(Rpx+(nar?12:16))*Math.cos(th),cy+(Rpx+(nar?10:14))*Math.sin(th));}
+  g.textBaseline="alphabetic";
+
+  /* the whole curve as a ghost, then the traced part */
+  const thc=Math.min(S.thmax,S.th);
+  const ic=Math.min(N,Math.floor(thc/S.thmax*N));
+  const trace=(i0,i1,col,w)=>{
+    g.strokeStyle=col;g.lineWidth=w;g.beginPath();let pen=false;
+    for(let i=i0;i<=i1;i++){const r=S.R[i];
+      if(!isFinite(r)){pen=false;continue;}
+      const q=P(r,S.TH[i]);pen?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]);pen=true;}
+    g.stroke();
+  };
+  trace(0,N,C.accA+"0.22)",1.4);
+  trace(0,ic,C.acc,2.4);
+
+  /* the arm */
+  const rc=rOf(thc),dx=Math.cos(thc),dy=Math.sin(thc);
+  g.strokeStyle=C.amber;g.lineWidth=1.2;g.beginPath();g.arc(cx,cy,16,0,thc,false);g.stroke();
+  if(isFinite(rc)){
+    const len=Math.abs(rc)*sc,q=P(rc,thc);
+    g.strokeStyle=C.amber;g.lineWidth=1.8;g.setLineDash(rc<0?[6,4]:[]);
+    g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+len*dx,cy+len*dy);g.stroke();g.setLineDash([]);
+    if(rc<0){g.strokeStyle=C.hot;g.lineWidth=2.2;g.beginPath();g.moveTo(cx,cy);g.lineTo(q[0],q[1]);g.stroke();
+      g.fillStyle=C.hot;g.textAlign="center";g.fillText("r < 0: through the pole",cx+len*dx*0.5,cy+len*dy*0.5-8);}
+    g.fillStyle=C.acc;g.beginPath();g.arc(q[0],q[1],6,0,TAU);g.fill();
+    g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+    g.fillStyle=C.ink;g.textAlign=q[0]<cx?"right":"left";
+    g.fillText("(r, θ) = ("+fmt(rc)+", "+fmt(thc)+")",q[0]+(q[0]<cx?-10:10),q[1]-10);
+  }else{
+    g.strokeStyle=C.dim;g.lineWidth=1.2;g.setLineDash([3,4]);
+    g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Rpx*0.35*dx,cy+Rpx*0.35*dy);g.stroke();g.setLineDash([]);
+    g.fillStyle=C.dim;g.textAlign="center";g.fillText("r undefined here: pen up",cx+Rpx*0.45*dx,cy+Rpx*0.45*dy);
+  }
+  g.fillStyle=C.amber;g.beginPath();g.arc(cx,cy,3.5,0,TAU);g.fill();
+
+  /* legend and headline numbers */
+  g.textAlign="left";
+  g.fillStyle=C.acc;g.fillText(nar?"— r(θ)":"— r(θ) traced so far",12,H-40);
+  g.fillStyle=C.amber;g.fillText(nar?"— arm (dashed: r < 0)":"— arm at angle θ (dashed when r < 0)",12,H-26);
+  g.fillStyle=C.hot;g.fillText(nar?"— real point, r < 0":"— where the point really is when r < 0",12,H-12);
+  g.fillStyle=C.ink;g.textAlign="right";
+  g.fillText("θ = "+fmt(thc,3)+" rad",W-12,18);
+  g.fillText("r = "+fmt(rc,3),W-12,34);
+  g.fillStyle=C.mut;g.fillText(thc<S.thmax?"sweeping…":"sweep done: θmax = "+fmt(S.thmax/Math.PI)+"π",W-12,H-12);
+  g.textAlign="left";g.fillStyle=C.ink;g.fillText("r = "+CUR[S.c].name(),12,18);
+
+  /* solved live */
+  const A=area(ic),ex=CUR[S.c].exact();
+  const x=isFinite(rc)?rc*Math.cos(thc):NaN,y=isFinite(rc)?rc*Math.sin(thc):NaN;
+  const list=[
+    ["θ",fmt(thc,3)+" rad = "+fmt(thc*180/Math.PI,1)+"°"],
+    ["r(θ)",fmt(rc,4),rc<0?"hot":"acc"],
+    ["(x, y)","("+fmt(x,3)+", "+fmt(y,3)+")"]];
+  if(S.c==="rose"){
+    const pet=S.k%2?S.k:2*S.k;
+    list.push(["petals",pet+" (k "+(S.k%2?"odd → k":"even → 2k")+")","amber"]);
+    list.push(["curve closes after","θ = "+(S.k%2?"π":"2π")]);
+  }
+  list.push(["area ½∫r²dθ, 0→θ (Simpson)",fmt(A,4),"blue"]);
+  list.push(["exact, full sweep 0→θmax",isFinite(ex)?fmt(ex,4):"— (no closed form here)"]);
+  rows(list);
+  document.getElementById("oLive").textContent=S.c==="rose"?("k = "+S.k+" → "+(S.k%2?S.k:2*S.k)+" petals"):("r = "+fmt(rc,3)+" at θ = "+fmt(thc,2));
+  document.getElementById("err").textContent=S.err;
+}
+
+/* ---------- animation ---------- */
+let raf=0;
+function loop(ts){
+  if(!S.last)S.last=ts;
+  const dt=Math.min(0.05,(ts-S.last)/1000);
+  S.t+=dt;S.th+=S.speed*dt;
+  S.last=ts;
+  draw();
+  if(S.th<S.thmax)raf=requestAnimationFrame(loop);else S.running=false;
+}
+function reset(){S.t=0;S.th=0;S.last=0;if(raf)cancelAnimationFrame(raf);raf=0;S.running=false;}
+function start(){if(!S.running){S.running=true;raf=requestAnimationFrame(loop);}}
+function restart(){reset();compute();start();}
+
+/* ---------- controls ---------- */
+function bind(id,set){document.getElementById(id).addEventListener("input",e=>{set(+e.target.value);restart();});}
+bind("sA",v=>{S.a=v/100;document.getElementById("rA").textContent="a = "+S.a.toFixed(2);setEq();});
+bind("sK",v=>{S.k=v;document.getElementById("rK").textContent="k = "+S.k;setEq();});
+bind("sB",v=>{S.b=v/100;document.getElementById("rB").textContent="b = "+S.b.toFixed(2);setEq();});
+bind("sT",v=>{S.thmax=v*Math.PI/12;document.getElementById("rT").textContent="θmax = "+(v/12).toFixed(2)+"π";});
+document.getElementById("sS").addEventListener("input",e=>{
+  S.speed=+e.target.value/100;document.getElementById("rS").textContent=S.speed.toFixed(2)+" rad/s";start();});
+function setThmax(v){const el=document.getElementById("sT");el.value=Math.round(v*12/Math.PI);
+  S.thmax=el.value*Math.PI/12;document.getElementById("rT").textContent="θmax = "+(el.value/12).toFixed(2)+"π";}
+function choose(c){
+  S.c=c;
+  document.querySelectorAll(".seg button").forEach(x=>x.classList.toggle("on",x.dataset.c===c));
+  setThmax(CUR[c].thmax);setEq();restart();
+}
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",function(){
+  if(this.dataset.c==="cust")applyCustom();else{S.err="";choose(this.dataset.c);}
+}));
+function applyCustom(){
+  S.txt=document.getElementById("fIn").value;
+  try{S.ast=parse(S.txt,["theta","t","x"]);S.err="";}
+  catch(e){S.ast=null;S.err=e.message;}
+  choose("cust");
+}
+document.getElementById("bGo").addEventListener("click",applyCustom);
+document.getElementById("fIn").addEventListener("keydown",e=>{if(e.key==="Enter")applyCustom();});
+document.getElementById("bRe").addEventListener("click",()=>{reset();start();});
+window.addEventListener("resize",draw);
+setEq();compute();start();
+</script>
+</body>
+</html>

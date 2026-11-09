@@ -1,0 +1,44 @@
+/* theme.css: light palette + the shared switches. Loaded by theme.js after each page's own <style>,
+   so these override the per-page :root tokens. */
+html[data-theme="light"]{
+  --bg:#f3f5f8; --panel:#ffffff; --panel2:#f7f9fb; --ink:#18212c; --mut:#55626f;
+  --hair:#d3dae3; --acc:#0b8a76; --amber:#b0741a; --hot:#d23c33; --blue:#1f63b3;
+}
+html[data-theme="light"] body{background:var(--bg);color:var(--ink)}
+html[data-theme="light"] .pill,
+html[data-theme="light"] .seg button.on,
+html[data-theme="light"] .btn:hover,
+html[data-theme="light"] .mod .go:hover,
+html[data-theme="light"] .fin button:hover{color:#ffffff}
+html[data-theme="light"] input[type=text],html[data-theme="light"] input[type=number],
+html[data-theme="light"] select,html[data-theme="light"] textarea{background:#fff;color:var(--ink);border-color:var(--hair)}
+html{transition:background .2s}
+body{transition:background .2s,color .2s}
+
+/* the dark / light switch in the top bar */
+.tswitch{margin-left:18px;background:transparent;border:1px solid var(--hair);color:var(--mut);
+  font:600 11px/1 var(--mono,ui-monospace,Menlo,monospace);letter-spacing:.08em;padding:6px 10px;cursor:pointer}
+.tswitch:hover{border-color:var(--acc);color:var(--acc)}
+
+/* the solved-live on/off switch */
+.card h3{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lsw{display:inline-flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;letter-spacing:.06em;
+  font-size:10px;color:var(--mut);user-select:none}
+.lsw-track{position:relative;width:30px;height:16px;border:1px solid var(--hair);background:var(--panel2);
+  display:inline-block;transition:background .15s}
+.lsw-knob{position:absolute;top:2px;left:2px;width:10px;height:10px;background:var(--mut);transition:left .15s,background .15s}
+.lsw.on .lsw-track{background:var(--acc);border-color:var(--acc)}
+.lsw.on .lsw-knob{left:16px;background:#04120d}
+html[data-theme="light"] .lsw.on .lsw-knob{background:#fff}
+.card.veiled .read{filter:blur(6px);opacity:.35;pointer-events:none;user-select:none;transition:filter .2s,opacity .2s}
+.card.veiled{position:relative}
+.card.veiled::after{content:"solved values hidden — switch on to reveal";position:absolute;left:16px;right:16px;bottom:14px;
+  top:44px;display:flex;align-items:center;justify-content:center;text-align:center;
+  font:11px/1.6 var(--mono,ui-monospace,Menlo,monospace);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.card .read{transition:filter .2s,opacity .2s}
+
+/* formulas under the visualization: real TeX faces via KaTeX */
+.eq .katex{font-size:1.12em}
+.eq .fx{font-family:KaTeX_Main,"Latin Modern Math","STIX Two Math","Times New Roman",serif;font-size:15px}
+.eq .fx .katex-display{margin:0}
+.mis .katex,.sub .katex,.hint .katex,.read .katex{font-size:1.05em}

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<title>The Playground · Physics Intuition App</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,"PingFang SC",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+h1 span{color:var(--mut);font-weight:400}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.tabs{display:flex;gap:0;margin:18px 0 0;border:1px solid var(--hair)}
+.tabs button{flex:1;background:var(--panel2);color:var(--mut);border:0;border-right:1px solid var(--hair);
+  font:600 14px/1 var(--sans);padding:13px 10px;cursor:pointer;letter-spacing:.02em}
+.tabs button:last-child{border-right:0}
+.tabs button.on{background:var(--acc);color:#04120d}
+.tabs button .cn{font-weight:400;opacity:.75;margin-left:6px}
+.mod{display:none;margin-top:16px}
+.mod.on{display:block}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.tog{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);
+  font-family:var(--mono);cursor:pointer;user-select:none}
+.tog input{accent-color:var(--amber);width:15px;height:15px}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis p{color:var(--ink)}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.lvl{font-family:var(--mono);font-size:12.5px;line-height:1.9}
+.lvl .l{display:flex;justify-content:space-between;padding:1px 6px;border-bottom:1px dashed var(--hair)}
+.lvl .l:last-child{border-bottom:0}
+.lvl .l.cur{background:rgba(77,208,181,.12);outline:1px solid var(--acc)}
+.lvl .k{color:var(--mut)}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center;line-height:1.2}
+.eq .frac .nu{display:block;padding:0 5px;border-bottom:1px solid var(--mut)}
+.eq .frac .de{display:block;padding:0 5px}
+.eq .lim{display:inline-block;vertical-align:middle;text-align:center;line-height:1.1}
+.eq .lim .u{display:block;font-size:10px;color:var(--mut)}
+.eq sub,.eq sup{font-size:10px}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · THE PLAYGROUND · MODULES 1&ndash;2 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Drag it. Change it. Break it until it clicks.</h1>
+    <p class="sub">Two live modules from the design memo, running in your browser right now. Everything
+    on screen is computed, not drawn: move a slider and the mathematics answers.</p>
+    <div class="tabs">
+      <button id="tabD" class="on">Derivative Playground</button>
+      <button id="tabQ">Quantum Box</button>
+    </div>
+  </header>
+
+  <!-- ================= MODULE 1 · DERIVATIVE ================= -->
+  <div class="mod on" id="modD">
+    <div class="grid">
+      <div class="cwrap"><canvas id="cvD" width="760" height="520"></canvas>
+        <div class="eq"><span class="lbl">The defining equation</span>
+          <span class="fx">\(\displaystyle f'(x_0)=\lim_{h\to 0}\frac{f(x_0+h)-f(x_0)}{h} \)
+            <span class="mutx">&nbsp;&nbsp;so&nbsp;&nbsp;</span>
+            \(\displaystyle \Delta y=f'(x_0)\,h+o(\Delta x) \)</span>
+      </div>
+      </div>
+      <div class="side">
+        <div class="card">
+          <h3>Controls</h3>
+          <div class="ctl"><label><span>drag the point on the curve</span><b id="rX0">x = 0.60</b></label></div>
+          <div class="ctl"><label><span>zoom at the point</span><b id="rZ">1.0&times;</b></label>
+            <input type="range" id="sZ" min="0" max="100" value="0"></div>
+          <div class="ctl"><label><span>step h</span><b id="rH">h = 1.00</b></label>
+            <input type="range" id="sH" min="2" max="150" value="100"></div>
+          <div class="ctl"><label class="tog"><input type="checkbox" id="tDy" checked> show dy vs &Delta;y</label></div>
+        </div>
+        <div class="card">
+          <h3>Readout</h3>
+          <div class="read">
+            <div class="r"><span class="k">f(x) = x&sup3;/3 &minus; x + 1</span><span class="v"></span></div>
+            <div class="r"><span class="k">slope f&prime;(x&#8320;)</span><span class="v acc" id="oSlope">&minus;0.640</span></div>
+            <div class="r"><span class="k">&Delta;y = f(x&#8320;+h)&minus;f(x&#8320;) <i>(curve)</i></span><span class="v hot" id="oDy2">0.000</span></div>
+            <div class="r"><span class="k">dy = f&prime;(x&#8320;)&middot;h <i>(tangent)</i></span><span class="v blue" id="oDy1">0.000</span></div>
+            <div class="r"><span class="k">gap o(&Delta;x) = &Delta;y &minus; dy</span><span class="v amber" id="oGap">0.000</span></div>
+            <div class="r"><span class="k">ratio &Delta;y / h</span><span class="v" id="oRatio">0.000</span></div>
+          </div>
+        </div>
+        <div class="mis">
+          <p class="mk">The misconception this kills</p>
+          <p>The derivative is not a fraction of two little numbers. It is what the ratio
+          <span class="live">&Delta;y/h = <span id="oLive1">?</span></span> approaches as h shrinks:
+          right now it differs from f&prime;(x&#8320;) = <span class="live" id="oLive2">?</span> by
+          <span class="live" id="oLive3">?</span>. Pull h left and watch the gap die. Then zoom in:
+          up close, every smooth curve is a straight line wearing a disguise.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODULE 2 · QUANTUM BOX ================= -->
+  <div class="mod" id="modQ">
+    <div class="grid">
+      <div class="cwrap"><canvas id="cvQ" width="760" height="520"></canvas>
+        <div class="eq"><span class="lbl">The solutions</span>
+          <span class="fx">\(\displaystyle \psi_n(x)=\sqrt{\tfrac{2}{L}}\,\sin\!\left(\frac{n\pi x}{L}\right) \)
+          <span class="mutx">&nbsp;·&nbsp;</span>
+          \(\displaystyle E_n=\frac{n^{2}\pi^{2}\hbar^{2}}{2mL^{2}} \)
+          <span class="mutx">&nbsp;(\(\displaystyle \hbar=m=1 \))</span></span>
+      </div>
+      </div>
+      <div class="side">
+        <div class="card">
+          <h3>Controls</h3>
+          <div class="ctl"><label><span>quantum number n</span><b id="rN">n = 1</b></label>
+            <input type="range" id="sN" min="1" max="6" value="1" step="1"></div>
+          <div class="ctl"><label><span>well width L</span><b id="rL">L = 8.0</b></label>
+            <input type="range" id="sL" min="40" max="100" value="80"></div>
+          <div class="ctl"><label class="tog"><input type="checkbox" id="tP2"> show |&psi;|&sup2;</label></div>
+          <div class="ctl"><label class="tog"><input type="checkbox" id="tAn" checked> animate (time phase)</label></div>
+        </div>
+        <div class="card">
+          <h3>Energy ladder (E&#8345; &prop; n&sup2;/L&sup2;)</h3>
+          <div class="lvl" id="ladder"></div>
+        </div>
+        <div class="mis">
+          <p class="mk">Change one parameter</p>
+          <p>Energy jumps as n&sup2;: the gap from n=1 to 2 is 3 units of E&#8321;, from 2 to 3 it is
+          5, from 3 to 4 it is 7. And shrink L: <b>every</b> level climbs as 1/L&sup2;, because
+          squeezing a wave into less room forces a shorter wavelength, and shorter wavelength is
+          higher energy. Confinement costs energy; that is why electrons do not fall into the
+          nucleus. Interior nodes: always n&minus;1 (count them: <span class="live" id="oNodes">0</span>).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Sample demo built with CRCS to show what the app feels like; Niko's build will grow from here.
+    <a href="index.html">All twenty-nine modules</a> live on the launcher.
+    Physics: f(x)=x&sup3;/3&minus;x+1 with exact f&prime;(x)=x&sup2;&minus;1; infinite square well
+    &psi;&#8345;(x)=&radic;(2/L)&middot;sin(n&pi;x/L), E&#8345;=n&sup2;&pi;&sup2;&#8463;&sup2;/2mL&sup2;
+    (natural units &#8463;=m=1). No libraries, no network: one file of vanilla JavaScript.
+  </foot>
+</div>
+
+<script>
+"use strict";
+/* ---------- shared canvas helpers ---------- */
+function fit(cv){
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth || cv.width, h = Math.round(w * (520/760));
+  cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  const g = cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
+  return {g, W:w, H:h};
+}
+const fmt = (v,d=3)=> (v<0?"−":"") + Math.abs(v).toFixed(d);
+
+/* ================= MODULE 1: DERIVATIVE ================= */
+const f  = x => x*x*x/3 - x + 1;
+const fp = x => x*x - 1;
+const D = { x0:0.6, zoom:1, h:1.0, showDy:true, cv:document.getElementById("cvD") };
+
+function dView(){
+  // base window; zoomed window centered on the drag point, aspect preserved
+  const bw=6, bh=14, cx = D.zoom===1 ? 0 : D.x0, cy = D.zoom===1 ? 1 : f(D.x0);
+  return {xmin:cx-bw/2/D.zoom, xmax:cx+bw/2/D.zoom, ymin:cy-bh/2/D.zoom, ymax:cy+bh/2/D.zoom};
+}
+function drawD(){
+  const {g,W,H} = fit(D.cv), v = dView();
+  const X = x => (x-v.xmin)/(v.xmax-v.xmin)*W;
+  const Y = y => H - (y-v.ymin)/(v.ymax-v.ymin)*H;
+  g.fillStyle=C.bg2; g.fillRect(0,0,W,H);
+  // grid
+  g.strokeStyle=C.grid; g.lineWidth=1;
+  const step = D.zoom>8 ? 0.25 : D.zoom>2 ? 0.5 : 1;
+  for(let x=Math.ceil(v.xmin/step)*step; x<=v.xmax; x+=step){ g.beginPath(); g.moveTo(X(x),0); g.lineTo(X(x),H); g.stroke(); }
+  for(let y=Math.ceil(v.ymin/step)*step; y<=v.ymax; y+=step){ g.beginPath(); g.moveTo(0,Y(y)); g.lineTo(W,Y(y)); g.stroke(); }
+  // axes
+  g.strokeStyle=C.axis; g.lineWidth=1.5;
+  g.beginPath(); g.moveTo(X(0),0); g.lineTo(X(0),H); g.stroke();
+  g.beginPath(); g.moveTo(0,Y(0)); g.lineTo(W,Y(0)); g.stroke();
+  // curve
+  g.strokeStyle=C.ink; g.lineWidth=2.4; g.beginPath();
+  for(let px=0; px<=W; px++){ const x=v.xmin+(v.xmax-v.xmin)*px/W, y=f(x);
+    px===0 ? g.moveTo(px,Y(y)) : g.lineTo(px,Y(y)); }
+  g.stroke();
+  const x0=D.x0, y0=f(x0), m=fp(x0);
+  // tangent line across view
+  g.strokeStyle=C.blue; g.lineWidth=1.8; g.setLineDash([]);
+  g.beginPath(); g.moveTo(X(v.xmin), Y(y0+m*(v.xmin-x0))); g.lineTo(X(v.xmax), Y(y0+m*(v.xmax-x0))); g.stroke();
+  // dy vs Δy construction
+  if(D.showDy){
+    const h=D.h, xq=x0+h, yc=f(xq), yt=y0+m*h;
+    g.setLineDash([5,4]); g.strokeStyle=C.mut; g.lineWidth=1.2;
+    g.beginPath(); g.moveTo(X(x0),Y(y0)); g.lineTo(X(xq),Y(y0)); g.stroke();      // horizontal run
+    g.beginPath(); g.moveTo(X(xq),0); g.lineTo(X(xq),H); g.stroke();              // vertical at x0+h
+    g.setLineDash([]);
+    // Δy (red) and the gap (yellow) are drawn COLLINEAR on the x0+h vertical:
+    // Δy as a wide band from f(x0) to the curve, the gap o(Δx)=Δy−dy as a thin
+    // line from the tangent point to the curve point on top of the same line.
+    g.strokeStyle=C.hot; g.lineWidth=8;                                       // Δy on the x0+h vertical
+    g.beginPath(); g.moveTo(X(xq), Y(y0)); g.lineTo(X(xq), Y(yc)); g.stroke();
+    g.strokeStyle=C.blue; g.lineWidth=3.5;                                     // dy bracket, offset right
+    g.beginPath(); g.moveTo(X(xq)+9, Y(y0)); g.lineTo(X(xq)+9, Y(yt)); g.stroke();
+    g.strokeStyle=C.amber; g.lineWidth=3;                                       // gap, collinear with Δy
+    g.beginPath(); g.moveTo(X(xq), Y(yt)); g.lineTo(X(xq), Y(yc)); g.stroke();
+    g.fillStyle=C.hot; g.beginPath(); g.arc(X(xq),Y(yc),4.5,0,7); g.fill();
+    g.fillStyle=C.blue; g.beginPath(); g.arc(X(xq),Y(yt),4.5,0,7); g.fill();
+    // labels: each sits level with the midpoint of its own segment, on the shared line
+    g.font="12px ui-monospace,Menlo,monospace";
+    let lyDy=(Y(y0)+Y(yc))/2+4, lyGap=(Y(yt)+Y(yc))/2+4;
+    if(Math.abs(lyDy-lyGap)<15){const mid=(lyDy+lyGap)/2; lyDy=mid-9; lyGap=mid+9;}
+    g.textAlign="right";
+    g.fillStyle=C.hot; g.fillText("Δy", X(xq)-10, lyDy);
+    g.fillStyle=C.amber; g.fillText("o(Δx) = Δy−dy", X(xq)-10, lyGap);
+    g.textAlign="left";
+    g.fillStyle=C.blue; g.fillText("dy", X(xq)+16, (Y(y0)+Y(yt))/2+4);
+    g.textAlign="left";
+  }
+  // drag point
+  g.fillStyle=C.acc; g.beginPath(); g.arc(X(x0),Y(y0),7,0,7); g.fill();
+  g.strokeStyle=C.edge; g.lineWidth=2; g.stroke();
+  // readouts
+  const dy2=f(x0+D.h)-y0, dy1=m*D.h;
+  document.getElementById("rX0").textContent = "x = " + fmt(x0,2);
+  document.getElementById("oSlope").textContent = fmt(m);
+  document.getElementById("oDy1").textContent = fmt(dy1);
+  document.getElementById("oDy2").textContent = fmt(dy2);
+  document.getElementById("oGap").textContent = fmt(dy2-dy1);
+  document.getElementById("oRatio").textContent = fmt(dy2/D.h);
+  document.getElementById("oLive1").textContent = fmt(dy2/D.h);
+  document.getElementById("oLive2").textContent = fmt(m);
+  document.getElementById("oLive3").textContent = fmt(Math.abs(dy2/D.h-m));
+}
+/* drag */
+(function(){
+  let drag=false;
+  const pick = e=>{
+    const r=D.cv.getBoundingClientRect(), v=dView();
+    const x = v.xmin + (v.xmax-v.xmin)*(e.clientX-r.left)/r.width;
+    D.x0 = Math.max(-2.9, Math.min(2.9, x)); drawD();
+  };
+  D.cv.addEventListener("pointerdown", e=>{drag=true; D.cv.setPointerCapture(e.pointerId); pick(e);});
+  D.cv.addEventListener("pointermove", e=>{ if(drag) pick(e); });
+  D.cv.addEventListener("pointerup",   ()=>{drag=false;});
+})();
+document.getElementById("sZ").addEventListener("input", e=>{
+  D.zoom = Math.pow(2, e.target.value/100*6);      // 1x .. 64x
+  document.getElementById("rZ").textContent = D.zoom.toFixed(1)+"×";
+  drawD();
+});
+document.getElementById("sH").addEventListener("input", e=>{
+  D.h = e.target.value/100;                         // 0.02 .. 1.50
+  document.getElementById("rH").textContent = "h = " + D.h.toFixed(2);
+  drawD();
+});
+document.getElementById("tDy").addEventListener("input", e=>{D.showDy=e.target.checked; drawD();});
+
+/* ================= MODULE 2: QUANTUM BOX ================= */
+const Q = { n:1, L:8, p2:false, anim:true, t:0, cv:document.getElementById("cvQ") };
+const En = (n,L)=> n*n*Math.PI*Math.PI/(2*L*L);
+const EMAXAXIS = En(6,4)*1.06;                       // fixed axis: ladder visibly climbs as L shrinks
+function drawQ(){
+  const {g,W,H} = fit(Q.cv);
+  const padL=56, padR=16, padT=16, padB=34;
+  const xw = x => padL + x/10*(W-padL-padR);         // world x: 0..10
+  const ye = E => H-padB - E/EMAXAXIS*(H-padT-padB); // energy axis
+  g.fillStyle=C.bg2; g.fillRect(0,0,W,H);
+  // energy axis
+  g.strokeStyle=C.axis; g.lineWidth=1.5;
+  g.beginPath(); g.moveTo(padL,padT); g.lineTo(padL,H-padB); g.lineTo(W-padR,H-padB); g.stroke();
+  g.font="11px ui-monospace,Menlo,monospace"; g.fillStyle=C.mut;
+  g.save(); g.translate(16,(H-padB+padT)/2); g.rotate(-Math.PI/2); g.textAlign="center";
+  g.fillText("energy E (natural units)",0,0); g.restore();
+  g.textAlign="center"; g.fillText("x",(padL+W-padR)/2,H-10);
+  // well walls (infinite) at 0 and L
+  g.fillStyle=C.mutA+".10)";
+  g.fillRect(xw(Q.L),padT,(W-padR)-xw(Q.L),H-padT-padB);
+  g.strokeStyle=C.mut; g.lineWidth=3;
+  g.beginPath(); g.moveTo(xw(0),padT); g.lineTo(xw(0),H-padB); g.stroke();
+  g.beginPath(); g.moveTo(xw(Q.L),padT); g.lineTo(xw(Q.L),H-padB); g.stroke();
+  g.fillStyle=C.mut; g.textAlign="left"; g.fillText("V=∞", xw(Q.L)+8, padT+14);
+  // all six levels
+  const lad = document.getElementById("ladder"); let ladHTML="";
+  for(let k=1;k<=6;k++){
+    const E=En(k,Q.L), y=ye(E), cur = k===Q.n;
+    g.strokeStyle = cur ? C.acc : C.hair; g.lineWidth = cur?2:1.2;
+    g.setLineDash(cur?[]:[4,4]);
+    g.beginPath(); g.moveTo(xw(0),y); g.lineTo(xw(Q.L),y); g.stroke(); g.setLineDash([]);
+    g.fillStyle = cur ? C.acc : C.dim; g.textAlign="right";
+    g.fillText("n="+k, padL-6, y+4);
+    ladHTML += `<div class="l${cur?" cur":""}"><span class="k">n=${k}</span>`+
+               `<span>E=${En(k,Q.L).toFixed(2)}</span><span class="k">=${k*k}·E₁</span></div>`;
+  }
+  lad.innerHTML = ladHTML;
+  // wavefunction on its energy level
+  const E=En(Q.n,Q.L), base=ye(E), amp=Math.sqrt(2/Q.L);
+  const phase = Q.anim ? Math.cos(Q.t*2.2) : 1;
+  const scale = 62/Math.sqrt(2/4);                    // display gain, fixed so amp grows as L shrinks
+  g.lineWidth=2.6;
+  g.beginPath();
+  for(let px=0; px<=200; px++){
+    const x=Q.L*px/200, s=Math.sin(Q.n*Math.PI*x/Q.L);
+    let val;
+    if(Q.p2){ val = (amp*s)*(amp*s)*(Q.anim?1:1); g.strokeStyle=C.amber; }   // |ψ|² is time-independent
+    else    { val = amp*s*phase; g.strokeStyle=C.blue; }
+    const y = base - val*scale*(Q.p2?1.6:1);
+    px===0 ? g.moveTo(xw(x),y) : g.lineTo(xw(x),y);
+  }
+  g.stroke();
+  // baseline + labels
+  g.fillStyle = Q.p2 ? C.amber : C.blue; g.textAlign="left";
+  g.fillText(Q.p2 ? "|ψ|² (probability density)" : "ψₙ(x)", xw(0)+6, base-8-(Q.p2?0:0));
+  document.getElementById("oNodes").textContent = (Q.n-1);
+}
+function loopQ(ts){ Q.t = ts/1000; if(Q.anim && !Q.p2) drawQ(); requestAnimationFrame(loopQ); }
+document.getElementById("sN").addEventListener("input", e=>{
+  Q.n = +e.target.value; document.getElementById("rN").textContent = "n = "+Q.n; drawQ(); });
+document.getElementById("sL").addEventListener("input", e=>{
+  Q.L = e.target.value/10; document.getElementById("rL").textContent = "L = "+Q.L.toFixed(1); drawQ(); });
+document.getElementById("tP2").addEventListener("input", e=>{Q.p2=e.target.checked; drawQ();});
+document.getElementById("tAn").addEventListener("input", e=>{Q.anim=e.target.checked; drawQ();});
+
+/* ================= tabs ================= */
+const tabD=document.getElementById("tabD"), tabQ=document.getElementById("tabQ");
+const modD=document.getElementById("modD"), modQ=document.getElementById("modQ");
+function show(which){
+  const d = which==="D";
+  tabD.classList.toggle("on",d); tabQ.classList.toggle("on",!d);
+  modD.classList.toggle("on",d); modQ.classList.toggle("on",!d);
+  d ? drawD() : drawQ();
+}
+tabD.addEventListener("click",()=>show("D"));
+tabQ.addEventListener("click",()=>show("Q"));
+window.addEventListener("resize",()=>{ drawD(); drawQ(); });
+
+/* init */
+document.getElementById("rH").textContent = "h = 1.00";
+drawD(); drawQ(); requestAnimationFrame(loopQ);
+if(location.hash==="#quantum") show("Q");
+</script>
+</body>
+</html>

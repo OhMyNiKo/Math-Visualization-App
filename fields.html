@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<title>Field Explorer · Physics Intuition App</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.seg{display:flex;border:1px solid var(--hair)}
+.seg button{flex:1;background:var(--panel2);color:var(--mut);border:0;border-right:1px solid var(--hair);
+  font:600 13px/1 var(--sans);padding:10px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--acc);color:#04120d}
+.seg button.hotc.on{background:var(--hot);color:#fff}
+.tog{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);
+  font-family:var(--mono);cursor:pointer;user-select:none;margin-top:10px}
+.tog input{accent-color:var(--amber);width:15px;height:15px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center;line-height:1.2}
+.eq .frac .nu{display:block;padding:0 5px;border-bottom:1px solid var(--mut)}
+.eq .frac .de{display:block;padding:0 5px}
+.eq sub,.eq sup{font-size:10px}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · FIELD EXPLORER · MODULE 3 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Field Explorer</h1>
+    <p class="sub">Place charges and the electric field appears; nothing here is drawn by hand,
+    every arrow is computed from Coulomb's law. Then release a test particle and watch it refuse
+    to follow the field line.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx">\(\displaystyle \mathbf E(\mathbf r)=\sum_i \frac{k\,q_i}{r_i^{2}}\,\hat{\mathbf r}_i \)
+        <span class="mutx">&nbsp;·&nbsp;</span> \(\displaystyle \mathbf F=q\mathbf E=m\mathbf a \)
+        <span class="mutx">&nbsp;(k=1, q=+1, m=1)</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="ctl">
+          <div class="seg">
+            <button id="bPos" class="on">+ charge</button>
+            <button id="bNeg" class="hotc">&minus; charge</button>
+          </div>
+          <label class="tog"><input type="checkbox" id="tEq"> show equipotential bands</label>
+          <button class="btn" id="bRel">Release test particle at marker</button>
+          <button class="btn" id="bClr" style="border-color:var(--hair);color:var(--mut)">Clear trajectories</button>
+        </div>
+        <p class="hint">Click empty space: add the selected charge. Drag a charge to move it.
+        Double-click a charge to remove it. The white +&thinsp;disc is the test particle
+        (positive, like a + charge, just white): drag it to choose the release point.</p>
+      </div>
+      <div class="card">
+        <h3>Readout, at the cursor</h3>
+        <div class="read">
+          <div class="r"><span class="k">|E| field magnitude</span><span class="v acc" id="oE">0.000</span></div>
+          <div class="r"><span class="k">V potential</span><span class="v blue" id="oV">0.000</span></div>
+          <div class="r"><span class="k">charges placed</span><span class="v" id="oN">2</span></div>
+          <div class="r"><span class="k">at midpoint of a +/+ pair</span><span class="v amber">|E| = 0</span></div>
+        </div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>Field lines are <b>not</b> the paths particles follow. A field line shows the direction
+        of force at each point; a moving particle keeps its momentum, so once the line curves,
+        the particle leaves it. Release the particle: the dashed curve is the field line through
+        the release point, the solid curve is where the particle actually goes. They separate by
+        <span class="live" id="oSep">?</span> px after release. Only when lines are straight do
+        the two agree.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Physics: E = &Sigma; kq&#x1D63;&#x0302;/r&sup2; summed over charges (k=1, test charge q=+1, m=1);
+    particle integrated with semi-implicit Euler; field line integrated along E&#x0302; with RK2.
+    Check: at the midpoint between two equal + charges the arrows vanish, |E| = 0 by symmetry.
+    One file of vanilla JavaScript, no libraries, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=3)=>(v<0?"−":"")+Math.abs(v).toFixed(d);
+
+/* state: world = canvas px coords (soft units, k=1, distances in units of 60px) */
+const S={
+  charges:[{x:260,y:260,q:+1},{x:500,y:260,q:+1}],
+  sign:+1, eq:false,
+  marker:{x:380,y:150},
+  paths:[],       // finished {traj:[],fline:[],sep}
+  mouse:{x:-1,y:-1},
+  drag:null, dragMark:false, live:null
+};
+const UNIT=60; // px per world unit
+
+function fieldAt(x,y){
+  let ex=0,ey=0,v=0;
+  for(const c of S.charges){
+    const dx=(x-c.x)/UNIT,dy=(y-c.y)/UNIT;
+    const r2=dx*dx+dy*dy, r=Math.sqrt(r2);
+    if(r<1e-4) continue;
+    const f=c.q/(r2*r);
+    ex+=f*dx; ey+=f*dy; v+=c.q/r;
+  }
+  return{ex,ey,v,mag:Math.hypot(ex,ey)};
+}
+
+/* field line from a point, along +E (RK2), stops near charges/edges */
+function fieldLine(x0,y0,W,H){
+  const pts=[{x:x0,y:y0}];
+  let x=x0,y=y0;
+  for(let i=0;i<900;i++){
+    const f1=fieldAt(x,y); if(f1.mag<1e-6) break;
+    const h=4;
+    const mx=x+h*f1.ex/f1.mag, my=y+h*f1.ey/f1.mag;
+    const f2=fieldAt(mx,my);  if(f2.mag<1e-6) break;
+    x+=h*0.5*(f1.ex/f1.mag+f2.ex/f2.mag);
+    y+=h*0.5*(f1.ey/f1.mag+f2.ey/f2.mag);
+    pts.push({x,y});
+    if(x<0||y<0||x>W||y>H) break;
+    if(S.charges.some(c=>Math.hypot(x-c.x,y-c.y)<12)) break;
+  }
+  return pts;
+}
+
+/* particle trajectory from rest: a = qE/m (world units), semi-implicit Euler */
+function trajectory(x0,y0,W,H){
+  const pts=[{x:x0,y:y0}];
+  let x=x0/UNIT,y=y0/UNIT,vx=0,vy=0;
+  const dt=0.004;
+  for(let i=0;i<2600;i++){
+    const f=fieldAt(x*UNIT,y*UNIT);
+    vx+=f.ex*dt; vy+=f.ey*dt;
+    x+=vx*dt; y+=vy*dt;
+    const px=x*UNIT,py=y*UNIT;
+    if(i%4===0) pts.push({x:px,y:py});
+    if(px<0||py<0||px>W||py>H) break;
+    if(S.charges.some(c=>Math.hypot(px-c.x,py-c.y)<10)) break;
+  }
+  return pts;
+}
+
+/* max separation between trajectory and field line (crude: per-index up to shared length) */
+function separation(traj,fl){
+  let m=0;
+  const n=Math.min(traj.length,fl.length);
+  for(let i=0;i<n;i++) m=Math.max(m,Math.hypot(traj[i].x-fl[i].x,traj[i].y-fl[i].y));
+  return m;
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+
+  /* equipotential bands (coarse blocks, banded by V) */
+  if(S.eq){
+    const B=6;
+    for(let py=0;py<H;py+=B)for(let px=0;px<W;px+=B){
+      const v=fieldAt(px+B/2,py+B/2).v;
+      const band=Math.floor(v/0.35);
+      if(((band%2)+2)%2===0){
+        g.fillStyle = v>=0 ? C.blueA+".10)" : C.hotA+".10)";
+        g.fillRect(px,py,B,B);
+      }
+    }
+  }
+
+  /* vector grid */
+  const GS=40;
+  for(let py=GS/2;py<H;py+=GS)for(let px=GS/2;px<W;px+=GS){
+    const f=fieldAt(px,py);
+    if(f.mag<1e-6) continue;
+    const len=Math.min(16,3+8*Math.log10(1+f.mag*8));
+    const ux=f.ex/f.mag,uy=f.ey/f.mag;
+    const a=Math.min(.9,.25+f.mag*1.2);
+    g.strokeStyle=`${C.accA}${a})`;g.lineWidth=1.4;
+    g.beginPath();g.moveTo(px-ux*len/2,py-uy*len/2);g.lineTo(px+ux*len/2,py+uy*len/2);g.stroke();
+    g.beginPath();
+    g.moveTo(px+ux*len/2,py+uy*len/2);
+    g.lineTo(px+ux*len/2-ux*5-uy*3,py+uy*len/2-uy*5+ux*3);
+    g.moveTo(px+ux*len/2,py+uy*len/2);
+    g.lineTo(px+ux*len/2-ux*5+uy*3,py+uy*len/2-uy*5-ux*3);
+    g.stroke();
+  }
+
+  /* stored paths */
+  for(const p of S.paths){
+    g.setLineDash([5,4]);g.strokeStyle=C.mut;g.lineWidth=1.6;
+    g.beginPath();p.fline.forEach((pt,i)=>i?g.lineTo(pt.x,pt.y):g.moveTo(pt.x,pt.y));g.stroke();
+    g.setLineDash([]);g.strokeStyle=C.amber;g.lineWidth=2.2;
+    g.beginPath();p.traj.forEach((pt,i)=>i?g.lineTo(pt.x,pt.y):g.moveTo(pt.x,pt.y));g.stroke();
+    /* the test particle where it ended up: same glyph as a + charge, but white */
+    const end=p.traj[p.traj.length-1];
+    if(end){ drawTestGlyph(g,end.x,end.y,7,10); }
+  }
+
+  /* charges */
+  for(const c of S.charges){
+    g.fillStyle=c.q>0?C.acc:C.hot;
+    g.beginPath();g.arc(c.x,c.y,11,0,7);g.fill();
+    g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+    g.fillStyle=C.edge;g.font="bold 14px ui-monospace,Menlo,monospace";g.textAlign="center";
+    g.fillText(c.q>0?"+":"−",c.x,c.y+5);
+  }
+
+  /* the test particle, waiting at the release point: drawn exactly like a
+     + charge but WHITE, so you can see at a glance that it is positive */
+  g.setLineDash([4,3]);g.strokeStyle=C.inkA+".5)";g.lineWidth=1.4;
+  g.beginPath();g.arc(S.marker.x,S.marker.y,17,0,7);g.stroke();g.setLineDash([]);
+  drawTestGlyph(g,S.marker.x,S.marker.y,11,14);
+
+  /* cursor readout */
+  if(S.mouse.x>=0){
+    const f=fieldAt(S.mouse.x,S.mouse.y);
+    document.getElementById("oE").textContent=fmt(f.mag);
+    document.getElementById("oV").textContent=fmt(f.v);
+  }
+  document.getElementById("oN").textContent=S.charges.length;
+  /* legend, bottom-left */
+  const ly=H-48;
+  g.font="11px ui-monospace,Menlo,monospace";
+  g.setLineDash([4,3]);g.strokeStyle=C.mut;g.lineWidth=1.6;
+  g.beginPath();g.moveTo(12,ly);g.lineTo(34,ly);g.stroke();g.setLineDash([]);
+  g.fillStyle=C.mut;g.textAlign="left";g.fillText("field line (direction)",42,ly+4);
+  g.strokeStyle=C.amber;g.lineWidth=2.2;
+  g.beginPath();g.moveTo(12,ly+16);g.lineTo(34,ly+16);g.stroke();
+  g.fillStyle=C.amber;g.fillText("actual trajectory",42,ly+20);
+  drawTestGlyph(g,23,ly+34,7,10);
+  g.font="11px ui-monospace,Menlo,monospace";g.fillStyle=C.ink;g.textAlign="left";
+  g.fillText("test particle (+1, white)",42,ly+38);
+}
+
+/* a + charge glyph in white: the test particle */
+function drawTestGlyph(g,x,y,r,fpx){
+  g.fillStyle=C.ink;g.beginPath();g.arc(x,y,r,0,7);g.fill();
+  g.strokeStyle=C.edge;g.lineWidth=r>8?2:1.5;g.stroke();
+  g.fillStyle=C.edge;g.font="bold "+fpx+"px ui-monospace,Menlo,monospace";g.textAlign="center";
+  g.fillText("+",x,y+fpx*0.36);
+  g.textAlign="left";
+}
+
+function release(){
+  const{W,H}=fit();
+  const fl=fieldLine(S.marker.x,S.marker.y,W,H);
+  const traj=trajectory(S.marker.x,S.marker.y,W,H);
+  const sep=separation(traj,fl);
+  S.paths.push({fline:fl,traj,sep});
+  if(S.paths.length>4) S.paths.shift();
+  document.getElementById("oSep").textContent=Math.round(sep)+" ";
+  draw();
+}
+
+/* interactions */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+cv.addEventListener("pointerdown",e=>{
+  const p=pos(e);
+  if(Math.hypot(p.x-S.marker.x,p.y-S.marker.y)<18){S.dragMark=true;cv.setPointerCapture(e.pointerId);return;}
+  const hit=S.charges.find(c=>Math.hypot(p.x-c.x,p.y-c.y)<14);
+  if(hit){S.drag=hit;cv.setPointerCapture(e.pointerId);return;}
+  S.charges.push({x:p.x,y:p.y,q:S.sign});S.paths=[];draw();
+});
+cv.addEventListener("pointermove",e=>{
+  const p=pos(e);S.mouse=p;
+  if(S.dragMark){S.marker=p;}
+  else if(S.drag){S.drag.x=p.x;S.drag.y=p.y;S.paths=[];}
+  draw();
+});
+cv.addEventListener("pointerup",()=>{S.drag=null;S.dragMark=false;});
+cv.addEventListener("dblclick",e=>{
+  const p=pos(e);
+  const i=S.charges.findIndex(c=>Math.hypot(p.x-c.x,p.y-c.y)<14);
+  if(i>=0){S.charges.splice(i,1);S.paths=[];draw();}
+});
+document.getElementById("bPos").addEventListener("click",function(){
+  S.sign=+1;this.classList.add("on");document.getElementById("bNeg").classList.remove("on");});
+document.getElementById("bNeg").addEventListener("click",function(){
+  S.sign=-1;this.classList.add("on");document.getElementById("bPos").classList.remove("on");});
+document.getElementById("tEq").addEventListener("input",e=>{S.eq=e.target.checked;draw();});
+document.getElementById("bRel").addEventListener("click",release);
+document.getElementById("bClr").addEventListener("click",()=>{S.paths=[];document.getElementById("oSep").textContent="?";draw();});
+window.addEventListener("resize",draw);
+draw();
+</script>
+</body>
+</html>

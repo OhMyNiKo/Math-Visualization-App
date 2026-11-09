@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>The ε–N Definition of a Limit · Physics Intuition App</title>
+<script src="theme.js"></script>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:6px;margin-bottom:10px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:14px var(--mono);padding:8px 10px;min-width:0}
+.fin input:focus{outline:none;border-color:var(--acc)}
+.fin button{background:var(--panel2);border:1px solid var(--acc);color:var(--acc);
+  font:600 12px var(--mono);padding:0 12px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · THE ε–N DEFINITION OF A LIMIT · MODULE 19 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>The ε–N Definition of a Limit</h1>
+    <p class="sub">Pick a sequence and a candidate limit L, then squeeze the band L &plusmn; ε with the
+    slider (or drag its edge on the canvas). The module hunts for the least N after which <b>every</b>
+    term stays inside the band, and colours the terms that break out. Press Replay to let an adversary
+    halve ε again and again and watch N answer each time.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The definition</span>
+        <span class="fx">\(\displaystyle \lim_{n\to\infty} u_n = L \iff \forall \varepsilon>0\ \exists N:\ n>N \Rightarrow |u_n - L|<\varepsilon \)</span>
+        <span class="mutx" id="eqU">\(\displaystyle u_n = \tfrac{1}{n} \)</span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="seg" id="segF">
+          <button data-k="inv" class="on">1/n</button>
+          <button data-k="alt">(−1)&#8319;/n</button>
+          <button data-k="rat">n/(n+1)</button>
+          <button data-k="sin">1 + sin(n)/n</button>
+          <button data-k="rat2">(2n+1)/(n+3)</button>
+          <button data-k="div">(−1)&#8319; diverges</button>
+        </div>
+        <div class="fin"><input type="text" id="fIn" value="1/n" spellcheck="false">
+          <button id="bGo">Use uₙ</button></div>
+        <div class="err" id="err"></div>
+        <div class="ctl"><label><span>band half-width ε</span><b id="rE">ε = 0.25</b></label>
+          <input type="range" id="sE" min="2" max="100" value="25"></div>
+        <div class="ctl"><label><span>candidate limit L</span><b id="rL">L = 0.00</b></label>
+          <input type="range" id="sL" min="-200" max="300" value="0"></div>
+        <button class="btn" id="bRe">&#8635; Replay: adversary halves ε</button>
+        <p class="hint">Custom uₙ: + &minus; * / ^ ( ), implicit products like 2n, sin cos tan atan exp
+        ln sqrt sinh cosh tanh, pi and e; the variable is n. N is searched up to n = 2000.</p>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"The terms get closer and closer to L, so L is the limit" is <b>not enough</b>. Closer is
+        cheap: (&minus;1)&#8319; gets no closer to anything, and 1 + sin(n)/n wobbles yet converges.
+        The definition demands that for <b>every</b> band, however thin, the terms eventually enter it
+        and <b>never leave</b>. For the current band the threshold is
+        <span class="live" id="oLive">?</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: N is the last index n &le; 2000 with |u&#8345; &minus; L| &ge; ε (so every later term is
+    inside the band); if a violation still occurs beyond n = 1500 the module reports that no N works
+    within its horizon. Sequences are evaluated in floating point. One file of vanilla JavaScript, no
+    libraries beyond the shared KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>!isFinite(v)?"—":(v<0?"−":"")+Math.abs(v).toFixed(d);
+const MONO="11px ui-monospace,Menlo,monospace";
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    `<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+
+/* ---------- tiny expression parser (shared with the Taylor lab); the variable may be x or n ---------- */
+function tokenize(s){
+  const T=[];let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(c===" "||c==="\t"){i++;continue;}
+    if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      const v=parseFloat(s.slice(i,j));if(!isFinite(v))throw new Error("bad number");
+      T.push({t:"num",v});i=j;continue;}
+    if(/[a-zA-Z_]/.test(c)){let j=i;while(j<s.length&&/[a-zA-Z_]/.test(s[j]))j++;
+      T.push({t:"id",v:s.slice(i,j)});i=j;continue;}
+    if("+-*/^(),".includes(c)){T.push({t:c});i++;continue;}
+    throw new Error("unexpected character '"+c+"'");
+  }
+  return T;
+}
+const FNS=["sin","cos","tan","atan","exp","ln","log","sqrt","sinh","cosh","tanh","abs"];
+function parse(s){
+  const T=tokenize(s);let p=0;
+  const peek=()=>T[p];
+  const eat=t=>{if(!T[p]||T[p].t!==t)throw new Error("expected '"+t+"'");return T[p++];};
+  function expr(){let a=term();
+    while(peek()&&(peek().t==="+"||peek().t==="-")){const op=T[p++].t;a={t:"bin",op,a,b:term()};}
+    return a;}
+  function term(){let a=factor();
+    for(;;){const n=peek();
+      if(n&&(n.t==="*"||n.t==="/")){const op=T[p++].t;a={t:"bin",op,a,b:factor()};}
+      else if(n&&(n.t==="num"||n.t==="id"||n.t==="(")){a={t:"bin",op:"*",a,b:factor()};}
+      else break;}
+    return a;}
+  function factor(){
+    if(peek()&&peek().t==="-"){p++;return{t:"neg",a:factor()};}
+    if(peek()&&peek().t==="+"){p++;return factor();}
+    return power();}
+  function power(){const a=atom();
+    if(peek()&&peek().t==="^"){p++;return{t:"bin",op:"^",a,b:factor()};}
+    return a;}
+  function atom(){
+    const n=peek();
+    if(!n)throw new Error("expression ends too early");
+    if(n.t==="num"){p++;return{t:"num",v:n.v};}
+    if(n.t==="("){p++;const e=expr();eat(")");return e;}
+    if(n.t==="id"){p++;const name=n.v.toLowerCase();
+      if(peek()&&peek().t==="("){
+        if(!FNS.includes(name))throw new Error("unknown function '"+name+"'");
+        p++;const e=expr();eat(")");return{t:"call",fn:name,a:e};}
+      if(name==="x"||name==="n")return{t:"var"};     /* the index n is the variable here */
+      if(name==="pi")return{t:"num",v:Math.PI};
+      if(name==="e")return{t:"num",v:Math.E};
+      if(FNS.includes(name))throw new Error("'"+name+"' needs parentheses: "+name+"(n)");
+      throw new Error("unknown name '"+n.v+"'");}
+    throw new Error("unexpected '"+n.t+"'");}
+  const e=expr();
+  if(p<T.length)throw new Error("could not parse the whole expression");
+  return e;
+}
+const NF={sin:Math.sin,cos:Math.cos,tan:Math.tan,atan:Math.atan,exp:Math.exp,ln:Math.log,
+  log:Math.log,sqrt:Math.sqrt,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,abs:Math.abs};
+function evalNum(n,x){
+  switch(n.t){
+    case "num":return n.v;
+    case "var":return x;
+    case "neg":return -evalNum(n.a,x);
+    case "bin":{const a=evalNum(n.a,x),b=evalNum(n.b,x);
+      return n.op==="+"?a+b:n.op==="-"?a-b:n.op==="*"?a*b:n.op==="/"?a/b:Math.pow(a,b);}
+    case "call":return NF[n.fn](evalNum(n.a,x));
+  }
+}
+
+/* ---------- presets ---------- */
+const PRE={
+  inv:{txt:"1/n",tex:"u_n = \\tfrac{1}{n}",u:n=>1/n,L:0},
+  alt:{txt:"(-1)^n/n",tex:"u_n = \\tfrac{(-1)^n}{n}",u:n=>(n%2?-1:1)/n,L:0},
+  rat:{txt:"n/(n+1)",tex:"u_n = \\tfrac{n}{n+1}",u:n=>n/(n+1),L:1},
+  sin:{txt:"1+sin(n)/n",tex:"u_n = 1 + \\tfrac{\\sin n}{n}",u:n=>1+Math.sin(n)/n,L:1},
+  rat2:{txt:"(2n+1)/(n+3)",tex:"u_n = \\tfrac{2n+1}{n+3}",u:n=>(2*n+1)/(n+3),L:2},
+  div:{txt:"(-1)^n",tex:"u_n = (-1)^n\\ \\text{(diverges)}",u:n=>(n%2?-1:1),L:0}
+};
+const NMAX=2000,NVIEW=60,HORIZON=1500;
+const S={key:"inv",txt:"1/n",ast:null,err:"",eps:0.25,L:0,u:[],N:null,table:[],t:0,last:0,step:-1,drag:false};
+
+function build(){
+  S.err="";
+  let uf;
+  if(S.key!=="custom"){uf=PRE[S.key].u;S.txt=PRE[S.key].txt;}
+  else{
+    try{S.ast=parse(S.txt);}catch(e){S.ast=null;S.err=e.message;}
+    uf=n=>{try{return S.ast?evalNum(S.ast,n):NaN;}catch(e){return NaN;}};
+  }
+  S.u=[NaN];for(let n=1;n<=NMAX;n++)S.u.push(uf(n));
+  if(S.key!=="custom")S.L=PRE[S.key].L;
+  else{ /* guess the candidate limit from far-out terms; the student may move it */
+    const far=[1e5,1e5+1,1e5+2,1e5+3].map(uf).filter(isFinite);
+    const guess=far.length?far.reduce((a,b)=>a+b,0)/far.length:0;
+    S.L=isFinite(guess)?Math.max(-2,Math.min(3,Math.round(guess*100)/100)):0;
+  }
+  syncL();
+  const e=document.getElementById("eqU");
+  e.innerHTML="\\( "+(S.key!=="custom"?PRE[S.key].tex:"u_n = "+texOf(S.txt))+" \\)";
+  if(window.piaRenderMath)window.piaRenderMath(e);
+}
+function texOf(s){
+  return s.replace(/\s+/g,"").replace(/\*/g,"\\cdot ").replace(/(sin|cos|tan|exp|ln|sqrt|sinh|cosh|tanh|atan|abs)\(/g,"\\$1(")
+    .replace(/\\sqrt\(([^()]*)\)/g,"\\sqrt{$1}").replace(/\^(\d+|\([^()]*\))/g,(m,p)=>"^{"+p.replace(/^\(|\)$/g,"")+"}")
+    .replace(/\\abs\(([^()]*)\)/g,"\\left|$1\\right|").replace(/pi/g,"\\pi ");
+}
+/* least N such that every n > N has |u_n − L| < ε, searched to NMAX; null if a violation survives past the horizon */
+function findN(eps){
+  let last=0;
+  for(let n=1;n<=NMAX;n++){const d=Math.abs(S.u[n]-S.L);if(!(d<eps))last=n;}
+  return last>HORIZON?null:last;
+}
+function syncL(){document.getElementById("sL").value=Math.round(S.L*100);document.getElementById("rL").textContent="L = "+fmt(S.L);}
+function syncE(){document.getElementById("sE").value=Math.round(S.eps*100);document.getElementById("rE").textContent="ε = "+fmt(S.eps);}
+
+/* ---------- drawing ---------- */
+let VY={lo:-1,hi:1};
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  const N=findN(S.eps);S.N=N;
+  /* vertical range: the first NVIEW terms plus the band, with padding */
+  const vis=[];for(let n=1;n<=NVIEW;n++)if(isFinite(S.u[n])&&Math.abs(S.u[n])<1e6)vis.push(S.u[n]);
+  let lo=Math.min(S.L-S.eps,...vis),hi=Math.max(S.L+S.eps,...vis);
+  const span=Math.max(hi-lo,4*S.eps,0.2),mid=(hi+lo)/2;lo=mid-span*0.62;hi=mid+span*0.62;
+  VY={lo,hi};
+  const left=52,right=W-14,top=40,bot=H-36;
+  const X=n=>left+(right-left)*(n-0.5)/NVIEW;
+  const Y=v=>bot-(v-lo)/(hi-lo)*(bot-top);
+  /* grid */
+  g.strokeStyle=C.grid;g.lineWidth=1;g.font=MONO;g.fillStyle=C.dim;g.textAlign="right";
+  const st=niceStep((hi-lo)/6);
+  for(let v=Math.ceil(lo/st)*st;v<=hi;v+=st){g.beginPath();g.moveTo(left,Y(v));g.lineTo(right,Y(v));g.stroke();g.fillText(fmt(v,st<0.1?2:1),left-6,Y(v)+4);}
+  g.textAlign="center";
+  for(let n=10;n<=NVIEW;n+=10){g.beginPath();g.moveTo(X(n),top);g.lineTo(X(n),bot);g.stroke();g.fillText(n,X(n),H-16);}
+  g.fillText("n",(left+right)/2,H-3);
+  g.strokeStyle=C.axis;g.lineWidth=1.5;g.beginPath();g.moveTo(left,bot);g.lineTo(right,bot);g.stroke();
+  g.beginPath();g.moveTo(left,top);g.lineTo(left,bot);g.stroke();
+  /* the band L ± ε and the candidate limit */
+  g.fillStyle=C.amberA+"0.22)";g.fillRect(left,Y(S.L+S.eps),right-left,Y(S.L-S.eps)-Y(S.L+S.eps));
+  g.strokeStyle=C.amber;g.lineWidth=1;g.setLineDash([4,4]);
+  g.beginPath();g.moveTo(left,Y(S.L+S.eps));g.lineTo(right,Y(S.L+S.eps));g.stroke();
+  g.beginPath();g.moveTo(left,Y(S.L-S.eps));g.lineTo(right,Y(S.L-S.eps));g.stroke();g.setLineDash([]);
+  g.lineWidth=2;g.beginPath();g.moveTo(left,Y(S.L));g.lineTo(right,Y(S.L));g.stroke();
+  g.fillText("L + ε",right-4,Y(S.L+S.eps)-4);g.fillText("L − ε (drag)",right-4,Y(S.L-S.eps)+13);
+  /* the threshold N */
+  if(N!==null){
+    if(N>=1&&N<=NVIEW){
+      g.strokeStyle=C.hot;g.lineWidth=2;g.beginPath();g.moveTo(X(N),top);g.lineTo(X(N),bot);g.stroke();
+      g.fillStyle=C.hot;g.textAlign="left";g.fillText("N = "+N,X(N)+5,top+12);
+      g.fillStyle=C.hotA+"0.08)";g.fillRect(left,top,X(N)-left,bot-top);
+    }else if(N>NVIEW){g.fillStyle=C.hot;g.textAlign="left";g.fillText("N = "+N+" (off the right edge)",left+8,top+12);}
+    else{g.fillStyle=C.acc;g.textAlign="left";g.fillText("N = 0: every term is already inside",left+8,top+12);}
+  }else{g.fillStyle=C.hot;g.font="600 12px ui-monospace,Menlo,monospace";g.textAlign="left";
+    g.fillText("no N works for ε = "+fmt(S.eps)+": terms keep leaving the band",left+8,top+12);g.font=MONO;}
+  /* the terms */
+  for(let n=1;n<=NVIEW;n++){
+    const v=S.u[n];if(!isFinite(v))continue;
+    const inside=Math.abs(v-S.L)<S.eps;
+    const y=Math.max(top-4,Math.min(bot+4,Y(v)));
+    g.fillStyle=inside?C.acc:C.hot;g.beginPath();g.arc(X(n),y,3.6,0,7);g.fill();
+    g.strokeStyle=C.edge;g.lineWidth=1;g.stroke();
+  }
+  g.fillStyle=C.bg2;g.fillRect(right-64,Y(S.L)-16,60,14);g.fillStyle=C.amber;g.textAlign="right";g.fillText("L = "+fmt(S.L),right-6,Y(S.L)-5);
+  /* legend */
+  g.textAlign="left";g.fillStyle=C.acc;g.fillText("● inside the band",left+8,H-3);
+  g.fillStyle=C.hot;g.fillText("● outside",left+130,H-3);
+  g.fillStyle=C.amber;g.fillText("▬ L ± ε",left+200,H-3);
+
+  /* readouts */
+  document.getElementById("err").textContent=S.err;
+  const list=[
+    ["sequence","uₙ = "+S.txt,""],
+    ["candidate limit L",fmt(S.L),"amber"],
+    ["band half-width ε",fmt(S.eps),"amber"],
+    ["least N",N===null?"no N works (to n = 2000)":String(N),N===null?"hot":"acc"],
+    ["u"+sub(NVIEW)+", |u"+sub(NVIEW)+" − L|",fmt(S.u[NVIEW],3)+", "+fmt(Math.abs(S.u[NVIEW]-S.L),3),""],
+    ["terms outside among 1..60",String(countOut()),countOut()?"hot":"acc"]
+  ];
+  if(S.table.length){
+    list.push(["adversary: ε → N","",""]);
+    for(const[e,n]of S.table)list.push(["  ε = "+fmt(e,3),n===null?"no N works":"N = "+n,n===null?"hot":"acc"]);
+  }
+  rows(list);
+  document.getElementById("oLive").textContent=N===null?"N does not exist for ε = "+fmt(S.eps):"N = "+N+" for ε = "+fmt(S.eps);
+}
+function countOut(){let c=0;for(let n=1;n<=NVIEW;n++)if(!(Math.abs(S.u[n]-S.L)<S.eps))c++;return c;}
+function niceStep(raw){const p=Math.pow(10,Math.floor(Math.log10(raw)));const m=raw/p;return(m<1.5?1:m<3.5?2:m<7.5?5:10)*p;}
+const SUBS="₀₁₂₃₄₅₆₇₈₉";
+function sub(k){return String(k).split("").map(c=>SUBS[+c]).join("");}
+
+/* ---------- the adversary: ε halves, N answers ---------- */
+const EPS_SEQ=[1,0.5,0.25,0.125,0.0625,0.03125];
+let raf=null;
+function loop(ts){
+  if(!S.last)S.last=ts;
+  S.t+=Math.min(0.05,(ts-S.last)/1000);S.last=ts;
+  const k=Math.min(EPS_SEQ.length-1,Math.floor(S.t/0.8));
+  if(k!==S.step){S.step=k;S.eps=EPS_SEQ[k];syncE();S.table.push([S.eps,findN(S.eps)]);draw();}
+  if(S.step<EPS_SEQ.length-1)raf=requestAnimationFrame(loop);else raf=null;
+}
+function replay(){if(raf)cancelAnimationFrame(raf);S.t=0;S.last=0;S.step=-1;S.table=[];raf=requestAnimationFrame(loop);}
+function stopAnim(){if(raf){cancelAnimationFrame(raf);raf=null;}}
+
+/* ---------- interaction: drag the lower band edge to set ε ---------- */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+function yToV(py){const W=cv.clientWidth||cv.width,H=Math.round(W*(520/760));const top=40,bot=H-36;
+  return VY.lo+(VY.hi-VY.lo)*(bot-py)/(bot-top);}
+cv.addEventListener("pointerdown",e=>{stopAnim();S.drag=true;cv.setPointerCapture(e.pointerId);move(e);});
+function move(e){
+  if(!S.drag)return;
+  const v=yToV(pos(e).y);
+  S.eps=Math.max(0.02,Math.min(1,Math.abs(v-S.L)));
+  syncE();draw();
+}
+cv.addEventListener("pointermove",move);
+cv.addEventListener("pointerup",()=>{S.drag=false;});
+cv.addEventListener("pointercancel",()=>{S.drag=false;});
+
+document.getElementById("sE").addEventListener("input",e=>{stopAnim();S.eps=e.target.value/100;syncE();draw();});
+document.getElementById("sL").addEventListener("input",e=>{stopAnim();S.L=e.target.value/100;syncL();S.table=[];draw();});
+document.getElementById("bRe").addEventListener("click",replay);
+document.querySelectorAll("#segF button").forEach(b=>b.addEventListener("click",function(){
+  document.querySelectorAll("#segF button").forEach(x=>x.classList.remove("on"));this.classList.add("on");
+  stopAnim();S.key=this.dataset.k;S.table=[];build();document.getElementById("fIn").value=S.txt;draw();
+}));
+function apply(){
+  stopAnim();S.txt=document.getElementById("fIn").value;S.key="custom";S.table=[];
+  document.querySelectorAll("#segF button").forEach(x=>x.classList.remove("on"));
+  build();draw();
+}
+document.getElementById("bGo").addEventListener("click",apply);
+document.getElementById("fIn").addEventListener("keydown",e=>{if(e.key==="Enter")apply();});
+window.addEventListener("resize",draw);
+build();draw();
+</script>
+</body>
+</html>

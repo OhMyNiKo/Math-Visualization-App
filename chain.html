@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>The Chain Rule as Gears · Physics Intuition App</title>
+<script src="theme.js"></script>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:6px;margin-bottom:10px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:14px var(--mono);padding:8px 10px;min-width:0}
+.fin input:focus{outline:none;border-color:var(--acc)}
+.fin button{background:var(--panel2);border:1px solid var(--acc);color:var(--acc);
+  font:600 12px var(--mono);padding:0 12px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+.fin .lab{font:600 12px/1 var(--mono);color:var(--mut);align-self:center;min-width:64px;white-space:nowrap}
+.fin.tight{margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · THE CHAIN RULE AS GEARS · MODULE 21 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>The Chain Rule as Gears</h1>
+    <p class="sub">A composite \( y=h(g(f(x))) \) is a train of gears: turn the \( x \) gear at unit speed and
+    each next gear turns faster or slower by exactly the local derivative of its layer, backwards when
+    that derivative is negative. Slide \( x \), watch the gear speeds change, and read the three small
+    graphs below whose tangent slopes are the three ratios being multiplied.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx">\(\displaystyle \dfrac{dy}{dx} = \dfrac{dy}{dv}\,\dfrac{dv}{du}\,\dfrac{du}{dx} \)
+        <span class="mutx">· with \(\displaystyle u=f(x),\ v=g(u),\ y=h(v) \): the ratios multiply along the train</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="seg">
+          <button data-f="x^2" data-g="sin(u)" data-h="v" class="on">sin(x²)</button>
+          <button data-f="3x" data-g="exp(u)" data-h="v">e^(3x)</button>
+          <button data-f="x^2" data-g="1+u" data-h="ln(v)">ln(1+x²)</button>
+          <button data-f="2x" data-g="u+1" data-h="v^5">(2x+1)⁵</button>
+          <button data-f="sin(x)" data-g="u+2" data-h="sqrt(v)">√(sin x + 2)</button>
+        </div>
+        <div class="fin tight"><span class="lab">u = f(x) =</span><input type="text" id="fIn" value="x^2" spellcheck="false"></div>
+        <div class="fin tight"><span class="lab">v = g(u) =</span><input type="text" id="gIn" value="sin(u)" spellcheck="false"></div>
+        <div class="fin"><span class="lab">y = h(v) =</span><input type="text" id="hIn" value="v" spellcheck="false">
+          <button id="bGo">Compose</button></div>
+        <div class="err" id="err"></div>
+        <div class="ctl"><label><span>input x</span><b id="rX">x = 0.70</b></label>
+          <input type="range" id="sX" min="-300" max="300" value="70"></div>
+        <button class="btn" id="bRe">&#8635; Replay</button>
+        <p class="hint">Each layer is typed in its own variable (x, u, v). Supported: + − * / ^ ( ),
+        implicit products, sin cos tan atan exp ln sqrt sinh cosh tanh, pi and e.</p>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"The derivative of a composite is the sum of the layer derivatives." No: gears in a train
+        <b>multiply</b> their ratios, they never add them. A layer with slope 0 stops the whole train
+        no matter how steep the others are, and a layer with slope −1 reverses everything after it.
+        Right now the true product \( h'(v)\,g'(u)\,f'(x) \) versus the wrong sum is
+        <span class="live" id="oLive">?</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: each layer parsed to an expression tree and evaluated exactly; layer derivatives and the
+    composite derivative by central differences with \( h=10^{-4} \) (error \( O(h^2) \)); gear angular
+    speeds are the exact products of the local derivatives, integrated frame by frame, with the whole
+    train's speed scaled so the fastest gear stays readable. One file of vanilla JavaScript, no libraries
+    beyond the shared KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>{if(!isFinite(v))return"—";const r=Math.abs(v).toFixed(d);return(v<0&&+r!==0?"−":"")+r;};
+const MONO="11px ui-monospace,Menlo,monospace";
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    `<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+
+/* ---------- tiny expression parser (shared with the Taylor module; variable name is a parameter) ---------- */
+function tokenize(s){
+  const T=[];let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(c===" "||c==="\t"){i++;continue;}
+    if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      const v=parseFloat(s.slice(i,j));if(!isFinite(v))throw new Error("bad number");
+      T.push({t:"num",v});i=j;continue;}
+    if(/[a-zA-Z_]/.test(c)){let j=i;while(j<s.length&&/[a-zA-Z_]/.test(s[j]))j++;
+      T.push({t:"id",v:s.slice(i,j)});i=j;continue;}
+    if("+-*/^(),".includes(c)){T.push({t:c});i++;continue;}
+    throw new Error("unexpected character '"+c+"'");
+  }
+  return T;
+}
+const FNS=["sin","cos","tan","atan","exp","ln","log","sqrt","sinh","cosh","tanh"];
+function parse(s,vn){
+  vn=vn||"x";
+  const T=tokenize(s);let p=0;
+  const peek=()=>T[p];
+  const eat=t=>{if(!T[p]||T[p].t!==t)throw new Error("expected '"+t+"'");return T[p++];};
+  function expr(){let a=term();
+    while(peek()&&(peek().t==="+"||peek().t==="-")){const op=T[p++].t;a={t:"bin",op,a,b:term()};}
+    return a;}
+  function term(){let a=factor();
+    for(;;){const n=peek();
+      if(n&&(n.t==="*"||n.t==="/")){const op=T[p++].t;a={t:"bin",op,a,b:factor()};}
+      else if(n&&(n.t==="num"||n.t==="id"||n.t==="(")){a={t:"bin",op:"*",a,b:factor()};}
+      else break;}
+    return a;}
+  function factor(){
+    if(peek()&&peek().t==="-"){p++;return{t:"neg",a:factor()};}
+    if(peek()&&peek().t==="+"){p++;return factor();}
+    return power();}
+  function power(){const a=atom();
+    if(peek()&&peek().t==="^"){p++;return{t:"bin",op:"^",a,b:factor()};}
+    return a;}
+  function atom(){
+    const n=peek();
+    if(!n)throw new Error("expression ends too early");
+    if(n.t==="num"){p++;return{t:"num",v:n.v};}
+    if(n.t==="("){p++;const e=expr();eat(")");return e;}
+    if(n.t==="id"){p++;const name=n.v.toLowerCase();
+      if(peek()&&peek().t==="("){
+        if(!FNS.includes(name))throw new Error("unknown function '"+name+"'");
+        p++;const e=expr();eat(")");return{t:"call",fn:name,a:e};}
+      if(name===vn)return{t:"var"};
+      if(name==="pi")return{t:"num",v:Math.PI};
+      if(name==="e")return{t:"num",v:Math.E};
+      if(FNS.includes(name))throw new Error("'"+name+"' needs parentheses: "+name+"("+vn+")");
+      throw new Error("unknown name '"+n.v+"' (this layer's variable is "+vn+")");}
+    throw new Error("unexpected '"+n.t+"'");}
+  const e=expr();
+  if(p<T.length)throw new Error("could not parse the whole expression");
+  return e;
+}
+const NF={sin:Math.sin,cos:Math.cos,tan:Math.tan,atan:Math.atan,exp:Math.exp,ln:Math.log,
+  log:Math.log,sqrt:Math.sqrt,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh};
+function evalNum(n,x){
+  switch(n.t){
+    case "num":return n.v;
+    case "var":return x;
+    case "neg":return -evalNum(n.a,x);
+    case "bin":{const a=evalNum(n.a,x),b=evalNum(n.b,x);
+      return n.op==="+"?a+b:n.op==="-"?a-b:n.op==="*"?a*b:n.op==="/"?a/b:Math.pow(a,b);}
+    case "call":return NF[n.fn](evalNum(n.a,x));
+  }
+}
+
+/* ---------- state and numerics ---------- */
+const S={fx:"x^2",gu:"sin(u)",hv:"v",fa:null,ga:null,ha:null,err:"",x:0.7,
+  th:[0,0,0,0],t:0,last:0,dt:0,XR:[-3,3]};
+const H0=1e-4;
+const ev=(a,x)=>{if(!a)return NaN;try{const v=evalNum(a,x);return isFinite(v)?v:NaN;}catch(e){return NaN;}};
+const der=(a,x)=>(ev(a,x+H0)-ev(a,x-H0))/(2*H0);
+const comp=x=>ev(S.ha,ev(S.ga,ev(S.fa,x)));
+function recompile(){
+  S.err="";
+  try{S.fa=parse(S.fx,"x");S.ga=parse(S.gu,"u");S.ha=parse(S.hv,"v");}
+  catch(e){S.fa=S.ga=S.ha=null;S.err=e.message;}
+}
+function range(a,lo,hi){
+  let mn=Infinity,mx=-Infinity;
+  for(let i=0;i<=160;i++){const v=ev(a,lo+(hi-lo)*i/160);if(isFinite(v)){mn=Math.min(mn,v);mx=Math.max(mx,v);}}
+  if(!isFinite(mn)){mn=-1;mx=1;}
+  if(mx-mn<1e-9){mn-=1;mx+=1;}
+  const pad=(mx-mn)*0.08;return[mn-pad,mx+pad];
+}
+
+/* ---------- drawing ---------- */
+function gear(g,cx,cy,r,th,color,fillA){
+  const n=Math.max(8,Math.round(2*Math.PI*r/10)),p=2*Math.PI/n;
+  g.beginPath();
+  for(let k=0;k<n;k++){const a=th+k*p;
+    const pts=[[r-3,a],[r+4,a+0.22*p],[r+4,a+0.5*p],[r-3,a+0.72*p]];
+    pts.forEach(([rr,aa],i)=>{const x=cx+rr*Math.cos(aa),y=cy+rr*Math.sin(aa);(k||i)?g.lineTo(x,y):g.moveTo(x,y);});}
+  g.closePath();g.fillStyle=fillA+"0.22)";g.fill();g.strokeStyle=color;g.lineWidth=1.6;g.stroke();
+  /* hub and spokes so the rotation is visible */
+  g.strokeStyle=color;g.lineWidth=2;
+  for(let k=0;k<3;k++){const a=th+k*2*Math.PI/3;g.beginPath();g.moveTo(cx+5*Math.cos(a),cy+5*Math.sin(a));
+    g.lineTo(cx+(r-7)*Math.cos(a),cy+(r-7)*Math.sin(a));g.stroke();}
+  g.fillStyle=C.bg2;g.beginPath();g.arc(cx,cy,5,0,7);g.fill();g.strokeStyle=color;g.lineWidth=1.5;g.stroke();
+  g.fillStyle=color;g.beginPath();g.arc(cx+(r-7)*Math.cos(th),cy+(r-7)*Math.sin(th),3.5,0,7);g.fill();
+}
+function panel(g,x0,y0,w,h,ast,xr,xc,color,title,vn){
+  const yr=range(ast,xr[0],xr[1]);
+  const X=x=>x0+(x-xr[0])/(xr[1]-xr[0])*w, Y=y=>y0+h-(y-yr[0])/(yr[1]-yr[0])*h;
+  g.fillStyle=C.inkA+"0.03)";g.fillRect(x0,y0,w,h);
+  g.strokeStyle=C.hair;g.lineWidth=1;g.strokeRect(x0+0.5,y0+0.5,w-1,h-1);
+  g.strokeStyle=C.axis;
+  if(yr[0]<0&&yr[1]>0){g.beginPath();g.moveTo(x0,Y(0));g.lineTo(x0+w,Y(0));g.stroke();}
+  if(xr[0]<0&&xr[1]>0){g.beginPath();g.moveTo(X(0),y0);g.lineTo(X(0),y0+h);g.stroke();}
+  g.save();g.beginPath();g.rect(x0,y0,w,h);g.clip();
+  g.strokeStyle=color;g.lineWidth=2;g.beginPath();let pen=false;
+  for(let i=0;i<=w;i++){const x=xr[0]+(xr[1]-xr[0])*i/w,y=ev(ast,x);
+    if(!isFinite(y)){pen=false;continue;}pen?g.lineTo(X(x),Y(y)):g.moveTo(X(x),Y(y));pen=true;}
+  g.stroke();
+  const yc=ev(ast,xc),m=der(ast,xc);
+  if(isFinite(yc)&&isFinite(m)){
+    const L=(xr[1]-xr[0])*0.22;
+    g.strokeStyle=C.ink;g.lineWidth=1.6;g.beginPath();g.moveTo(X(xc-L),Y(yc-m*L));g.lineTo(X(xc+L),Y(yc+m*L));g.stroke();
+    g.setLineDash([3,3]);g.strokeStyle=C.dim;g.lineWidth=1;g.beginPath();g.moveTo(X(xc),y0);g.lineTo(X(xc),y0+h);g.stroke();g.setLineDash([]);
+    g.fillStyle=color;g.beginPath();g.arc(X(xc),Y(yc),5,0,7);g.fill();g.strokeStyle=C.edge;g.lineWidth=1.5;g.stroke();
+  }
+  g.restore();
+  g.font=MONO;g.textAlign="left";g.fillStyle=color;g.fillText(title,x0+8,y0+15);
+  g.fillStyle=C.ink;g.fillText("slope "+fmt(m,3),x0+8,y0+29);
+  g.fillStyle=C.dim;g.textAlign="right";g.fillText(vn+" = "+fmt(xc,2),x0+w-8,y0+h-7);
+  g.textAlign="left";g.fillText(fmt(yr[1],1),x0+8,y0+43);g.fillText(fmt(yr[0],1),x0+8,y0+h-7);
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  const sx=W/760;
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  const x=S.x,u=ev(S.fa,x),v=ev(S.ga,u),y=ev(S.ha,v);
+  const fp=der(S.fa,x),gp=der(S.ga,u),hp=der(S.ha,v);
+  const w=[1,fp,fp*gp,fp*gp*hp].map(q=>isFinite(q)?q:0);
+  const num=(comp(x+H0)-comp(x-H0))/(2*H0);
+
+  /* gear train: radii inversely proportional to speed (clamped so every gear stays visible) */
+  const cl=(r)=>Math.max(15,Math.min(64,r));
+  const r=[34,0,0,0];
+  for(let i=1;i<4;i++){const q=Math.abs(w[i]/w[i-1]);r[i]=cl(isFinite(q)&&q>1e-9?r[i-1]/q:64);}
+  const rs=r.map(q=>q*sx);
+  let tot=0;for(let i=0;i<4;i++)tot+=2*rs[i];tot+=3*2*sx;
+  const cx=[],cy=24+66*sx;let px=(W-tot)/2;
+  for(let i=0;i<4;i++){px+=rs[i];cx.push(px);px+=rs[i]+2*sx;}
+  /* integrate the rotation with the frame clock; scale so the fastest gear is readable */
+  const wmax=Math.max(...w.map(Math.abs)),base=Math.min(1.6,5/Math.max(wmax,1e-9));
+  for(let i=0;i<4;i++)S.th[i]+=w[i]*base*S.dt;
+  S.dt=0;
+  const cols=[C.ink,C.acc,C.amber,C.blue],fills=[C.inkA,C.accA,C.amberA,C.blueA];
+  const narrow=W<560;
+  const names=narrow?["x","u = f(x)","v = g(u)","y = h(v)"]:["x (input, driven)","u = f(x)","v = g(u)","y = h(v)"];
+  const rat=narrow?["ω = 1","ω = "+fmt(fp,2),"ω = "+fmt(w[2],2),"ω = "+fmt(w[3],2)]
+    :["ω = 1 (drive)","ω = f′(x) = "+fmt(fp,3),"ω = g′(u)·f′(x) = "+fmt(w[2],3),"ω = dy/dx = "+fmt(w[3],3)];
+  const vals=["x = "+fmt(x,2),"u = "+fmt(u,3),"v = "+fmt(v,3),"y = "+fmt(y,3)];
+  const ly=cy+66*sx+4;
+  for(let i=0;i<4;i++){
+    const colx=W*(i+0.5)/4;
+    g.setLineDash([2,3]);g.strokeStyle=C.dim;g.lineWidth=1;
+    g.beginPath();g.moveTo(cx[i],cy+rs[i]+5);g.lineTo(colx,ly+4);g.stroke();g.setLineDash([]);
+    gear(g,cx[i],cy,rs[i],S.th[i],cols[i],fills[i]);
+    g.font=MONO;g.textAlign="center";
+    g.fillStyle=cols[i];g.fillText(names[i],colx,ly+16);
+    g.fillStyle=C.ink;g.fillText(vals[i],colx,ly+30);
+    g.fillStyle=C.mut;g.fillText(rat[i],colx,ly+44);
+    const dir=w[i]>1e-9?"↻":w[i]<-1e-9?"↺":"■ stopped";
+    g.fillStyle=w[i]>1e-9?C.acc:w[i]<-1e-9?C.hot:C.mut;g.font="15px ui-monospace,Menlo,monospace";
+    g.fillText(dir,cx[i],cy-rs[i]-12);g.font=MONO;
+    if(i<3){g.fillStyle=C.dim;g.fillText("×",W*(i+1)/4,ly+44);}
+  }
+  g.textAlign="left";g.fillStyle=C.dim;
+  g.fillText(narrow?"gear ratio = that layer's derivative":"the ratio between neighbouring gears is that layer's derivative; a negative ratio reverses the spin",12,16);
+
+  /* three layer graphs */
+  const ur=range(S.fa,S.XR[0],S.XR[1]),vr=range(S.ga,ur[0],ur[1]);
+  const top=ly+56,ph=H-top-12,gap=12,pw=(W-4*gap)/3;
+  const tt=(a,b)=>pw<170?a:a+" = "+b;
+  panel(g,gap,top,pw,ph,S.fa,S.XR,x,C.acc,tt("u = f(x)",S.fx),"x");
+  panel(g,2*gap+pw,top,pw,ph,S.ga,ur,u,C.amber,tt("v = g(u)",S.gu),"u");
+  panel(g,3*gap+2*pw,top,pw,ph,S.ha,vr,v,C.blue,tt("y = h(v)",S.hv),"v");
+
+  /* readouts */
+  document.getElementById("err").textContent=S.err;
+  const prod=hp*gp*fp,sum=hp+gp+fp;
+  rows([
+    ["x",fmt(x,3)],
+    ["u = f(x)",fmt(u,4),"acc"],
+    ["v = g(u)",fmt(v,4),"amber"],
+    ["y = h(v)",fmt(y,4),"blue"],
+    ["f′(x) = du/dx",fmt(fp,4),"acc"],
+    ["g′(u) = dv/du",fmt(gp,4),"amber"],
+    ["h′(v) = dy/dv",fmt(hp,4),"blue"],
+    ["product h′·g′·f′",fmt(prod,4),"acc"],
+    ["dy/dx by central diff.",fmt(num,4)],
+    ["|product − numeric|",isFinite(num)&&isFinite(prod)?Math.abs(num-prod).toExponential(1):"—","hot"],
+    ["wrong sum h′+g′+f′",fmt(sum,4),"hot"]
+  ]);
+  document.getElementById("oLive").textContent=fmt(prod,3)+" vs "+fmt(sum,3);
+}
+
+/* ---------- animation loop ---------- */
+let raf;
+function loop(ts){
+  if(!S.last)S.last=ts;
+  const dt=Math.min(0.05,(ts-S.last)/1000);
+  S.t+=dt;S.dt+=dt;
+  S.last=ts;
+  draw();
+  raf=requestAnimationFrame(loop);
+}
+function reset(){S.t=0;S.last=0;S.dt=0;S.th=[0,0,0,0];}
+document.getElementById("sX").addEventListener("input",e=>{
+  S.x=+e.target.value/100;document.getElementById("rX").textContent="x = "+fmt(S.x,2);});
+function apply(){
+  S.fx=document.getElementById("fIn").value;
+  S.gu=document.getElementById("gIn").value;
+  S.hv=document.getElementById("hIn").value;
+  document.querySelectorAll(".seg button").forEach(b=>b.classList.remove("on"));
+  recompile();reset();
+}
+document.getElementById("bGo").addEventListener("click",apply);
+["fIn","gIn","hIn"].forEach(id=>document.getElementById(id).addEventListener("keydown",e=>{if(e.key==="Enter")apply();}));
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",function(){
+  document.getElementById("fIn").value=this.dataset.f;
+  document.getElementById("gIn").value=this.dataset.g;
+  document.getElementById("hIn").value=this.dataset.h;
+  S.fx=this.dataset.f;S.gu=this.dataset.g;S.hv=this.dataset.h;
+  document.querySelectorAll(".seg button").forEach(x=>x.classList.remove("on"));
+  this.classList.add("on");
+  recompile();reset();
+}));
+document.getElementById("bRe").addEventListener("click",()=>{reset();});
+window.addEventListener("resize",draw);
+recompile();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

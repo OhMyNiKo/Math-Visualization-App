@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<title>The Conservation Ledger · Physics Intuition App</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px}
+.seg button{flex:1;background:var(--panel2);color:var(--mut);border:0;border-right:1px solid var(--hair);
+  font:600 13px/1 var(--sans);padding:10px 4px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--acc);color:#04120d}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.tog{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);
+  font-family:var(--mono);cursor:pointer;user-select:none;margin-top:10px}
+.tog input{accent-color:var(--amber);width:15px;height:15px}
+.ledger{margin-top:4px}
+.lbar{display:flex;height:30px;border:1px solid var(--hair);overflow:hidden}
+.lbar .ke{background:#4dd0b5;height:100%}
+.lbar .pe{background:#6cb6ff;height:100%}
+.lbar .ht{background:#ff6b5e;height:100%}
+.lkey{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;
+  color:var(--mut);margin-top:6px}
+.lkey b.ke{color:#4dd0b5}.lkey b.pe{color:#6cb6ff}.lkey b.ht{color:#ff6b5e}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9;margin-top:8px}
+.read .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center;line-height:1.2}
+.eq .frac .nu{display:block;padding:0 5px;border-bottom:1px solid var(--mut)}
+.eq .frac .de{display:block;padding:0 5px}
+.eq sub,.eq sup{font-size:10px}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · THE CONSERVATION LEDGER · MODULE 5 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>The Conservation Ledger</h1>
+    <p class="sub">A ball on a track, and an accountant watching it. Energy never appears and never
+    disappears; it only moves between accounts. The companion to the channel's Noether episode and
+    its twenty-eight indestructible blocks.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx">\(\displaystyle E=\tfrac12 mv^{2}+mgy+Q_{\text{heat}}=\text{const} \)
+        <span class="mutx">&nbsp;·&nbsp;</span> \(\displaystyle \frac{dE}{dt}=0 \)
+        <span class="mutx">&nbsp;(Noether: time symmetry &rArr; energy conservation)</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Track</h3>
+        <div class="seg">
+          <button id="tV" class="on">Valley</button>
+          <button id="tW">Double well</button>
+          <button id="tH">Hill &amp; bowl</button>
+        </div>
+        <button class="btn" id="bGo">Pause</button>
+        <label class="tog"><input type="checkbox" id="tFr"> friction on (opens the heat account)</label>
+        <p class="hint">While paused, drag the ball anywhere on the track to set the drop point;
+        the ledger resets to that height.</p>
+      </div>
+      <div class="card">
+        <h3>The ledger</h3>
+        <div class="ledger">
+          <div class="lbar"><div class="ke" id="wKe"></div><div class="pe" id="wPe"></div><div class="ht" id="wHt"></div></div>
+          <div class="lkey"><span><b class="ke">&#9632;</b> kinetic</span><span><b class="pe">&#9632;</b> potential</span><span><b class="ht">&#9632;</b> heat</span></div>
+        </div>
+        <div class="read">
+          <div class="r"><span class="k">kinetic</span><span class="v acc" id="oKe">0.00</span></div>
+          <div class="r"><span class="k">potential</span><span class="v blue" id="oPe">0.00</span></div>
+          <div class="r"><span class="k">heat</span><span class="v hot" id="oHt">0.00</span></div>
+          <div class="r"><span class="k">TOTAL (must not move)</span><span class="v amber" id="oTot">0.00</span></div>
+          <div class="r"><span class="k">numerical drift</span><span class="v" id="oDr">0.00%</span></div>
+        </div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>Energy is never "used up". The ball slows, but the total
+        <span class="live" id="oLive">?</span> does not move: with friction on, the missing motion
+        is sitting in the heat account, to the last decimal. Twenty-eight blocks, always
+        twenty-eight; friction only moves them to a ledger you cannot see by eye. That bookkeeping
+        identity is what "conservation of energy" means, and Noether's theorem says it holds
+        because physics today is the same as physics tomorrow.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Physics: bead on a wire y(x); x&Prime; = (&minus;g y&prime; &minus; y&prime;y&Prime;x&prime;&sup2;)/(1+y&prime;&sup2;),
+    g = 6, classic RK4 at dt = 1/500 with 8 substeps per frame; KE = &frac12;(1+y&prime;&sup2;)x&prime;&sup2;,
+    PE = g&middot;(y&minus;y&#8342;&#8343;&#8345;), friction dv/dt = &minus;cv with heat accumulated as
+    &int;cv&sup2;dt. Check: without friction the printed total drifts under 1 percent over minutes.
+    One file of vanilla JavaScript, no libraries, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>(v<0?"−":"")+Math.abs(v).toFixed(d);
+
+/* tracks: y(x), y'(x), y''(x) analytic, x in [-6,6] */
+const TRACKS={
+  valley:{ y:x=>x*x/8,             yp:x=>x/4,                ypp:x=>1/4 },
+  well:  { y:x=>x*x*x*x/100-x*x/5, yp:x=>x*x*x/25-2*x/5,     ypp:x=>3*x*x/25-2/5 },
+  hill:  { y:x=>x*x/10+2.2*Math.exp(-x*x/3),
+           yp:x=>x/5+2.2*Math.exp(-x*x/3)*(-2*x/3),
+           ypp:x=>1/5+2.2*Math.exp(-x*x/3)*(4*x*x/9-2/3) }
+};
+const G=6, C=0.35, DT=1/500, SUB=8, XMIN=-6, XMAX=6;
+const S={trk:TRACKS.valley, x:-4.6, v:0, heat:0, run:true, fric:false, E0:0, ymin:0, drag:false};
+
+function ymin(trk){
+  let m=1e9;
+  for(let x=XMIN;x<=XMAX;x+=0.01) m=Math.min(m,trk.y(x));
+  return m;
+}
+function energies(){
+  const yp=S.trk.yp(S.x);
+  const ke=0.5*(1+yp*yp)*S.v*S.v;
+  const pe=G*(S.trk.y(S.x)-S.ymin);
+  return{ke,pe,tot:ke+pe+S.heat};
+}
+function resetEnergy(){
+  S.heat=0; S.v=0;
+  S.ymin=ymin(S.trk);
+  S.E0=energies().tot;
+}
+function accel(x,v){
+  const yp=S.trk.yp(x), ypp=S.trk.ypp(x);
+  let a=(-G*yp - yp*ypp*v*v)/(1+yp*yp);
+  if(S.fric) a+=-C*v;
+  return a;
+}
+function step(){
+  /* classic RK4 on (x, v): drift stays far under 1% without friction */
+  for(let i=0;i<SUB;i++){
+    const x=S.x, v=S.v;
+    const k1x=v,              k1v=accel(x,v);
+    const k2x=v+k1v*DT/2,     k2v=accel(x+k1x*DT/2, v+k1v*DT/2);
+    const k3x=v+k2v*DT/2,     k3v=accel(x+k2x*DT/2, v+k2v*DT/2);
+    const k4x=v+k3v*DT,       k4v=accel(x+k3x*DT,   v+k3v*DT);
+    S.x=x+DT/6*(k1x+2*k2x+2*k3x+k4x);
+    S.v=v+DT/6*(k1v+2*k2v+2*k3v+k4v);
+    if(S.fric){
+      const yp=S.trk.yp(S.x);
+      S.heat+=C*(1+yp*yp)*S.v*S.v*DT;
+    }
+    /* hard walls at the domain edge: elastic bounce */
+    if(S.x<XMIN){S.x=XMIN;S.v=Math.abs(S.v);}
+    if(S.x>XMAX){S.x=XMAX;S.v=-Math.abs(S.v);}
+  }
+}
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  const pad=30;
+  /* world -> screen; y up */
+  let yMax=0;
+  for(let x=XMIN;x<=XMAX;x+=0.05) yMax=Math.max(yMax,S.trk.y(x));
+  const X=x=>(x-XMIN)/(XMAX-XMIN)*(W-2*pad)+pad;
+  const Y=y=>H-46-(y-S.ymin)/(yMax-S.ymin+0.4)*(H-110);
+  /* track */
+  g.strokeStyle=C.ink;g.lineWidth=3;g.beginPath();
+  for(let x=XMIN;x<=XMAX;x+=0.03){
+    const px=X(x),py=Y(S.trk.y(x));
+    x===XMIN?g.moveTo(px,py):g.lineTo(px,py);
+  }
+  g.stroke();
+  /* height reference of remaining mechanical energy: dashed line at the turn-back height */
+  const e=energies();
+  const hLine=(S.E0-S.heat)/G+S.ymin;   /* height the ball can still reach */
+  g.setLineDash([5,4]);g.strokeStyle=C.amber;g.lineWidth=1.2;
+  g.beginPath();g.moveTo(pad,Y(hLine));g.lineTo(W-pad,Y(hLine));g.stroke();g.setLineDash([]);
+  g.fillStyle=C.amber;g.font="11px ui-monospace,Menlo,monospace";g.textAlign="left";
+  g.fillText("reachable height (mechanical energy left)",pad+4,Y(hLine)-6);
+  /* ball */
+  const bx=X(S.x),by=Y(S.trk.y(S.x))-9;
+  g.fillStyle=C.acc;g.beginPath();g.arc(bx,by,9,0,7);g.fill();
+  g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+  /* ledger DOM */
+  const tot=Math.max(e.tot,1e-9), E=Math.max(S.E0,1e-9);
+  document.getElementById("wKe").style.width=(e.ke/E*100)+"%";
+  document.getElementById("wPe").style.width=(e.pe/E*100)+"%";
+  document.getElementById("wHt").style.width=(S.heat/E*100)+"%";
+  document.getElementById("oKe").textContent=fmt(e.ke);
+  document.getElementById("oPe").textContent=fmt(e.pe);
+  document.getElementById("oHt").textContent=fmt(S.heat);
+  document.getElementById("oTot").textContent=fmt(e.tot);
+  document.getElementById("oLive").textContent=fmt(e.tot);
+  const dr=S.E0>1e-6?((e.tot-S.E0)/S.E0*100):0;
+  document.getElementById("oDr").textContent=(dr>=0?"+":"−")+Math.abs(dr).toFixed(2)+"%";
+}
+function loop(){
+  if(S.run) step();
+  draw();
+  requestAnimationFrame(loop);
+}
+/* interactions */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+cv.addEventListener("pointerdown",e=>{if(!S.run){S.drag=true;cv.setPointerCapture(e.pointerId);}});
+cv.addEventListener("pointermove",e=>{
+  if(!S.drag) return;
+  const p=pos(e),{W}=fit(),pad=30;
+  S.x=Math.max(XMIN,Math.min(XMAX,(p.x-pad)/(W-2*pad)*(XMAX-XMIN)+XMIN));
+  resetEnergy();draw();
+});
+cv.addEventListener("pointerup",()=>{S.drag=false;});
+function pick(trk,btn,x0){
+  S.trk=trk;S.x=x0;resetEnergy();
+  document.querySelectorAll(".seg button").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+}
+document.getElementById("tV").addEventListener("click",function(){pick(TRACKS.valley,this,-4.6);});
+document.getElementById("tW").addEventListener("click",function(){pick(TRACKS.well,this,-4.8);});
+document.getElementById("tH").addEventListener("click",function(){pick(TRACKS.hill,this,-5.2);});
+document.getElementById("bGo").addEventListener("click",function(){
+  S.run=!S.run;this.textContent=S.run?"Pause":"Run";});
+document.getElementById("tFr").addEventListener("input",e=>{S.fric=e.target.checked;});
+window.addEventListener("resize",draw);
+resetEnergy();loop();
+</script>
+</body>
+</html>

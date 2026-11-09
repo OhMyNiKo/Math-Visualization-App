@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<title>The Integral Machine · Physics Intuition App</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none;cursor:ew-resize}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:10px}
+.seg button{flex:1;background:var(--panel2);color:var(--mut);border:0;border-right:1px solid var(--hair);
+  font:600 12px/1 var(--mono);padding:9px 2px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:0;margin-bottom:4px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:13px/1.2 var(--mono);padding:10px}
+.fin button{background:var(--panel2);border:1px solid var(--acc);border-left:0;color:var(--acc);
+  font:600 12px/1 var(--mono);padding:0 14px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center;line-height:1.2}
+.eq .frac .nu{display:block;padding:0 5px;border-bottom:1px solid var(--mut)}
+.eq .frac .de{display:block;padding:0 5px}
+.eq .big{font-size:18px;vertical-align:middle}
+.eq sub,.eq sup{font-size:10px}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · THE INTEGRAL MACHINE · MODULE 14 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>The Integral Machine</h1>
+    <p class="sub">Type a curve, drag the two amber walls to choose a region, and the machine
+    slices it into rectangles. The exact area and the rectangle total are both printed live:
+    now slide N and watch one number hunt down the other.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx">\(\displaystyle \int_a^b f(x)\,dx=\lim_{N\to\infty}\sum_{i=1}^{N} f(x_i)\,\Delta x \)
+        <span class="mutx">&nbsp;·&nbsp;\(\displaystyle \Delta x=(b-a)/N \) &nbsp;·&nbsp;\(\displaystyle \int \) is a stretched S, for “sum”</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Function (type it, like Desmos)</h3>
+        <div class="fin"><input type="text" id="fIn" value="sin(x)+2" spellcheck="false">
+          <button id="bGo">Plot</button></div>
+        <div class="err" id="err"></div>
+        <div class="seg">
+          <button data-f="sin(x)+2" class="on">sin+2</button>
+          <button data-f="x^2/4">x&sup2;/4</button>
+          <button data-f="3exp(-x^2/4)">gauss</button>
+          <button data-f="x^3/16-x/2">odd</button>
+        </div>
+        <div class="ctl"><label><span>number of rectangles N</span><b id="rN">N = 8</b></label>
+          <input type="range" id="sN" min="1" max="300" value="8"></div>
+        <div class="seg" style="margin-top:2px">
+          <button id="mL">left</button>
+          <button id="mM" class="on">midpoint</button>
+          <button id="mR">right</button>
+        </div>
+        <p class="hint">Drag the amber walls on the canvas to move a and b. Area below the axis
+        counts negative and is shown in red: the integral is a signed sum, not a paint bucket.</p>
+      </div>
+      <div class="card">
+        <h3>Readout</h3>
+        <div class="read">
+          <div class="r"><span class="k">exact &int;&#8336;&#7495; f dx</span><span class="v acc" id="oI">?</span></div>
+          <div class="r"><span class="k">rectangle total &Sigma;</span><span class="v blue" id="oS">?</span></div>
+          <div class="r"><span class="k">difference |&int; &minus; &Sigma;|</span><span class="v amber" id="oD">?</span></div>
+          <div class="r"><span class="k">same, at double N</span><span class="v" id="oD2">?</span></div>
+        </div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>Integration is not an area <i>formula</i> that exists by magic; the integral <b>is</b>
+        the limit of these rectangle totals. Right now the gap is
+        <span class="live" id="oLive">?</span>; double N and it falls to roughly half (midpoint
+        rule: a quarter). Push N to 300 and the two numbers become one. Every &int; you will
+        ever write is shorthand for exactly this stampede of rectangles.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: exact value by composite Simpson on 4,000 subintervals (error far below the last
+    printed digit for these smooth functions); rectangle totals by left, midpoint, or right rule.
+    Parser supports + &minus; * / ^ ( ), implicit products, sin cos tan atan exp ln sqrt sinh cosh
+    tanh, pi and e. One file of vanilla JavaScript, no libraries, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=4)=>!isFinite(v)?"—":(v<0?"−":"")+Math.abs(v).toFixed(d);
+
+/* ---------- parser (numeric) ---------- */
+function tokenize(s){
+  const T=[];let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(c===" "||c==="\t"){i++;continue;}
+    if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      const v=parseFloat(s.slice(i,j));if(!isFinite(v))throw new Error("bad number");
+      T.push({t:"num",v});i=j;continue;}
+    if(/[a-zA-Z_]/.test(c)){let j=i;while(j<s.length&&/[a-zA-Z_]/.test(s[j]))j++;
+      T.push({t:"id",v:s.slice(i,j)});i=j;continue;}
+    if("+-*/^(),".includes(c)){T.push({t:c});i++;continue;}
+    throw new Error("unexpected character '"+c+"'");
+  }
+  return T;
+}
+const FNS={sin:Math.sin,cos:Math.cos,tan:Math.tan,atan:Math.atan,exp:Math.exp,ln:Math.log,
+  log:Math.log,sqrt:Math.sqrt,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,abs:Math.abs};
+function parse(s){
+  const T=tokenize(s);let p=0;
+  const peek=()=>T[p];
+  const eat=t=>{if(!T[p]||T[p].t!==t)throw new Error("expected '"+t+"'");return T[p++];};
+  function expr(){let a=term();
+    while(peek()&&(peek().t==="+"||peek().t==="-")){const op=T[p++].t;a={t:"bin",op,a,b:term()};}
+    return a;}
+  function term(){let a=factor();
+    for(;;){const n=peek();
+      if(n&&(n.t==="*"||n.t==="/")){const op=T[p++].t;a={t:"bin",op,a,b:factor()};}
+      else if(n&&(n.t==="num"||n.t==="id"||n.t==="(")){a={t:"bin",op:"*",a,b:factor()};}
+      else break;}
+    return a;}
+  function factor(){
+    if(peek()&&peek().t==="-"){p++;return{t:"neg",a:factor()};}
+    if(peek()&&peek().t==="+"){p++;return factor();}
+    return power();}
+  function power(){const a=atom();
+    if(peek()&&peek().t==="^"){p++;return{t:"bin",op:"^",a,b:factor()};}
+    return a;}
+  function atom(){
+    const n=peek();
+    if(!n)throw new Error("expression ends too early");
+    if(n.t==="num"){p++;return{t:"num",v:n.v};}
+    if(n.t==="("){p++;const e=expr();eat(")");return e;}
+    if(n.t==="id"){p++;const name=n.v.toLowerCase();
+      if(peek()&&peek().t==="("){
+        if(!FNS[name])throw new Error("unknown function '"+name+"'");
+        p++;const e=expr();eat(")");return{t:"call",fn:name,a:e};}
+      if(name==="x")return{t:"var"};
+      if(name==="pi")return{t:"num",v:Math.PI};
+      if(name==="e")return{t:"num",v:Math.E};
+      if(FNS[name])throw new Error("'"+name+"' needs parentheses: "+name+"(x)");
+      throw new Error("unknown name '"+n.v+"'");}
+    throw new Error("unexpected '"+n.t+"'");}
+  const e=expr();
+  if(p<T.length)throw new Error("could not parse the whole expression");
+  return e;
+}
+function evalN(n,x){
+  switch(n.t){
+    case "num":return n.v;
+    case "var":return x;
+    case "neg":return -evalN(n.a,x);
+    case "bin":{const a=evalN(n.a,x),b=evalN(n.b,x);
+      return n.op==="+"?a+b:n.op==="-"?a-b:n.op==="*"?a*b:n.op==="/"?a/b:Math.pow(a,b);}
+    case "call":return FNS[n.fn](evalN(n.a,x));
+  }
+}
+
+/* ---------- state ---------- */
+const S={txt:"sin(x)+2",ast:null,a:-3,b:4,N:8,rule:"mid",drag:null,err:null};
+const V={xmin:-6.3,xmax:6.3,ymin:-3.6,ymax:4.4};
+function F(x){try{const v=S.ast?evalN(S.ast,x):NaN;return isFinite(v)?v:NaN;}catch(e){return NaN;}}
+function recompile(){
+  S.err=null;
+  try{S.ast=parse(S.txt);}catch(e){S.ast=null;S.err=e.message;}
+}
+function simpson(a,b,m){
+  const n=m%2?m+1:m,h=(b-a)/n;let s=F(a)+F(b);
+  for(let i=1;i<n;i++)s+=F(a+i*h)*((i%2)?4:2);
+  return s*h/3;
+}
+function riemann(N){
+  const dx=(S.b-S.a)/N;let s=0;
+  for(let i=0;i<N;i++){
+    const x=S.rule==="left"?S.a+i*dx:S.rule==="right"?S.a+(i+1)*dx:S.a+(i+0.5)*dx;
+    s+=F(x)*dx;
+  }
+  return s;
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  const X=x=>(x-V.xmin)/(V.xmax-V.xmin)*W;
+  const Y=y=>H-(y-V.ymin)/(V.ymax-V.ymin)*H;
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  /* grid */
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  for(let x=Math.ceil(V.xmin);x<=V.xmax;x++){g.beginPath();g.moveTo(X(x),0);g.lineTo(X(x),H);g.stroke();}
+  for(let y=Math.ceil(V.ymin);y<=V.ymax;y++){g.beginPath();g.moveTo(0,Y(y));g.lineTo(W,Y(y));g.stroke();}
+  g.strokeStyle=C.axis;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(X(0),0);g.lineTo(X(0),H);g.stroke();
+  g.beginPath();g.moveTo(0,Y(0));g.lineTo(W,Y(0));g.stroke();
+
+  /* rectangles */
+  if(S.ast){
+    const dx=(S.b-S.a)/S.N;
+    for(let i=0;i<S.N;i++){
+      const x0=S.a+i*dx;
+      const xs=S.rule==="left"?x0:S.rule==="right"?x0+dx:x0+dx/2;
+      const h=F(xs);
+      if(!isFinite(h))continue;
+      g.fillStyle=h>=0?C.accA+".30)":C.hotA+".30)";
+      g.strokeStyle=h>=0?C.accA+".75)":C.hotA+".75)";
+      g.lineWidth=1;
+      const px=X(x0),pw=X(x0+dx)-px,py=Y(Math.max(0,h)),ph=Math.abs(Y(h)-Y(0));
+      g.fillRect(px,h>=0?py:Y(0),pw,ph);
+      g.strokeRect(px,h>=0?py:Y(0),pw,ph);
+    }
+    /* curve */
+    g.strokeStyle=C.ink;g.lineWidth=2.4;g.beginPath();let pen=false;
+    for(let px=0;px<=W;px++){
+      const y=F(V.xmin+(V.xmax-V.xmin)*px/W);
+      if(!isFinite(y)||Math.abs(y)>60){pen=false;continue;}
+      const sy=Y(Math.max(V.ymin-6,Math.min(V.ymax+6,y)));
+      pen?g.lineTo(px,sy):g.moveTo(px,sy);pen=true;
+    }
+    g.stroke();
+  }
+
+  /* region walls a, b */
+  for(const[val,name]of[[S.a,"a"],[S.b,"b"]]){
+    g.strokeStyle=C.amber;g.lineWidth=2;
+    g.beginPath();g.moveTo(X(val),0);g.lineTo(X(val),H);g.stroke();
+    g.fillStyle=C.amber;g.beginPath();g.arc(X(val),14,7,0,7);g.fill();
+    g.fillStyle=C.edge;g.font="bold 11px ui-monospace,Menlo,monospace";g.textAlign="center";
+    g.fillText(name,X(val),18);
+  }
+  g.font="11px ui-monospace,Menlo,monospace";g.fillStyle=C.dim;g.textAlign="left";
+  g.fillText("drag the amber walls · teal above the axis, red below (negative)",12,H-12);
+
+  /* readout */
+  document.getElementById("err").textContent=S.err||"";
+  if(S.ast){
+    const I=simpson(S.a,S.b,4000),R1=riemann(S.N),R2=riemann(S.N*2);
+    document.getElementById("oI").textContent=fmt(I);
+    document.getElementById("oS").textContent=fmt(R1);
+    document.getElementById("oD").textContent=fmt(Math.abs(I-R1));
+    document.getElementById("oD2").textContent=fmt(Math.abs(I-R2));
+    document.getElementById("oLive").textContent=fmt(Math.abs(I-R1));
+  }
+}
+
+/* interaction */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+cv.addEventListener("pointerdown",e=>{
+  const p=pos(e),{W}=fit();
+  const X=x=>(x-V.xmin)/(V.xmax-V.xmin)*W;
+  const da=Math.abs(p.x-X(S.a)),db=Math.abs(p.x-X(S.b));
+  S.drag=da<db?"a":"b";
+  cv.setPointerCapture(e.pointerId);mv(e);
+});
+function mv(e){
+  if(!S.drag)return;
+  const p=pos(e),{W}=fit();
+  const x=V.xmin+(V.xmax-V.xmin)*p.x/W;
+  if(S.drag==="a")S.a=Math.max(V.xmin+0.2,Math.min(S.b-0.2,x));
+  else S.b=Math.max(S.a+0.2,Math.min(V.xmax-0.2,x));
+  draw();
+}
+cv.addEventListener("pointermove",mv);
+cv.addEventListener("pointerup",()=>{S.drag=null;});
+document.getElementById("sN").addEventListener("input",e=>{
+  S.N=+e.target.value;document.getElementById("rN").textContent="N = "+S.N;draw();});
+for(const[id,rule]of[["mL","left"],["mM","mid"],["mR","right"]])
+  document.getElementById(id).addEventListener("click",function(){
+    S.rule=rule;
+    for(const j of["mL","mM","mR"])document.getElementById(j).classList.remove("on");
+    this.classList.add("on");draw();
+  });
+function apply(){
+  S.txt=document.getElementById("fIn").value;
+  document.querySelectorAll(".seg button[data-f]").forEach(b=>b.classList.remove("on"));
+  recompile();draw();
+}
+document.getElementById("bGo").addEventListener("click",apply);
+document.getElementById("fIn").addEventListener("keydown",e=>{if(e.key==="Enter")apply();});
+document.querySelectorAll(".seg button[data-f]").forEach(b=>b.addEventListener("click",function(){
+  document.getElementById("fIn").value=this.dataset.f;S.txt=this.dataset.f;
+  document.querySelectorAll(".seg button[data-f]").forEach(x=>x.classList.remove("on"));
+  this.classList.add("on");recompile();draw();
+}));
+window.addEventListener("resize",draw);
+recompile();draw();
+</script>
+</body>
+</html>

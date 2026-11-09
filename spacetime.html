@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<title>Spacetime Diagram · Physics Intuition App</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.tog{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);
+  font-family:var(--mono);cursor:pointer;user-select:none;margin-top:10px}
+.tog input{accent-color:var(--amber);width:15px;height:15px}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center;line-height:1.2}
+.eq .frac .nu{display:block;padding:0 5px;border-bottom:1px solid var(--mut)}
+.eq .frac .de{display:block;padding:0 5px}
+.eq sub,.eq sup{font-size:10px}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · SPACETIME DIAGRAM · MODULE 11 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Spacetime Diagram</h1>
+    <p class="sub">The lab's grid of space and time, and on top of it, in teal, the grid of an
+    observer flying past at speed v. Slide v and watch their axes scissor toward the light cone;
+    drag the two events and see "at the same time" fall apart.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx">\(\displaystyle x'=\gamma(x-vt) \)
+        <span class="mutx">&nbsp;·&nbsp;</span> \(\displaystyle t'=\gamma\left(t-\frac{vx}{c^{2}}\right) \)
+        <span class="mutx">&nbsp;·&nbsp;</span> \(\displaystyle \gamma=\frac{1}{\sqrt{1-v^{2}/c^{2}}} \)
+        <span class="mutx">&nbsp;(units c=1)</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="ctl"><label><span>observer speed v/c</span><b id="rV">v = 0.50c</b></label>
+          <input type="range" id="sV" min="-90" max="90" value="50"></div>
+        <label class="tog"><input type="checkbox" id="tGrid" checked> show the moving observer's grid</label>
+        <label class="tog"><input type="checkbox" id="tHyp"> show calibration hyperbolae</label>
+        <p class="hint">Drag events A and B anywhere on the diagram. The dashed teal line through
+        A is the moving observer's "now": everything on it happens, for them, at the same moment.</p>
+      </div>
+      <div class="card">
+        <h3>Readout</h3>
+        <div class="read">
+          <div class="r"><span class="k">&gamma; factor</span><span class="v acc" id="oG">1.155</span></div>
+          <div class="r"><span class="k">lab frame: A, B</span><span class="v" id="oLab">?</span></div>
+          <div class="r"><span class="k">moving frame: A&prime;, B&prime;</span><span class="v blue" id="oMov">?</span></div>
+          <div class="r"><span class="k">order of A and B</span><span class="v amber" id="oOrd">?</span></div>
+        </div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"Now" is not universal. In the lab frame A and B are separated in time by
+        <span class="live" id="oLive1">?</span>; for the moving observer, by
+        <span class="live" id="oLive2">?</span> &mdash; slide v and you can even
+        <b>flip which happens first</b>. Relativity permits this only for events too far apart
+        for light to connect (spacelike pairs), so no message, no cause, no effect ever runs
+        backwards. Simultaneity is a convention of your motion; causality is not.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Physics: Lorentz transform with c = 1; the teal grid is the set of lines t&prime; = const and
+    x&prime; = const drawn in the lab's coordinates, so its shear IS the transform. Calibration
+    hyperbolae t&sup2;&minus;x&sup2; = &plusmn;1 mark one unit of proper time and proper length on
+    every axis, however tilted. Check: the interval s&sup2; = x&sup2;&minus;t&sup2; of each event
+    reads the same in both frames.
+    One file of vanilla JavaScript, no libraries, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>(v<0?"−":"+")+Math.abs(v).toFixed(d);
+const S={b:0.5,grid:true,hyp:false,
+  A:{x:1.6,t:1.0},B:{x:-1.8,t:1.0},drag:null};
+const R=4.6;   // world half-range
+
+function draw(){
+  const{g,W,H}=fit();
+  const sc=Math.min(W,H)/(2*R)*0.92;
+  const cx=W/2,cy=H/2;
+  const X=x=>cx+x*sc, Y=t=>cy-t*sc;
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+
+  /* lab grid */
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  for(let k=-4;k<=4;k++){
+    g.beginPath();g.moveTo(X(k),0);g.lineTo(X(k),H);g.stroke();
+    g.beginPath();g.moveTo(0,Y(k));g.lineTo(W,Y(k));g.stroke();
+  }
+  /* light cone */
+  g.strokeStyle=C.amberA+".75)";g.lineWidth=1.4;g.setLineDash([7,5]);
+  g.beginPath();g.moveTo(X(-R),Y(-R));g.lineTo(X(R),Y(R));g.stroke();
+  g.beginPath();g.moveTo(X(-R),Y(R));g.lineTo(X(R),Y(-R));g.stroke();
+  g.setLineDash([]);
+  g.font="11px ui-monospace,Menlo,monospace";g.fillStyle=C.amber;g.textAlign="left";
+  g.fillText("light",X(R*0.72),Y(R*0.72)-6);
+
+  const b=S.b, gam=1/Math.sqrt(1-b*b);
+
+  /* moving observer's grid: lines of constant t' and x' */
+  if(S.grid&&Math.abs(b)>0.001){
+    g.strokeStyle=C.accA+".30)";g.lineWidth=1;
+    for(let k=-6;k<=6;k++){
+      /* t' = k: t = b x + k/γ */
+      g.beginPath();g.moveTo(X(-R),Y(b*(-R)+k/gam));g.lineTo(X(R),Y(b*R+k/gam));g.stroke();
+      /* x' = k: t = x/b - k/(γb)  → param by t: x = b t + k/γ */
+      g.beginPath();g.moveTo(X(b*(-R)+k/gam),Y(-R));g.lineTo(X(b*R+k/gam),Y(R));g.stroke();
+    }
+  }
+  /* primed axes */
+  if(Math.abs(b)>0.001){
+    g.strokeStyle=C.acc;g.lineWidth=2;
+    g.beginPath();g.moveTo(X(-R*b),Y(-R));g.lineTo(X(R*b),Y(R));g.stroke();      // t' axis: x=bt
+    g.beginPath();g.moveTo(X(-R),Y(-R*b));g.lineTo(X(R),Y(R*b));g.stroke();      // x' axis: t=bx
+    g.fillStyle=C.acc;
+    g.fillText("ct′",X(R*b*0.93)+8,Y(R*0.93));
+    g.fillText("x′",X(R*0.93),Y(R*b*0.93)-8);
+  }
+  /* lab axes on top */
+  g.strokeStyle=C.axis;g.lineWidth=1.6;
+  g.beginPath();g.moveTo(cx,0);g.lineTo(cx,H);g.stroke();
+  g.beginPath();g.moveTo(0,cy);g.lineTo(W,cy);g.stroke();
+  g.fillStyle=C.mut;
+  g.fillText("ct",cx+7,14);g.fillText("x",W-16,cy-7);
+
+  /* calibration hyperbolae */
+  if(S.hyp){
+    g.strokeStyle=C.mutA+".5)";g.lineWidth=1.1;
+    for(const s2 of [1,-1]){
+      for(const sgn of [1,-1]){
+        g.beginPath();let pen=false;
+        for(let i=0;i<=200;i++){
+          const u=-R+2*R*i/200;
+          let x,t;
+          if(s2===1){t=sgn*Math.sqrt(1+u*u);x=u;}          // timelike: t²−x²=1
+          else{x=sgn*Math.sqrt(1+u*u);t=u;}                 // spacelike: x²−t²=1
+          const px=X(x),py=Y(t);
+          pen?g.lineTo(px,py):g.moveTo(px,py);pen=true;
+        }
+        g.stroke();
+      }
+    }
+    g.fillStyle=C.mut;g.fillText("t²−x² = ±1 (unit ticks in EVERY frame)",12,H-30);
+  }
+
+  /* the moving observer's "now" through A */
+  if(Math.abs(b)>0.001){
+    const A=S.A;
+    g.setLineDash([5,4]);g.strokeStyle=C.accA+".8)";g.lineWidth=1.3;
+    const t0=A.t-b*A.x;
+    g.beginPath();g.moveTo(X(-R),Y(b*(-R)+t0));g.lineTo(X(R),Y(b*R+t0));g.stroke();
+    g.setLineDash([]);
+    g.fillStyle=C.acc;
+    g.fillText("their “now” through A",X(R)-160,Y(b*R+t0)-8);
+  }
+
+  /* events */
+  const drawEv=(E,name,col)=>{
+    g.fillStyle=col;g.beginPath();g.arc(X(E.x),Y(E.t),8,0,7);g.fill();
+    g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+    g.fillStyle=col;g.font="bold 13px ui-monospace,Menlo,monospace";
+    g.fillText(name,X(E.x)+11,Y(E.t)-9);
+    g.font="11px ui-monospace,Menlo,monospace";
+  };
+  drawEv(S.A,"A",C.hot);
+  drawEv(S.B,"B",C.blue);
+  g.fillStyle=C.dim;g.textAlign="left";
+  g.fillText("drag A and B · teal grid = the moving observer's coordinates",12,H-12);
+
+  /* readouts */
+  const L=E=>({x:gam*(E.x-b*E.t),t:gam*(E.t-b*E.x)});
+  const Ap=L(S.A),Bp=L(S.B);
+  document.getElementById("oG").textContent=gam.toFixed(3);
+  document.getElementById("oLab").textContent=
+    `A(${S.A.x.toFixed(1)},${S.A.t.toFixed(1)}) B(${S.B.x.toFixed(1)},${S.B.t.toFixed(1)})`;
+  document.getElementById("oMov").textContent=
+    `A′(${Ap.x.toFixed(1)},${Ap.t.toFixed(1)}) B′(${Bp.x.toFixed(1)},${Bp.t.toFixed(1)})`;
+  const dtL=S.B.t-S.A.t, dtM=Bp.t-Ap.t;
+  const ord=x=>Math.abs(x)<0.02?"simultaneous":(x>0?"A first":"B first");
+  const flip=ord(dtL)!==ord(dtM)&&Math.abs(dtL)>0.02&&Math.abs(dtM)>0.02;
+  document.getElementById("oOrd").textContent=
+    `lab: ${ord(dtL)} · moving: ${ord(dtM)}${flip?" (FLIPPED)":""}`;
+  document.getElementById("oLive1").textContent="Δt = "+fmt(dtL);
+  document.getElementById("oLive2").textContent="Δt′ = "+fmt(dtM);
+}
+
+/* interaction */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+function world(p,W,H){
+  const sc=Math.min(W,H)/(2*R)*0.92;
+  return{x:(p.x-W/2)/sc,t:(H/2-p.y)/sc};
+}
+cv.addEventListener("pointerdown",e=>{
+  const p=pos(e),{W,H}=fit(),w=world(p,W,H);
+  const dA=Math.hypot(w.x-S.A.x,w.t-S.A.t),dB=Math.hypot(w.x-S.B.x,w.t-S.B.t);
+  S.drag=dA<dB?(dA<0.6?"A":null):(dB<0.6?"B":null);
+  if(S.drag)cv.setPointerCapture(e.pointerId);
+});
+cv.addEventListener("pointermove",e=>{
+  if(!S.drag)return;
+  const p=pos(e),{W,H}=fit(),w=world(p,W,H);
+  const E=S.drag==="A"?S.A:S.B;
+  E.x=Math.max(-R+0.3,Math.min(R-0.3,w.x));
+  E.t=Math.max(-R+0.3,Math.min(R-0.3,w.t));
+  draw();
+});
+cv.addEventListener("pointerup",()=>{S.drag=null;});
+document.getElementById("sV").addEventListener("input",e=>{
+  S.b=e.target.value/100;
+  document.getElementById("rV").textContent="v = "+(S.b>=0?"":"−")+Math.abs(S.b).toFixed(2)+"c";
+  draw();});
+document.getElementById("tGrid").addEventListener("input",e=>{S.grid=e.target.checked;draw();});
+document.getElementById("tHyp").addEventListener("input",e=>{S.hyp=e.target.checked;draw();});
+window.addEventListener("resize",draw);
+draw();
+</script>
+</body>
+</html>

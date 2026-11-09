@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Matrices as Linear Transformations · Physics Intuition App</title>
+<script src="theme.js"></script>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:6px;margin-bottom:10px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:14px var(--mono);padding:8px 10px;min-width:0}
+.fin input:focus{outline:none;border-color:var(--acc)}
+.fin button{background:var(--panel2);border:1px solid var(--acc);color:var(--acc);
+  font:600 12px var(--mono);padding:0 12px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+.v.violet{color:#c792ea}
+html[data-theme="light"] .v.violet{color:#7c3fb8}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · MATRICES AS LINEAR MAPS · MODULE 26 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Matrices as Linear Transformations</h1>
+    <p class="sub">A \(2\times2\) matrix is a recipe for where the two basis arrows go; the whole
+    plane follows. Set the four entries or pick a preset, watch the grid deform from the identity
+    to \(M\), drag the point \(p\) to see its image \(Mp\), and read the determinant off the
+    parallelogram as a signed area.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx" id="eqLive">\(\displaystyle M=\begin{pmatrix}a&amp;b\\c&amp;d\end{pmatrix},\ \det M = ad-bc \)</span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="seg">
+          <button data-k="id">identity</button>
+          <button data-k="rot" class="on">rotation 45&deg;</button>
+          <button data-k="shear">shear</button>
+          <button data-k="refl">reflect in y = x</button>
+          <button data-k="scale">scale (2, &frac12;)</button>
+          <button data-k="sing">singular</button>
+        </div>
+        <div class="ctl"><label><span>a (top-left)</span><b id="rA">a = 0.71</b></label>
+          <input type="range" id="sA" min="-30" max="30" value="7"></div>
+        <div class="ctl"><label><span>b (top-right)</span><b id="rB">b = &minus;0.71</b></label>
+          <input type="range" id="sB" min="-30" max="30" value="-7"></div>
+        <div class="ctl"><label><span>c (bottom-left)</span><b id="rC">c = 0.71</b></label>
+          <input type="range" id="sC" min="-30" max="30" value="7"></div>
+        <div class="ctl"><label><span>d (bottom-right)</span><b id="rD">d = 0.71</b></label>
+          <input type="range" id="sD" min="-30" max="30" value="7"></div>
+        <div class="ctl"><label><span>rotation angle &rarr; a, b, c, d</span><b id="rTh">&theta; = 45&deg;</b></label>
+          <input type="range" id="sTh" min="0" max="360" value="45" step="1"></div>
+        <div class="ctl"><label><span>morph I &rarr; M</span><b id="rM">t = 1.00</b></label>
+          <input type="range" id="sM" min="0" max="100" value="100"></div>
+        <button class="btn" id="bRe">&#8635; Replay the morph</button>
+        <p class="hint">Amber arrow: image of e&#8321; = (a, c). Blue arrow: image of e&#8322; = (b, d).
+        Dashed violet lines: eigenvector directions, when the eigenvalues are real.</p>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"The determinant is the size of the matrix." It is not: \(\det M\) is the factor by
+        which \(M\) scales every area (the unit square becomes a parallelogram of area
+        \(|\det M|\)), and its sign says whether orientation survives (+) or the plane is flipped
+        over (&minus;). Big entries can still give \(\det M = 0\), which squashes the whole plane onto
+        a line. Right now \(\det M = \) <span class="live" id="oLive">?</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: the grid, unit square and point are mapped exactly by \( M(t) = (1-t)I + tM \)
+    (entrywise interpolation, so the intermediate frames are themselves linear maps);
+    \( \det M = ad-bc \); eigenvalues from \( \lambda^2-(a+d)\lambda+\det M = 0 \), eigenvectors
+    from \( (M-\lambda I)v=0 \), drawn only when the discriminant is non-negative. One file of
+    vanilla JavaScript, no libraries beyond the shared KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>!isFinite(v)?"—":(v<0?"−":"")+Math.abs(v).toFixed(d);
+const MONO="11px ui-monospace,Menlo,monospace";
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    `<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+
+/* ---------- state ---------- */
+const R45=Math.SQRT1_2;
+const S={a:R45,b:-R45,c:R45,d:R45,th:45,m:1,p:{x:1.5,y:0.5},t:0,last:0,anim:false,drag:false};
+const PRESETS={id:[1,0,0,1],rot:[R45,-R45,R45,R45],shear:[1,1,0,1],refl:[0,1,1,0],scale:[2,0,0,0.5],sing:[1,2,2,4]};
+const ease=s=>s*s*(3-2*s);
+const tex=(v,d=2)=>!isFinite(v)?"?":(v<0?"-":"")+Math.abs(v).toFixed(d);
+const EPS=1e-9;
+
+/* the matrix actually drawn: M(t) = (1−t)I + tM */
+function Mt(){const t=S.m;return{a:1+(S.a-1)*t,b:S.b*t,c:S.c*t,d:1+(S.d-1)*t};}
+const apply=(M,x,y)=>({x:M.a*x+M.b*y,y:M.c*x+M.d*y});
+const det=M=>M.a*M.d-M.b*M.c;
+function eigen(M){
+  const tr=M.a+M.d,D=det(M),disc=tr*tr-4*D;
+  if(disc<-EPS)return{real:false,re:tr/2,im:Math.sqrt(-disc)/2};
+  const r=Math.sqrt(Math.max(0,disc)),l1=(tr+r)/2,l2=(tr-r)/2;
+  const vec=l=>{
+    if(Math.abs(M.b)>EPS)return{x:M.b,y:l-M.a};
+    if(Math.abs(M.c)>EPS)return{x:l-M.d,y:M.c};
+    return Math.abs(l-M.a)<EPS?{x:1,y:0}:{x:0,y:1};   /* diagonal matrix */
+  };
+  const scalar=Math.abs(M.b)<EPS&&Math.abs(M.c)<EPS&&Math.abs(M.a-M.d)<EPS;
+  return{real:true,l1,l2,v1:vec(l1),v2:vec(l2),repeated:r<EPS,scalar};
+}
+
+/* ---------- drawing ---------- */
+function frame(W,H){const u=H/8;return{u,ox:W/2,oy:H/2,X:x=>W/2+x*u,Y:y=>H/2-y*u};}
+function arrow(g,F,x0,y0,x1,y1,color,width,dash,head=10){
+  const X0=F.X(x0),Y0=F.Y(y0),X1=F.X(x1),Y1=F.Y(y1);
+  const L=Math.hypot(X1-X0,Y1-Y0);if(L<1)return;
+  const ux=(X1-X0)/L,uy=(Y1-Y0)/L;
+  g.strokeStyle=color;g.fillStyle=color;g.lineWidth=width;g.setLineDash(dash||[]);
+  g.beginPath();g.moveTo(X0,Y0);g.lineTo(X1-ux*head*0.6,Y1-uy*head*0.6);g.stroke();g.setLineDash([]);
+  g.beginPath();g.moveTo(X1,Y1);g.lineTo(X1-ux*head-uy*head*0.45,Y1-uy*head+ux*head*0.45);
+  g.lineTo(X1-ux*head+uy*head*0.45,Y1-uy*head-ux*head*0.45);g.closePath();g.fill();
+}
+function lineThrough(g,F,W,H,vx,vy,color,width,dash){
+  const L=Math.hypot(vx,vy);if(L<EPS)return;
+  const k=(W+H)/F.u;const ux=vx/L*k,uy=vy/L*k;
+  g.strokeStyle=color;g.lineWidth=width;g.setLineDash(dash||[]);
+  g.beginPath();g.moveTo(F.X(-ux),F.Y(-uy));g.lineTo(F.X(ux),F.Y(uy));g.stroke();g.setLineDash([]);
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  const F=frame(W,H);
+  if(S.anim){S.m=ease(Math.min(1,S.t/1.5));if(S.t>=1.5)S.anim=false;mLabel();}
+  const M=Mt(),D=det(M),Dfin=det(S);
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  const nx=Math.ceil(W/2/F.u)+1,ny=Math.ceil(H/2/F.u)+1,K=Math.max(nx,ny)+6;
+
+  /* original grid, faint */
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  for(let i=-nx;i<=nx;i++){g.beginPath();g.moveTo(F.X(i),0);g.lineTo(F.X(i),H);g.stroke();}
+  for(let j=-ny;j<=ny;j++){g.beginPath();g.moveTo(0,F.Y(j));g.lineTo(W,F.Y(j));g.stroke();}
+  g.strokeStyle=C.axis;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(0,F.oy);g.lineTo(W,F.oy);g.stroke();
+  g.beginPath();g.moveTo(F.ox,0);g.lineTo(F.ox,H);g.stroke();
+  g.font=MONO;g.fillStyle=C.dim;g.textAlign="center";
+  for(let i=-nx;i<=nx;i++)if(i)g.fillText(i,F.X(i),F.oy+14);
+  g.textAlign="left";for(let j=-ny;j<=ny;j++)if(j)g.fillText(j,F.ox+4,F.Y(j)-3);
+  /* original unit square */
+  g.strokeStyle=C.dim;g.lineWidth=1.2;g.setLineDash([4,4]);
+  g.strokeRect(F.X(0),F.Y(1),F.u,F.u);g.setLineDash([]);
+
+  /* transformed grid */
+  const singular=Math.abs(D)<1e-6;
+  g.strokeStyle=singular?C.hotA+"0.5)":C.accA+"0.55)";g.lineWidth=1;
+  for(let k=-K;k<=K;k++){
+    let p=apply(M,k,-K),q=apply(M,k,K);
+    g.beginPath();g.moveTo(F.X(p.x),F.Y(p.y));g.lineTo(F.X(q.x),F.Y(q.y));g.stroke();
+    p=apply(M,-K,k);q=apply(M,K,k);
+    g.beginPath();g.moveTo(F.X(p.x),F.Y(p.y));g.lineTo(F.X(q.x),F.Y(q.y));g.stroke();
+  }
+
+  /* eigenvector directions of the drawn matrix */
+  const E=eigen(M);
+  if(E.real&&!E.scalar){
+    lineThrough(g,F,W,H,E.v1.x,E.v1.y,C.violet,1.5,[7,5]);
+    if(!E.repeated)lineThrough(g,F,W,H,E.v2.x,E.v2.y,C.violet,1.5,[7,5]);
+    g.fillStyle=C.violet;g.font=MONO;g.textAlign="left";
+    const lab=(v,l,n)=>{const L=Math.hypot(v.x,v.y);if(L<EPS)return;
+      const s=Math.min((W/2-24)/Math.abs(v.x/L*F.u||1e-9),(H/2-24)/Math.abs(v.y/L*F.u||1e-9))*0.7;
+      g.fillText("λ"+n+" = "+fmt(l),Math.min(W-72,F.X(v.x/L*s)+4),F.Y(v.y/L*s)-4);};
+    lab(E.v1,E.l1,"₁");if(!E.repeated)lab(E.v2,E.l2,"₂");
+  }
+
+  /* transformed unit square */
+  const e1=apply(M,1,0),e2=apply(M,0,1),e12=apply(M,1,1);
+  const neg=D<-1e-6;
+  g.fillStyle=neg?C.hotA+"0.28)":C.accA+"0.25)";
+  g.beginPath();g.moveTo(F.X(0),F.Y(0));g.lineTo(F.X(e1.x),F.Y(e1.y));g.lineTo(F.X(e12.x),F.Y(e12.y));
+  g.lineTo(F.X(e2.x),F.Y(e2.y));g.closePath();g.fill();
+  g.strokeStyle=neg?C.hot:C.acc;g.lineWidth=1.5;g.stroke();
+  if(singular){
+    const v=Math.hypot(e1.x,e1.y)>EPS?e1:e2;
+    if(Math.hypot(v.x,v.y)>EPS)lineThrough(g,F,W,H,v.x,v.y,C.hot,2.5,[]);
+    g.fillStyle=C.hot;g.font="bold 12px ui-monospace,Menlo,monospace";g.textAlign="left";
+    g.fillText(Math.hypot(v.x,v.y)>EPS?"det = 0: the whole plane collapses onto this line":"det = 0: the whole plane collapses to a point",12,H-12);
+  }
+  /* images of the basis */
+  arrow(g,F,0,0,e1.x,e1.y,C.amber,3,[]);arrow(g,F,0,0,e2.x,e2.y,C.blue,3,[]);
+  g.font="bold 12px ui-monospace,Menlo,monospace";g.textAlign="left";
+  g.fillStyle=C.amber;g.fillText("Me₁",F.X(e1.x)+8,F.Y(e1.y)-6);
+  g.fillStyle=C.blue;g.fillText("Me₂",F.X(e2.x)+8,F.Y(e2.y)-6);
+  /* signed-area label at the centroid */
+  const cxp=(e1.x+e2.x)/2,cyp=(e1.y+e2.y)/2;
+  const big=Math.abs(D)>0.35;
+  const lx=big?F.X(cxp):F.X(cxp)+(singular?46:0),ly=big?F.Y(cyp):F.Y(cyp)-26;
+  g.textAlign="center";g.fillStyle=neg?C.hot:C.ink;
+  g.fillText("det = "+fmt(D),lx,ly+4);
+  if(neg){g.fillStyle=C.hot;g.font=MONO;g.fillText("orientation reversed",lx,ly+18);}
+
+  /* the point p and its image */
+  const q=apply(M,S.p.x,S.p.y);
+  g.setLineDash([3,4]);g.strokeStyle=C.dim;g.lineWidth=1;
+  g.beginPath();g.moveTo(F.X(S.p.x),F.Y(S.p.y));g.lineTo(F.X(q.x),F.Y(q.y));g.stroke();g.setLineDash([]);
+  g.strokeStyle=C.ink;g.lineWidth=2;g.beginPath();g.arc(F.X(S.p.x),F.Y(S.p.y),6,0,7);g.stroke();
+  g.fillStyle=C.ink;g.beginPath();g.arc(F.X(q.x),F.Y(q.y),6,0,7);g.fill();
+  g.strokeStyle=C.edge;g.lineWidth=1.5;g.stroke();
+  g.fillStyle=C.ink;g.font="bold 12px ui-monospace,Menlo,monospace";g.textAlign="left";
+  g.fillText("p",F.X(S.p.x)+9,F.Y(S.p.y)+4);g.fillText("Mp",F.X(q.x)+9,F.Y(q.y)+4);
+  /* morph status */
+  g.fillStyle=C.mut;g.font=MONO;g.textAlign="left";
+  g.fillText(S.m<0.999?"morph t = "+fmt(S.m)+"  (drawing M(t) = (1−t)I + tM)":"drawing M",12,18);
+
+  /* readouts, for the final M */
+  const Ef=eigen(S),qf=apply(S,S.p.x,S.p.y);
+  const inv=Math.abs(Dfin)>1e-9;
+  const list=[["M","["+fmt(S.a)+" "+fmt(S.b)+"; "+fmt(S.c)+" "+fmt(S.d)+"]"],
+    ["det M = ad − bc",fmt(Dfin,3),Dfin<-1e-6?"hot":"acc"],
+    ["area scale factor |det M|",fmt(Math.abs(Dfin),3)+(Dfin<-1e-6?" (flipped)":""),"acc"],
+    ["e₁ = (1, 0) → (a, c)","("+fmt(S.a)+", "+fmt(S.c)+")","amber"],
+    ["e₂ = (0, 1) → (b, d)","("+fmt(S.b)+", "+fmt(S.d)+")","blue"]];
+  if(Ef.real)list.push(["eigenvalues λ₁, λ₂",fmt(Ef.l1,3)+", "+fmt(Ef.l2,3)+(Ef.scalar?" (every direction)":Ef.repeated?" (repeated)":""),"violet"]);
+  else list.push(["eigenvalues (complex)",fmt(Ef.re)+" ± "+fmt(Ef.im)+"i","violet"]);
+  list.push(["invertible?",inv?"yes, det ≠ 0":"no, det = 0",inv?"acc":"hot"]);
+  list.push(["p → Mp","("+fmt(S.p.x)+", "+fmt(S.p.y)+") → ("+fmt(qf.x)+", "+fmt(qf.y)+")"]);
+  rows(list);
+  document.getElementById("oLive").textContent=fmt(Dfin,3)+(Dfin<-1e-6?", orientation reversed":inv?"":", not invertible");
+}
+
+/* live TeX under the canvas: on state change only */
+function eqUpdate(){
+  const el=document.getElementById("eqLive");
+  el.innerHTML="\\( M=\\begin{pmatrix}a&b\\\\c&d\\end{pmatrix}=\\begin{pmatrix}"+tex(S.a)+"&"+tex(S.b)+"\\\\"+tex(S.c)+"&"+tex(S.d)+"\\end{pmatrix},\\ \\det M = ad-bc = "+tex(det(S),3)+" \\)";
+  if(window.piaRenderMath)window.piaRenderMath(el);
+}
+
+/* ---------- animation ---------- */
+let raf=0;
+function loop(ts){
+  if(!S.last)S.last=ts;
+  S.t+=Math.min(0.05,(ts-S.last)/1000);
+  S.last=ts;
+  draw();
+  if(S.anim)raf=requestAnimationFrame(loop);else raf=0;
+}
+function reset(){S.t=0;S.last=0;S.anim=false;if(raf){cancelAnimationFrame(raf);raf=0;}}
+function replay(){reset();S.m=0;S.anim=true;raf=requestAnimationFrame(loop);}
+
+/* ---------- controls ---------- */
+const $=id=>document.getElementById(id);
+function mLabel(){$("rM").textContent="t = "+fmt(S.m);$("sM").value=Math.round(S.m*100);}
+function labels(){
+  $("rA").textContent="a = "+fmt(S.a);$("rB").textContent="b = "+fmt(S.b);
+  $("rC").textContent="c = "+fmt(S.c);$("rD").textContent="d = "+fmt(S.d);
+  $("sA").value=Math.round(S.a*10);$("sB").value=Math.round(S.b*10);
+  $("sC").value=Math.round(S.c*10);$("sD").value=Math.round(S.d*10);
+  $("rTh").innerHTML="θ = "+S.th+"°";$("sTh").value=S.th;
+  mLabel();
+}
+function segOn(k){document.querySelectorAll(".seg button").forEach(x=>x.classList.toggle("on",x.dataset.k===k));}
+function bind(id,set){$(id).addEventListener("input",e=>{set(+e.target.value);segOn(null);S.m=1;labels();eqUpdate();reset();draw();});}
+bind("sA",v=>{S.a=v/10;});bind("sB",v=>{S.b=v/10;});bind("sC",v=>{S.c=v/10;});bind("sD",v=>{S.d=v/10;});
+$("sTh").addEventListener("input",e=>{
+  S.th=+e.target.value;const r=S.th*Math.PI/180;
+  S.a=Math.cos(r);S.b=-Math.sin(r);S.c=Math.sin(r);S.d=Math.cos(r);
+  segOn(S.th===45?"rot":S.th%360===0?"id":null);S.m=1;labels();eqUpdate();reset();draw();
+});
+$("sM").addEventListener("input",e=>{reset();S.m=+e.target.value/100;mLabel();draw();});
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",function(){
+  const P=PRESETS[this.dataset.k];[S.a,S.b,S.c,S.d]=P;
+  if(this.dataset.k==="rot")S.th=45;else if(this.dataset.k==="id")S.th=0;
+  segOn(this.dataset.k);labels();eqUpdate();replay();
+}));
+$("bRe").addEventListener("click",replay);
+
+/* ---------- dragging p ---------- */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+cv.addEventListener("pointerdown",e=>{
+  const p=pos(e),{W,H}=fit();const F=frame(W,H);
+  if(Math.hypot(p.x-F.X(S.p.x),p.y-F.Y(S.p.y))>30)return;
+  S.drag=true;cv.setPointerCapture(e.pointerId);move(e);
+});
+function move(e){
+  if(!S.drag)return;
+  const p=pos(e),{W,H}=fit();const F=frame(W,H);
+  S.p.x=Math.max(-6,Math.min(6,Math.round((p.x-F.ox)/F.u*20)/20));
+  S.p.y=Math.max(-4,Math.min(4,Math.round((F.oy-p.y)/F.u*20)/20));
+  if(!S.anim)draw();
+}
+cv.addEventListener("pointermove",move);
+cv.addEventListener("pointerup",()=>{S.drag=false;});
+cv.addEventListener("pointercancel",()=>{S.drag=false;});
+window.addEventListener("resize",draw);
+labels();eqUpdate();replay();
+</script>
+</body>
+</html>

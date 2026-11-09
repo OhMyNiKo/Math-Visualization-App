@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<title>Phase Space · Physics Intuition App</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px}
+.seg button{flex:1;background:var(--panel2);color:var(--mut);border:0;border-right:1px solid var(--hair);
+  font:600 13px/1 var(--sans);padding:10px 4px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--acc);color:#04120d}
+.tog{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);
+  font-family:var(--mono);cursor:pointer;user-select:none;margin-top:10px}
+.tog input{accent-color:var(--amber);width:15px;height:15px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center;line-height:1.2}
+.eq .frac .nu{display:block;padding:0 5px;border-bottom:1px solid var(--mut)}
+.eq .frac .de{display:block;padding:0 5px}
+.eq sub,.eq sup{font-size:10px}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · PHASE SPACE · MODULE 8 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Phase Space</h1>
+    <p class="sub">On the left, a pendulum or a spring you can grab. On the right, the same motion
+    seen the way physicists actually see it: one point tracing a curve in the plane of position and
+    momentum. Drag the bob anywhere, let go, and watch the whole history become geometry.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx" id="eqTxt">\(\displaystyle \ddot\theta=-\frac{g}{\ell}\sin\theta-\gamma\dot\theta \)
+        <span class="mutx">&nbsp;·&nbsp;state = \(\displaystyle (\theta,\dot\theta) \), one point; motion = one curve</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="seg">
+          <button id="bPend" class="on">Pendulum</button>
+          <button id="bSpr">Spring</button>
+        </div>
+        <button class="btn" id="bGo">Pause</button>
+        <label class="tog"><input type="checkbox" id="tDamp"> air resistance on</label>
+        <div class="ctl" style="margin-top:10px"><label><span>drag strength &gamma;</span><b id="rC">&gamma; = 0.25</b></label>
+          <input type="range" id="sC" min="2" max="100" value="25"></div>
+        <p class="hint">Drag the bob (left panel) to set the start position, or drag directly in
+        the phase plane (right panel) to set position <i>and</i> velocity at once. Release to run.</p>
+      </div>
+      <div class="card">
+        <h3>Readout</h3>
+        <div class="read">
+          <div class="r"><span class="k" id="kPos">angle &theta;</span><span class="v acc" id="oX">0.00</span></div>
+          <div class="r"><span class="k" id="kVel">angular velocity &theta;&#775;</span><span class="v blue" id="oV">0.00</span></div>
+          <div class="r"><span class="k">energy E</span><span class="v amber" id="oE">0.00</span></div>
+          <div class="r"><span class="k">loop status</span><span class="v" id="oLoop">closed</span></div>
+        </div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>Damping does not just "make the swing smaller". In phase space the entire story is one
+        curve: a <b>closed loop</b> when energy is conserved, and with air resistance on, a
+        <b>spiral</b> falling into the resting point, E = <span class="live" id="oLive">?</span>
+        and shrinking. Trajectories never cross themselves or each other; that single fact is why
+        knowing (position, velocity) once determines the motion forever.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Physics: pendulum &theta;&#776; = &minus;(g/&#8467;)sin&theta; &minus; &gamma;&theta;&#775; with
+    g/&#8467; = 9.8; spring x&#776; = &minus;(k/m)x &minus; &gamma;x&#775; with k/m = 4; classic RK4
+    at dt = 1/240 with 4 substeps per frame. Faint curves in the phase plane are constant-energy
+    contours; the separatrix (the contour through the inverted position) is drawn brighter.
+    One file of vanilla JavaScript, no libraries, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>(v<0?"−":"")+Math.abs(v).toFixed(d);
+
+const W2=9.8;   // pendulum g/l
+const K2=4;     // spring k/m
+const S={mode:"pend",x:2.2,v:0,run:true,damp:false,c:0.25,trail:[],drag:null,t:0};
+
+function acc(x,v){
+  const d=S.damp?S.c:0;
+  return S.mode==="pend" ? -W2*Math.sin(x)-d*v : -K2*x-d*v;
+}
+function energy(x,v){
+  return S.mode==="pend" ? 0.5*v*v+W2*(1-Math.cos(x)) : 0.5*v*v+0.5*K2*x*x;
+}
+const DT=1/240,SUB=4;
+function step(){
+  for(let i=0;i<SUB;i++){
+    const x=S.x,v=S.v;
+    const k1x=v,k1v=acc(x,v);
+    const k2x=v+k1v*DT/2,k2v=acc(x+k1x*DT/2,v+k1v*DT/2);
+    const k3x=v+k2v*DT/2,k3v=acc(x+k2x*DT/2,v+k2v*DT/2);
+    const k4x=v+k3v*DT,k4v=acc(x+k3x*DT,v+k3v*DT);
+    S.x=x+DT/6*(k1x+2*k2x+2*k3x+k4x);
+    S.v=v+DT/6*(k1v+2*k2v+2*k3v+k4v);
+  }
+  S.trail.push({x:S.x,v:S.v});
+  if(S.trail.length>2600)S.trail.shift();
+}
+
+/* layout: left 42% animation, right 58% phase plane */
+function panes(W,H){return{aw:W*0.42,px0:W*0.42+8,pw:W-W*0.42-8,H};}
+const PXR=3.6, PVR=8.5;   // phase ranges: |x|<=PXR (pend uses pi wrap-ish), |v|<=PVR
+function phX(x,p){return p.px0+(x+PXR)/(2*PXR)*p.pw;}
+function phY(v,H){return H-(v+PVR)/(2*PVR)*H;}
+
+function draw(){
+  const{g,W,H}=fit(),p=panes(W,H);
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  g.strokeStyle=C.hair;g.beginPath();g.moveTo(p.px0-4,0);g.lineTo(p.px0-4,H);g.stroke();
+
+  /* ---------- left: the thing itself ---------- */
+  g.font="11px ui-monospace,Menlo,monospace";g.fillStyle=C.dim;g.textAlign="left";
+  if(S.mode==="pend"){
+    const cx=p.aw/2,cy=H*0.30,R=H*0.34;
+    g.fillText("the pendulum",12,18);
+    g.fillStyle=C.mut;g.fillRect(cx-26,cy-4,52,4);
+    const bx=cx+R*Math.sin(S.x),by=cy+R*Math.cos(S.x);
+    g.strokeStyle=C.mut;g.lineWidth=2;
+    g.beginPath();g.moveTo(cx,cy);g.lineTo(bx,by);g.stroke();
+    /* rest position marker */
+    g.setLineDash([4,4]);g.strokeStyle=C.axis;g.beginPath();g.moveTo(cx,cy);g.lineTo(cx,cy+R);g.stroke();g.setLineDash([]);
+    g.fillStyle=C.acc;g.beginPath();g.arc(bx,by,13,0,7);g.fill();
+    g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+  }else{
+    const y=H*0.42,x0=14,rest=p.aw*0.55,px=rest+S.x*(p.aw*0.115);
+    g.fillText("the spring",12,18);
+    g.fillStyle=C.mut;g.fillRect(x0-4,y-42,6,84);
+    /* coil */
+    g.strokeStyle=C.mut;g.lineWidth=2;g.beginPath();g.moveTo(x0+2,y);
+    const nseg=12;
+    for(let i=1;i<=nseg;i++){
+      const sx=x0+2+(px-24-x0-2)*i/nseg, sy=y+((i%2)?-10:10)*(i===nseg?0:1);
+      g.lineTo(sx,sy);
+    }
+    g.lineTo(px-24,y);g.stroke();
+    g.setLineDash([4,4]);g.strokeStyle=C.axis;g.beginPath();g.moveTo(rest,y-34);g.lineTo(rest,y+34);g.stroke();g.setLineDash([]);
+    g.fillStyle=C.dim;g.fillText("x=0",rest-10,y+48);
+    g.fillStyle=C.acc;g.fillRect(px-24,y-16,32,32);
+    g.strokeStyle=C.edge;g.lineWidth=2;g.strokeRect(px-24,y-16,32,32);
+    /* track */
+    g.strokeStyle=C.hair;g.beginPath();g.moveTo(x0,y+18);g.lineTo(p.aw-10,y+18);g.stroke();
+  }
+  g.fillStyle=C.dim;g.fillText("drag the mass, then let go",12,H-12);
+
+  /* ---------- right: phase plane ---------- */
+  const cx0=phX(0,p),cy0=phY(0,H);
+  /* energy contours */
+  const levels=S.mode==="pend"?[2,6,12,19.6,28]:[1,3,6,10,16];
+  for(const E of levels){
+    const sep=S.mode==="pend"&&Math.abs(E-2*W2)<0.01;
+    g.strokeStyle=sep?C.amberA+".45)":C.mutA+".16)";
+    g.lineWidth=sep?1.4:1;
+    g.beginPath();let pen=false;
+    for(let i=0;i<=260;i++){
+      const x=-PXR+2*PXR*i/260;
+      const u=S.mode==="pend"?2*(E-W2*(1-Math.cos(x))):2*E-K2*x*x;
+      if(u<0){pen=false;continue;}
+      const v=Math.sqrt(u);
+      const sx=phX(x,p),sy=phY(v,H);
+      pen?g.lineTo(sx,sy):g.moveTo(sx,sy);pen=true;
+    }
+    g.stroke();
+    g.beginPath();pen=false;
+    for(let i=0;i<=260;i++){
+      const x=-PXR+2*PXR*i/260;
+      const u=S.mode==="pend"?2*(E-W2*(1-Math.cos(x))):2*E-K2*x*x;
+      if(u<0){pen=false;continue;}
+      const v=-Math.sqrt(u);
+      const sx=phX(x,p),sy=phY(v,H);
+      pen?g.lineTo(sx,sy):g.moveTo(sx,sy);pen=true;
+    }
+    g.stroke();
+  }
+  /* axes */
+  g.strokeStyle=C.axis;g.lineWidth=1.2;
+  g.beginPath();g.moveTo(p.px0,cy0);g.lineTo(p.px0+p.pw,cy0);g.stroke();
+  g.beginPath();g.moveTo(cx0,0);g.lineTo(cx0,H);g.stroke();
+  g.fillStyle=C.dim;g.textAlign="left";
+  g.fillText(S.mode==="pend"?"θ →":"x →",p.px0+p.pw-38,cy0-6);
+  g.fillText(S.mode==="pend"?"θ̇ ↑":"v ↑",cx0+6,14);
+  /* trail */
+  if(S.trail.length>1){
+    for(let i=1;i<S.trail.length;i++){
+      const a=S.trail[i-1],b=S.trail[i];
+      if(Math.abs(a.x-b.x)>3)continue;   // wrap skip
+      const al=0.12+0.88*(i/S.trail.length);
+      g.strokeStyle=`${C.accA}${al})`;g.lineWidth=1.8;
+      g.beginPath();g.moveTo(phX(a.x,p),phY(a.v,H));g.lineTo(phX(b.x,p),phY(b.v,H));g.stroke();
+    }
+  }
+  /* state point */
+  g.fillStyle=C.amber;g.beginPath();g.arc(phX(S.x,p),phY(S.v,H),7,0,7);g.fill();
+  g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+  g.fillStyle=C.dim;g.fillText("phase space: every possible history is a curve here",p.px0+8,H-12);
+
+  /* readouts */
+  document.getElementById("oX").textContent=fmt(S.x);
+  document.getElementById("oV").textContent=fmt(S.v);
+  const E=energy(S.x,S.v);
+  document.getElementById("oE").textContent=fmt(E);
+  document.getElementById("oLive").textContent=fmt(E);
+  document.getElementById("oLoop").textContent=S.damp?"spiralling in":"closed";
+}
+
+function loop(){ if(S.run&&!S.drag)step(); draw(); requestAnimationFrame(loop); }
+
+/* ---------- interaction ---------- */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+cv.addEventListener("pointerdown",e=>{
+  const q=pos(e),{W,H}=fit(),p=panes(W,H);
+  S.drag=q.x<p.px0-4?"anim":"phase";
+  cv.setPointerCapture(e.pointerId);
+  dragTo(q,p,H);
+});
+function dragTo(q,p,H){
+  if(S.drag==="anim"){
+    if(S.mode==="pend"){
+      const cx=p.aw/2,cy=H*0.30;
+      S.x=Math.atan2(q.x-cx,q.y-cy);S.v=0;
+    }else{
+      const rest=p.aw*0.55;
+      S.x=Math.max(-3.2,Math.min(3.2,(q.x-rest)/(p.aw*0.115)));S.v=0;
+    }
+  }else{
+    S.x=Math.max(-PXR,Math.min(PXR,-PXR+2*PXR*(q.x-p.px0)/p.pw));
+    S.v=Math.max(-PVR,Math.min(PVR,PVR-2*PVR*q.y/H));
+  }
+  S.trail=[];draw();
+}
+cv.addEventListener("pointermove",e=>{
+  if(!S.drag)return;
+  const q=pos(e),{W,H}=fit();
+  dragTo(q,panes(W,H),H);
+});
+cv.addEventListener("pointerup",()=>{S.drag=null;});
+
+document.getElementById("bPend").addEventListener("click",function(){
+  S.mode="pend";S.x=2.2;S.v=0;S.trail=[];
+  this.classList.add("on");document.getElementById("bSpr").classList.remove("on");
+  document.getElementById("kPos").innerHTML="angle &theta;";
+  document.getElementById("kVel").innerHTML="angular velocity &theta;&#775;";
+  document.getElementById("eqTxt").innerHTML='\\( \\ddot\\theta=-\\frac{g}{\\ell}\\sin\\theta-\\gamma\\dot\\theta \\) <span class="mutx">&nbsp;·&nbsp;state = \\( (\\theta,\\dot\\theta) \\), one point; motion = one curve</span>';window.piaRenderMath&&piaRenderMath(document.getElementById("eqTxt"));
+});
+document.getElementById("bSpr").addEventListener("click",function(){
+  S.mode="spring";S.x=2.0;S.v=0;S.trail=[];
+  this.classList.add("on");document.getElementById("bPend").classList.remove("on");
+  document.getElementById("kPos").textContent="position x";
+  document.getElementById("kVel").textContent="velocity v";
+  document.getElementById("eqTxt").innerHTML='\\( \\ddot x=-\\frac{k}{m}x-\\gamma\\dot x \\) <span class="mutx">&nbsp;·&nbsp;state = \\( (x,v) \\), one point; motion = one curve</span>';window.piaRenderMath&&piaRenderMath(document.getElementById("eqTxt"));
+});
+document.getElementById("bGo").addEventListener("click",function(){
+  S.run=!S.run;this.textContent=S.run?"Pause":"Run";});
+document.getElementById("tDamp").addEventListener("input",e=>{S.damp=e.target.checked;});
+document.getElementById("sC").addEventListener("input",e=>{
+  S.c=e.target.value/100;document.getElementById("rC").textContent="γ = "+S.c.toFixed(2);});
+window.addEventListener("resize",draw);
+loop();
+</script>
+</body>
+</html>

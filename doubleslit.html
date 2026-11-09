@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<title>Double-Slit Interference · Physics Intuition App</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center;line-height:1.2}
+.eq .frac .nu{display:block;padding:0 5px;border-bottom:1px solid var(--mut)}
+.eq .frac .de{display:block;padding:0 5px}
+.eq sub,.eq sup{font-size:10px}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · DOUBLE-SLIT INTERFERENCE · MODULE 9 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Double-Slit Interference</h1>
+    <p class="sub">One source, one barrier with two slits, one screen: every distance and the
+    wavelength are yours to change. The field between barrier and screen is computed point by
+    point from wave superposition, and the screen shows its intensity as colour.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx">\(\displaystyle I(y)\propto\cos^{2}\!\left(\frac{\pi d\,y}{\lambda D}\right)\,\operatorname{sinc}^{2}\!\left(\frac{\pi a\,y}{\lambda D}\right) \)
+        <span class="mutx">&nbsp;·&nbsp;bright fringes \(\displaystyle \Delta y=\lambda D/d \)</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="ctl"><label><span>wavelength &lambda;</span><b id="rL">&lambda; = 18</b></label>
+          <input type="range" id="sL" min="8" max="40" value="18"></div>
+        <div class="ctl"><label><span>slit separation d (centre to centre)</span><b id="rD">d = 80</b></label>
+          <input type="range" id="sD" min="30" max="160" value="80"></div>
+        <div class="ctl"><label><span>slit width a</span><b id="rA">a = 10</b></label>
+          <input type="range" id="sA" min="4" max="30" value="10"></div>
+        <div class="ctl"><label><span>source &rarr; barrier D&#8321;</span><b id="rD1">D&#8321; = 200</b></label>
+          <input type="range" id="sD1" min="100" max="330" value="200"></div>
+        <div class="ctl"><label><span>barrier &rarr; screen D&#8322;</span><b id="rD2">D&#8322; = 340</b></label>
+          <input type="range" id="sD2" min="150" max="420" value="340"></div>
+        <p class="hint">Units are pixels; every quantity above is a length in the picture itself.
+        The colour bar at the screen is the answer an actual detector would record.</p>
+      </div>
+      <div class="card">
+        <h3>Readout</h3>
+        <div class="read">
+          <div class="r"><span class="k">fringe spacing, theory &lambda;D&#8322;/d</span><span class="v acc" id="oTh">?</span></div>
+          <div class="r"><span class="k">fringe spacing, measured</span><span class="v amber" id="oMe">?</span></div>
+          <div class="r"><span class="k">intensity at central bright</span><span class="v" id="oImax">?</span></div>
+          <div class="r"><span class="k">intensity at first dark</span><span class="v hot" id="oImin">?</span></div>
+        </div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>Waves do <b>not</b> add like intensities. Amplitudes add first, then you square:
+        two bright waves can make a dark stripe, and the first dark fringe here really reads
+        <span class="live" id="oLive">?</span> of the central maximum. Widen &lambda; and the
+        stripes spread; the spacing is &lambda;D/d, set by the wave itself, not by the slits
+        "being close together".</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Physics: Huygens superposition, each slit sampled as 7 secondary sources; complex field
+    A = &Sigma; e<sup>ik(r&#8320;+r)</sup>/&radic;r summed at every screen and field point, intensity |A|&sup2;
+    (k = 2&pi;/&lambda;). The Fraunhofer formula above is the far-field limit of exactly this sum.
+    Check: spacing measured from the computed screen agrees with &lambda;D&#8322;/d to a few percent.
+    One file of vanilla JavaScript, no libraries, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h,dpr};
+}
+const fmt=(v,d=1)=>(v<0?"−":"")+Math.abs(v).toFixed(d);
+const S={lam:18,d:80,a:10,D1:200,D2:340};
+
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  const cyc=H/2;
+  const xs=28;                                   // source x
+  const xb=Math.min(xs+S.D1,W-140);              // barrier x
+  const xscr=Math.min(xb+S.D2,W-46);             // screen x
+  const k=2*Math.PI/S.lam;
+
+  /* slit centres and secondary sources */
+  const s1=cyc-S.d/2, s2=cyc+S.d/2;
+  const srcs=[];
+  for(const sc of [s1,s2])
+    for(let m=0;m<7;m++){
+      const y=sc-S.a/2+S.a*(m+0.5)/7;
+      const r0=Math.hypot(xb-xs,y-cyc);          // phase picked up source→slit
+      srcs.push({y,r0});
+    }
+
+  const field=(x,y)=>{
+    let re=0,im=0;
+    for(const s of srcs){
+      const r=Math.hypot(x-xb,y-s.y)+1e-6;
+      const ph=k*(s.r0+r), am=1/Math.sqrt(r+8);
+      re+=am*Math.cos(ph); im+=am*Math.sin(ph);
+    }
+    return re*re+im*im;
+  };
+
+  /* incident wavefronts, source side (faint arcs) */
+  g.strokeStyle=C.blueA+".20)";g.lineWidth=1;
+  for(let r=S.lam;r<S.D1+S.d;r+=S.lam){
+    g.beginPath();g.arc(xs,cyc,r,-1.15,1.15);g.stroke();
+  }
+  g.fillStyle=C.blue;g.beginPath();g.arc(xs,cyc,4.5,0,7);g.fill();
+  g.font="11px ui-monospace,Menlo,monospace";g.fillStyle=C.mut;g.textAlign="center";
+  g.fillText("source",xs+4,cyc+22);
+
+  /* field region barrier→screen, coarse blocks */
+  const B=3;let fmax=1e-12;
+  const x0=xb+2,x1=xscr-2;
+  const vals=[];
+  for(let y=0;y<H;y+=B){
+    const row=[];
+    for(let x=x0;x<x1;x+=B){const I=field(x+B/2,y+B/2);row.push(I);if(I>fmax)fmax=I;}
+    vals.push(row);
+  }
+  for(let iy=0;iy<vals.length;iy++)for(let ix=0;ix<vals[iy].length;ix++){
+    const t=Math.pow(vals[iy][ix]/fmax,0.5);
+    const r=Math.round(15+62*t),gg=Math.round(21+187*t),b=Math.round(28+153*t);
+    g.fillStyle=`rgb(${r},${gg},${b})`;
+    g.fillRect(x0+ix*B,iy*B,B,B);
+  }
+
+  /* barrier with slits */
+  g.fillStyle=C.mut;
+  g.fillRect(xb-3,0,6,(s1-S.a/2));
+  g.fillRect(xb-3,s1+S.a/2,6,(s2-S.a/2)-(s1+S.a/2));
+  g.fillRect(xb-3,s2+S.a/2,6,H-(s2+S.a/2));
+  g.fillStyle=C.dim;g.textAlign="center";g.fillText("barrier",xb,14);
+
+  /* screen: intensity as colour, 1px resolution */
+  let smax=1e-12;const scr=new Float64Array(H);
+  for(let y=0;y<H;y++){scr[y]=field(xscr,y+0.5);if(scr[y]>smax)smax=scr[y];}
+  for(let y=0;y<H;y++){
+    const t=Math.pow(scr[y]/smax,0.55);
+    const r=Math.round(15+225*t),gg=Math.round(21+219*t),b=Math.round(28+199*t);
+    g.fillStyle=`rgb(${r},${gg},${b})`;
+    g.fillRect(xscr-4,y,9,1);
+  }
+  g.strokeStyle=C.hair;g.strokeRect(xscr-4.5,0,10,H);
+  g.fillStyle=C.dim;g.fillText("screen",xscr,14);
+
+  /* intensity curve right of the screen */
+  const gw=W-xscr-12;
+  if(gw>18){
+    g.strokeStyle=C.acc;g.lineWidth=1.6;g.beginPath();
+    for(let y=0;y<H;y++){
+      const x=xscr+7+(scr[y]/smax)*gw;
+      y===0?g.moveTo(x,y):g.lineTo(x,y);
+    }
+    g.stroke();
+  }
+
+  /* measured fringe spacing: mean gap between maxima near centre */
+  const peaks=[];
+  for(let y=6;y<H-6;y++)
+    if(scr[y]>scr[y-3]&&scr[y]>=scr[y+3]&&scr[y]>0.25*smax){
+      if(!peaks.length||y-peaks[peaks.length-1]>6)peaks.push(y);
+    }
+  let meas=NaN;
+  const near=peaks.filter(y=>Math.abs(y-cyc)<H*0.32);
+  if(near.length>=2){
+    let sum=0;for(let i=1;i<near.length;i++)sum+=near[i]-near[i-1];
+    meas=sum/(near.length-1);
+  }
+  const th=S.lam*S.D2/S.d;
+
+  /* dark-fringe intensity relative to max */
+  let imin=1;
+  const y1=cyc+th/2;                                    // first dark, roughly
+  if(y1<H){imin=field(xscr,y1)/smax;}
+
+  document.getElementById("oTh").textContent=fmt(th)+" px";
+  document.getElementById("oMe").textContent=isFinite(meas)?fmt(meas)+" px":"–";
+  document.getElementById("oImax").textContent="1.00";
+  document.getElementById("oImin").textContent=fmt(Math.min(imin,1),2);
+  document.getElementById("oLive").textContent=fmt(Math.min(imin,1)*100,0)+"%";
+}
+
+function upd(id,run){document.getElementById(id).addEventListener("input",e=>{run(+e.target.value);draw();});}
+upd("sL",v=>{S.lam=v;document.getElementById("rL").textContent="λ = "+v;});
+upd("sD",v=>{S.d=v;document.getElementById("rD").textContent="d = "+v;});
+upd("sA",v=>{S.a=v;document.getElementById("rA").textContent="a = "+v;});
+upd("sD1",v=>{S.D1=v;document.getElementById("rD1").textContent="D₁ = "+v;});
+upd("sD2",v=>{S.D2=v;document.getElementById("rD2").textContent="D₂ = "+v;});
+window.addEventListener("resize",draw);
+draw();
+</script>
+</body>
+</html>

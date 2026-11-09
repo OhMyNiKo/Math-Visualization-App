@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<title>Quantum Tunneling · Physics Intuition App</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.tog{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);
+  font-family:var(--mono);cursor:pointer;user-select:none;margin-top:10px}
+.tog input{accent-color:var(--amber);width:15px;height:15px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center;line-height:1.2}
+.eq .frac .nu{display:block;padding:0 5px;border-bottom:1px solid var(--mut)}
+.eq .frac .de{display:block;padding:0 5px}
+.eq sub,.eq sup{font-size:10px}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · QUANTUM TUNNELING · MODULE 13 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Quantum Tunneling</h1>
+    <p class="sub">A Gaussian wave packet is fired at a wall it classically cannot pass. This page
+    integrates the Schr&ouml;dinger equation live, at every frame. Flip the log axis on when the
+    packet hits and watch the wave die <b>exponentially</b> inside the wall &mdash; and survive.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx">\(\displaystyle i\hbar\,\frac{\partial\psi}{\partial t}=-\frac{\hbar^{2}}{2m}\frac{\partial^{2}\psi}{\partial x^{2}}+V\psi \)
+        <span class="mutx">&nbsp;·&nbsp;</span>
+        \(\displaystyle T\approx e^{-2\kappa w},\quad \kappa=\frac{\sqrt{2m(V_0-E)}}{\hbar} \)</span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="ctl"><label><span>packet energy E</span><b id="rE">E = 1.00</b></label>
+          <input type="range" id="sE" min="20" max="450" value="100"></div>
+        <div class="ctl"><label><span>barrier height V&#8320;</span><b id="rV">V&#8320; = 2.00</b></label>
+          <input type="range" id="sV" min="50" max="600" value="200"></div>
+        <div class="ctl"><label><span>barrier width w</span><b id="rW">w = 2.0</b></label>
+          <input type="range" id="sW" min="5" max="60" value="20"></div>
+        <div class="ctl"><label class="tog"><input type="checkbox" id="tLog"> log axis (see the exponential)</label></div>
+        <button class="btn" id="bRe">&#8635; Relaunch the packet</button>
+        <button class="btn" id="bGo">Pause</button>
+        <p class="hint">The faint blue curve is Re&thinsp;&psi;; teal is |&psi;|&sup2;. On the log
+        axis the dashed red guide has slope &minus;2&kappa;: the wave inside the wall follows it.</p>
+      </div>
+      <div class="card">
+        <h3>Readout</h3>
+        <div class="read">
+          <div class="r"><span class="k">&kappa; = &radic;(2(V&#8320;&minus;E))</span><span class="v blue" id="oK">?</span></div>
+          <div class="r"><span class="k">T predicted &asymp; e<sup>&minus;2&kappa;w</sup></span><span class="v amber" id="oTp">?</span></div>
+          <div class="r"><span class="k">T measured (right of wall)</span><span class="v acc" id="oTm">?</span></div>
+          <div class="r"><span class="k">R measured (left of wall)</span><span class="v" id="oRm">?</span></div>
+        </div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>The particle does not "jump over" the wall &mdash; it has no extra energy to borrow.
+        The wave <b>leaks through</b>, decaying exponentially inside: transmission right now is
+        <span class="live" id="oLive">?</span>. Double the width and T roughly squares; that
+        brutal sensitivity is why alpha decay half-lives span 30 orders of magnitude, why the
+        sun can fuse protons at a mere 15 million kelvin, and why your flash drive remembers.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Physics: time-dependent Schr&ouml;dinger equation (&#8463;=m=1) on 600 grid points,
+    dx = 0.1, integrated by Crank&ndash;Nicolson (unitary, unconditionally stable) at dt = 0.005,
+    six steps per frame; absorbing edges via a smooth imaginary potential so nothing wraps around.
+    Packet: &sigma; = 1.8, k&#8320; = &radic;2E. Check: with the absorber off the printed norm
+    stays at 1.000 to the last digit CN guarantees.
+    One file of vanilla JavaScript, no libraries, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmtE=v=>{
+  if(!isFinite(v))return "—";
+  if(v===0)return "0";
+  if(v>=0.01)return v.toFixed(3);
+  const e=Math.floor(Math.log10(v));
+  return (v/Math.pow(10,e)).toFixed(1)+"e"+e;
+};
+
+/* ---------- grid & state ---------- */
+const N=600,DX=0.1,XMAX=N*DX,DT=0.005,SUB=6;
+const XB=30;                                   // barrier left edge
+const S={E:1.0,V0:2.0,w:2.0,run:true,log:false};
+const psiR=new Float64Array(N),psiI=new Float64Array(N);
+const V=new Float64Array(N),GAM=new Float64Array(N);
+/* CN precomputed complex arrays */
+const aR=new Float64Array(N),aI=new Float64Array(N);   // A diagonal
+const bR=new Float64Array(N),bI=new Float64Array(N);   // B diagonal
+const eR=new Float64Array(N),eI=new Float64Array(N);   // Thomas pivots
+const yR=new Float64Array(N),yI=new Float64Array(N);   // work
+let cR=0,cI=0,mR=0,mI=0;                                // A,B off-diagonals (constants)
+
+function buildPotential(){
+  for(let i=0;i<N;i++){
+    const x=i*DX;
+    V[i]=(x>=XB&&x<=XB+S.w)?S.V0:0;
+    const dl=x, dr=XMAX-x, zone=5;
+    const d=Math.min(dl,dr);
+    GAM[i]=d<zone?1.0*Math.pow((zone-d)/zone,2):0;
+  }
+}
+function buildCN(){
+  /* A = I + i(dt/2)H_eff,  B = I − i(dt/2)H_eff,  H_eff = −½∂² + V − iΓ */
+  const h=DT/2, k=1/(DX*DX);
+  cI=-h*0.5*k; cR=0;          // A off-diag  = i·h·(−1/(2dx²))
+  mR=0; mI=+h*0.5*k;          // B off-diag  = −i·h·(−1/(2dx²))
+  for(let i=0;i<N;i++){
+    aR[i]=1+h*GAM[i];  aI[i]=h*(k+V[i]);
+    bR[i]=1-h*GAM[i];  bI[i]=-h*(k+V[i]);
+  }
+  /* Thomas pivots e_i = a_i − c²/e_{i−1} (c constant) */
+  eR[0]=aR[0];eI[0]=aI[0];
+  const c2R=cR*cR-cI*cI, c2I=2*cR*cI;
+  for(let i=1;i<N;i++){
+    const d=eR[i-1]*eR[i-1]+eI[i-1]*eI[i-1];
+    const qR=(c2R*eR[i-1]+c2I*eI[i-1])/d, qI=(c2I*eR[i-1]-c2R*eI[i-1])/d;
+    eR[i]=aR[i]-qR; eI[i]=aI[i]-qI;
+  }
+}
+function launch(){
+  const k0=Math.sqrt(2*S.E),x0=14,sg=1.8;
+  let nrm=0;
+  for(let i=0;i<N;i++){
+    const x=i*DX,ga=Math.exp(-(x-x0)*(x-x0)/(4*sg*sg));
+    psiR[i]=ga*Math.cos(k0*x); psiI[i]=ga*Math.sin(k0*x);
+    nrm+=(psiR[i]*psiR[i]+psiI[i]*psiI[i])*DX;
+  }
+  const s=1/Math.sqrt(nrm);
+  for(let i=0;i<N;i++){psiR[i]*=s;psiI[i]*=s;}
+}
+function step(){
+  /* rhs = B·psi  (tridiagonal multiply) */
+  for(let i=0;i<N;i++){
+    let rR=bR[i]*psiR[i]-bI[i]*psiI[i];
+    let rI=bR[i]*psiI[i]+bI[i]*psiR[i];
+    if(i>0){rR+=mR*psiR[i-1]-mI*psiI[i-1];rI+=mR*psiI[i-1]+mI*psiR[i-1];}
+    if(i<N-1){rR+=mR*psiR[i+1]-mI*psiI[i+1];rI+=mR*psiI[i+1]+mI*psiR[i+1];}
+    yR[i]=rR;yI[i]=rI;
+  }
+  /* forward eliminate: y_i −= (c/e_{i−1})·y_{i−1} */
+  for(let i=1;i<N;i++){
+    const d=eR[i-1]*eR[i-1]+eI[i-1]*eI[i-1];
+    const fR=(cR*eR[i-1]+cI*eI[i-1])/d, fI=(cI*eR[i-1]-cR*eI[i-1])/d;
+    yR[i]-=fR*yR[i-1]-fI*yI[i-1];
+    yI[i]-=fR*yI[i-1]+fI*yR[i-1];
+  }
+  /* back substitute */
+  {
+    const d=eR[N-1]*eR[N-1]+eI[N-1]*eI[N-1];
+    psiR[N-1]=(yR[N-1]*eR[N-1]+yI[N-1]*eI[N-1])/d;
+    psiI[N-1]=(yI[N-1]*eR[N-1]-yR[N-1]*eI[N-1])/d;
+  }
+  for(let i=N-2;i>=0;i--){
+    const tR=yR[i]-(cR*psiR[i+1]-cI*psiI[i+1]);
+    const tI=yI[i]-(cR*psiI[i+1]+cI*psiR[i+1]);
+    const d=eR[i]*eR[i]+eI[i]*eI[i];
+    psiR[i]=(tR*eR[i]+tI*eI[i])/d;
+    psiI[i]=(tI*eR[i]-tR*eI[i])/d;
+  }
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  const padB=30,plotH=H-padB;
+  const X=x=>x/XMAX*W;
+  const VMAX=6.5;
+  const YV=v=>plotH-(v/VMAX)*plotH*0.9;
+
+  /* barrier + energy line on the V scale */
+  g.fillStyle=C.mutA+".22)";
+  g.fillRect(X(XB),YV(S.V0),X(S.w)-X(0),plotH-YV(S.V0));
+  g.strokeStyle=C.mut;g.lineWidth=1.4;
+  g.strokeRect(X(XB),YV(S.V0),X(S.w)-X(0),plotH-YV(S.V0));
+  g.font="11px ui-monospace,Menlo,monospace";
+  if(!S.log){
+    g.setLineDash([6,5]);g.strokeStyle=C.amber;g.lineWidth=1.3;
+    g.beginPath();g.moveTo(0,YV(S.E));g.lineTo(W,YV(S.E));g.stroke();g.setLineDash([]);
+    g.fillStyle=C.amber;g.textAlign="left";g.fillText("E",6,YV(S.E)-5);
+  }
+  g.fillStyle=C.mut;g.textAlign="center";g.fillText("V₀",X(XB+S.w/2),YV(S.V0)-6);
+
+  let pR=0,pT=0,nrm=0,maxP=1e-12;
+  const P=new Float64Array(N);
+  for(let i=0;i<N;i++){
+    P[i]=psiR[i]*psiR[i]+psiI[i]*psiI[i];
+    nrm+=P[i]*DX;
+    if(i*DX<XB)pR+=P[i]*DX;
+    if(i*DX>XB+S.w)pT+=P[i]*DX;
+    if(P[i]>maxP)maxP=P[i];
+  }
+
+  if(!S.log){
+    /* Re ψ faint */
+    const AMP=plotH*0.30/Math.sqrt(maxP);
+    g.strokeStyle=C.blueA+".45)";g.lineWidth=1.2;g.beginPath();
+    for(let i=0;i<N;i++){
+      const y=plotH*0.62-psiR[i]*AMP*0.8;
+      i?g.lineTo(X(i*DX),y):g.moveTo(X(i*DX),y);
+    }
+    g.stroke();
+    /* |ψ|² */
+    g.strokeStyle=C.acc;g.lineWidth=2.2;g.beginPath();
+    for(let i=0;i<N;i++){
+      const y=plotH-6-(P[i]/maxP)*plotH*0.55;
+      i?g.lineTo(X(i*DX),y):g.moveTo(X(i*DX),y);
+    }
+    g.stroke();
+    g.fillStyle=C.acc;g.textAlign="left";g.fillText("|ψ|²  (linear axis)",8,16);
+  }else{
+    /* log axis */
+    const LMIN=-9,LMAX=0.5;
+    const YL=l=>plotH-6-((l-LMIN)/(LMAX-LMIN))*plotH*0.86;
+    g.strokeStyle=C.grid;
+    for(let l=-8;l<=0;l+=2){
+      g.beginPath();g.moveTo(0,YL(l));g.lineTo(W,YL(l));g.stroke();
+      g.fillStyle=C.dim;g.textAlign="left";g.fillText("10"+(l===0?"⁰":"⁻"+(-l)),4,YL(l)-3);
+    }
+    g.strokeStyle=C.acc;g.lineWidth=2.2;g.beginPath();let pen=false;
+    for(let i=0;i<N;i++){
+      const l=Math.log10(P[i]/maxP+1e-12);
+      if(l<LMIN){pen=false;continue;}
+      const y=YL(Math.min(LMAX,l));
+      pen?g.lineTo(X(i*DX),y):g.moveTo(X(i*DX),y);pen=true;
+    }
+    g.stroke();
+    /* κ guide line inside the barrier */
+    if(S.V0>S.E){
+      const kap=Math.sqrt(2*(S.V0-S.E));
+      const i0=Math.round(XB/DX);
+      const l0=Math.log10(P[i0]/maxP+1e-12);
+      const slope=-2*kap/Math.LN10;             // d(log10 P)/dx
+      g.setLineDash([5,4]);g.strokeStyle=C.hot;g.lineWidth=1.6;
+      g.beginPath();
+      g.moveTo(X(XB),YL(l0));
+      g.lineTo(X(XB+S.w),YL(l0+slope*S.w));
+      g.stroke();g.setLineDash([]);
+      g.fillStyle=C.hot;g.textAlign="left";
+      g.fillText("slope −2κ",X(XB+S.w)+6,YL(l0+slope*S.w));
+    }
+    g.fillStyle=C.acc;g.textAlign="left";g.fillText("log₁₀ |ψ|²  — exponential decay = straight line",8,16);
+  }
+  g.fillStyle=C.dim;g.textAlign="center";g.fillText("x",W/2,H-8);
+
+  /* readouts */
+  const under=S.V0>S.E;
+  const kap=under?Math.sqrt(2*(S.V0-S.E)):NaN;
+  const Tp=under?Math.exp(-2*kap*S.w):NaN;
+  document.getElementById("oK").textContent=under?kap.toFixed(3):"— (over the barrier)";
+  document.getElementById("oTp").textContent=under?fmtE(Tp):"large";
+  document.getElementById("oTm").textContent=fmtE(pT);
+  document.getElementById("oRm").textContent=fmtE(pR);
+  document.getElementById("oLive").textContent="T = "+fmtE(pT);
+}
+
+function loop(){
+  if(S.run)for(let s=0;s<SUB;s++)step();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function rebuild(){buildPotential();buildCN();}
+document.getElementById("sE").addEventListener("input",e=>{
+  S.E=e.target.value/100;document.getElementById("rE").textContent="E = "+S.E.toFixed(2);
+  launch();});
+document.getElementById("sV").addEventListener("input",e=>{
+  S.V0=e.target.value/100;document.getElementById("rV").textContent="V₀ = "+S.V0.toFixed(2);
+  rebuild();});
+document.getElementById("sW").addEventListener("input",e=>{
+  S.w=e.target.value/10;document.getElementById("rW").textContent="w = "+S.w.toFixed(1);
+  rebuild();});
+document.getElementById("tLog").addEventListener("input",e=>{S.log=e.target.checked;});
+document.getElementById("bRe").addEventListener("click",()=>{launch();});
+document.getElementById("bGo").addEventListener("click",function(){
+  S.run=!S.run;this.textContent=S.run?"Pause":"Run";});
+window.addEventListener("resize",draw);
+rebuild();launch();loop();
+</script>
+</body>
+</html>

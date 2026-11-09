@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Change of Coordinates and the Jacobian · Physics Intuition App</title>
+<script src="theme.js"></script>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:6px;margin-bottom:10px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:14px var(--mono);padding:8px 10px;min-width:0}
+.fin input:focus{outline:none;border-color:var(--acc)}
+.fin button{background:var(--panel2);border:1px solid var(--acc);color:var(--acc);
+  font:600 12px var(--mono);padding:0 12px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+/* added: the two custom-map boxes carry a small prefix */
+.fin .pre{font:12px var(--mono);color:var(--mut);align-self:center;white-space:nowrap;min-width:64px}
+.cur{font-family:var(--mono);font-size:12.5px;color:var(--ink);margin:2px 0 10px;min-height:20px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · THE JACOBIAN · MODULE 29 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Change of Coordinates and the Jacobian</h1>
+    <p class="sub">Left: the (u, v) plane with a square grid and a little cell you can drag. Right:
+    where the map (u, v) → (x, y) sends that grid and that cell. Press Replay to watch the grid
+    bend from the identity into the chosen map. The two arrows are h·∂(x,y)/∂u and h·∂(x,y)/∂v;
+    the parallelogram they span is the linear approximation of the bent cell, and its area is
+    |det J|·h². Shrink h and watch the true area and |det J|·h² agree.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx">\(\displaystyle J=\frac{\partial(x,y)}{\partial(u,v)}=\begin{pmatrix}x_u & x_v\\ y_u & y_v\end{pmatrix} \)
+        <span class="mutx">· \(\displaystyle dA = |\det J|\,du\,dv \) · polar: \(\displaystyle \det J = r \), so \(\displaystyle dA = r\,dr\,d\theta \)</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>The map (u, v) → (x, y)</h3>
+        <div class="seg">
+          <button data-m="polar" class="on">polar (r, θ)</button>
+          <button data-m="shear">shear</button>
+          <button data-m="square">x = u²</button>
+          <button data-m="wavy">wavy</button>
+          <button data-m="cust">custom</button>
+        </div>
+        <div class="fin"><span class="pre">x(u,v) =</span><input type="text" id="fX" value="u^2 - v^2" spellcheck="false"></div>
+        <div class="fin"><span class="pre">y(u,v) =</span><input type="text" id="fY" value="2 u v" spellcheck="false">
+          <button id="bGo">Map</button></div>
+        <div class="err" id="err"></div>
+        <div class="cur" id="mEq"></div>
+        <div class="ctl"><label><span>corner u₀ (drag the cell)</span><b id="rU">u₀ = 1.20</b></label>
+          <input type="range" id="sU" min="0" max="200" value="120"></div>
+        <div class="ctl"><label><span>corner v₀</span><b id="rV">v₀ = 0.80</b></label>
+          <input type="range" id="sV" min="0" max="628" value="80"></div>
+        <div class="ctl"><label><span>cell side h</span><b id="rH">h = 0.40</b></label>
+          <input type="range" id="sH" min="2" max="100" value="40"></div>
+        <button class="btn" id="bRe">&#8635; Replay the morph</button>
+        <p class="hint">Custom: two expressions in <b>u</b> and <b>v</b>. Supported: + &minus; * / ^ ( ),
+        implicit products like 2uv, sin cos tan atan exp ln sqrt abs sinh cosh tanh, pi and e.
+        The default z = (u + iv)² has det J = 4(u² + v²).</p>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"Changing variables just renames dx dy as du dv." It does not: a small du × dv cell is
+        sent to a bent patch whose area is |det J| du dv, and that factor is what keeps
+        ∬ f dA honest. The famous r in r dr dθ is not a convention or a decoration; it is exactly
+        det J of the polar map, and it goes to zero at the pole because the map squashes a whole
+        edge of the (r, θ) rectangle into one point. Right now
+        <span class="live" id="oLive">?</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: the Jacobian by central differences (step 10⁻⁴) of the map actually drawn (the morph
+    (1&minus;s)·identity + s·map, so at rest it is the chosen map); det J = x_u y_v &minus; x_v y_u;
+    the true image-cell area by the shoelace formula on the mapped square boundary sampled at 160
+    points; the cell tint scales |det J| against its maximum over the visible grid. One file of
+    vanilla JavaScript, no libraries beyond the shared KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>{if(!isFinite(v))return "—";const s=Math.abs(v).toFixed(d);return (v<0&&+s!==0?"−":"")+s;};
+let MONO="11px ui-monospace,Menlo,monospace";   /* 9px on a phone-width canvas, set in draw() */
+const setFont=W=>{MONO=(W<560?"9px":"11px")+" ui-monospace,Menlo,monospace";return W<560;};
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    `<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+
+/* ---------- expression parser (taylor.html's, with two variables u and v) ----------
+   parse(text, VARS) accepts every name in VARS as a variable; evalNum(ast, env) reads env[name]. */
+function tokenize(s){
+  const T=[];let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(c===" "||c==="\t"){i++;continue;}
+    if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      const v=parseFloat(s.slice(i,j));if(!isFinite(v))throw new Error("bad number");
+      T.push({t:"num",v});i=j;continue;}
+    if(/[a-zA-Z_]/.test(c)){let j=i;while(j<s.length&&/[a-zA-Z_]/.test(s[j]))j++;
+      T.push({t:"id",v:s.slice(i,j)});i=j;continue;}
+    if("+-*/^(),".includes(c)){T.push({t:c});i++;continue;}
+    throw new Error("unexpected character '"+c+"'");
+  }
+  return T;
+}
+const FNS=["sin","cos","tan","atan","exp","ln","log","sqrt","abs","sinh","cosh","tanh"];
+function parse(s,VARS){
+  const T=tokenize(s);let p=0;
+  const peek=()=>T[p];
+  const eat=t=>{if(!T[p]||T[p].t!==t)throw new Error("expected '"+t+"'");return T[p++];};
+  function expr(){let a=term();
+    while(peek()&&(peek().t==="+"||peek().t==="-")){const op=T[p++].t;a={t:"bin",op,a,b:term()};}
+    return a;}
+  function term(){let a=factor();
+    for(;;){const n=peek();
+      if(n&&(n.t==="*"||n.t==="/")){const op=T[p++].t;a={t:"bin",op,a,b:factor()};}
+      else if(n&&(n.t==="num"||n.t==="id"||n.t==="(")){a={t:"bin",op:"*",a,b:factor()};}
+      else break;}
+    return a;}
+  function factor(){
+    if(peek()&&peek().t==="-"){p++;return{t:"neg",a:factor()};}
+    if(peek()&&peek().t==="+"){p++;return factor();}
+    return power();}
+  function power(){const a=atom();
+    if(peek()&&peek().t==="^"){p++;return{t:"bin",op:"^",a,b:factor()};}
+    return a;}
+  function atom(){
+    const n=peek();
+    if(!n)throw new Error("expression ends too early");
+    if(n.t==="num"){p++;return{t:"num",v:n.v};}
+    if(n.t==="("){p++;const e=expr();eat(")");return e;}
+    if(n.t==="id"){p++;const raw=n.v,name=raw.toLowerCase();
+      if(peek()&&peek().t==="("){
+        if(!FNS.includes(name))throw new Error("unknown function '"+name+"'");
+        p++;const e=expr();eat(")");return{t:"call",fn:name,a:e};}
+      if(VARS.includes(name))return{t:"var",n:name};
+      if(name==="pi")return{t:"num",v:Math.PI};
+      if(name==="e")return{t:"num",v:Math.E};
+      if(FNS.includes(name))throw new Error("'"+name+"' needs parentheses: "+name+"(u)");
+      /* "uv" typed without a space: split a run of variable letters into a product */
+      if([...name].every(ch=>VARS.includes(ch))){
+        let node={t:"var",n:name[0]};
+        for(let i=1;i<name.length;i++)node={t:"bin",op:"*",a:node,b:{t:"var",n:name[i]}};
+        return node;}
+      throw new Error("unknown name '"+raw+"' (the variables are u and v)");}
+    throw new Error("unexpected '"+n.t+"'");}
+  const e=expr();
+  if(p<T.length)throw new Error("could not parse the whole expression");
+  return e;
+}
+const NF={sin:Math.sin,cos:Math.cos,tan:Math.tan,atan:Math.atan,exp:Math.exp,ln:Math.log,
+  log:Math.log,sqrt:Math.sqrt,abs:Math.abs,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh};
+function evalNum(n,env){
+  switch(n.t){
+    case "num":return n.v;
+    case "var":return env[n.n];
+    case "neg":return -evalNum(n.a,env);
+    case "bin":{const a=evalNum(n.a,env),b=evalNum(n.b,env);
+      return n.op==="+"?a+b:n.op==="-"?a-b:n.op==="*"?a*b:n.op==="/"?a/b:Math.pow(a,b);}
+    case "call":return NF[n.fn](evalNum(n.a,env));
+  }
+}
+
+/* ---------- the maps ---------- */
+const TAU=2*Math.PI;
+const MAPS={
+  polar:{tex:"x = u\\cos v,\\ y = u\\sin v \\quad (u = r,\\ v = \\theta)",f:(u,v)=>[u*Math.cos(v),u*Math.sin(v)],
+    uR:[0,2],vR:[0,TAU],du:0.25,dv:Math.PI/8,u0:1.2,v0:0.8,h:0.4},
+  shear:{tex:"x = u + 0.5v,\\ y = v",f:(u,v)=>[u+0.5*v,v],
+    uR:[-2,2],vR:[-2,2],du:0.5,dv:0.5,u0:0.5,v0:0.5,h:0.5},
+  square:{tex:"x = u^2,\\ y = v",f:(u,v)=>[u*u,v],
+    uR:[0,2],vR:[-2,2],du:0.25,dv:0.5,u0:1.2,v0:0.5,h:0.4},
+  wavy:{tex:"x = u + 0.3\\sin v,\\ y = v + 0.3\\sin u",f:(u,v)=>[u+0.3*Math.sin(v),v+0.3*Math.sin(u)],
+    uR:[-3,3],vR:[-3,3],du:0.5,dv:0.5,u0:1,v0:1,h:0.6},
+  cust:{tex:"x = x(u,v),\\ y = y(u,v)",f:null,
+    uR:[-2,2],vR:[-2,2],du:0.5,dv:0.5,u0:0.6,v0:0.4,h:0.4}
+};
+const S={m:"polar",u0:1.2,v0:0.8,h:0.4,t:0,last:0,running:false,s:1,
+  astX:null,astY:null,err:"",bb:null,viewL:null,divider:0,drag:false};
+function F(u,v){
+  if(S.m==="cust"){
+    if(!S.astX||!S.astY)return[u,v];
+    try{const x=evalNum(S.astX,{u,v}),y=evalNum(S.astY,{u,v});return[isFinite(x)?x:NaN,isFinite(y)?y:NaN];}
+    catch(e){return[NaN,NaN];}
+  }
+  return MAPS[S.m].f(u,v);
+}
+const G=(u,v,s)=>{const p=F(u,v);return[(1-s)*u+s*p[0],(1-s)*v+s*p[1]];};
+const M=()=>MAPS[S.m];
+
+/* bounding box of the (x, y) picture: identity grid ∪ mapped grid, clamped so a wild custom map stays sane */
+function bbox(s){
+  const m=M();let lo=[Infinity,Infinity],hi=[-Infinity,-Infinity];
+  const take=p=>{if(!isFinite(p[0])||!isFinite(p[1]))return;
+    lo[0]=Math.min(lo[0],Math.max(-40,p[0]));lo[1]=Math.min(lo[1],Math.max(-40,p[1]));
+    hi[0]=Math.max(hi[0],Math.min(40,p[0]));hi[1]=Math.max(hi[1],Math.min(40,p[1]));};
+  for(let i=0;i<=24;i++)for(let j=0;j<=24;j++)
+    take(G(m.uR[0]+(m.uR[1]-m.uR[0])*i/24,m.vR[0]+(m.vR[1]-m.vR[0])*j/24,s));
+  if(!isFinite(lo[0])){lo=[m.uR[0],m.vR[0]];hi=[m.uR[1],m.vR[1]];}
+  if(hi[0]-lo[0]<1e-6){lo[0]-=0.5;hi[0]+=0.5;}
+  if(hi[1]-lo[1]<1e-6){lo[1]-=0.5;hi[1]+=0.5;}
+  S.bb={lo,hi};
+}
+function mkView(x0,y0,w,h,lo,hi,pad){
+  const sc=Math.min((w-2*pad)/(hi[0]-lo[0]),(h-2*pad)/(hi[1]-lo[1]));
+  const cx=x0+w/2,cy=y0+h/2,mx=(lo[0]+hi[0])/2,my=(lo[1]+hi[1])/2;
+  return{X:x=>cx+(x-mx)*sc,Y:y=>cy-(y-my)*sc,XI:px=>mx+(px-cx)/sc,YI:py=>my-(py-cy)/sc,sc};
+}
+function jac(u,v,s){
+  const e=1e-4;
+  const a=G(u+e,v,s),b=G(u-e,v,s),c=G(u,v+e,s),d=G(u,v-e,s);
+  const xu=(a[0]-b[0])/(2*e),yu=(a[1]-b[1])/(2*e),xv=(c[0]-d[0])/(2*e),yv=(c[1]-d[1])/(2*e);
+  return{xu,xv,yu,yv,det:xu*yv-xv*yu};
+}
+function cellPoly(s){
+  const {u0,v0,h}=S,P=[],n=40;
+  for(let i=0;i<n;i++)P.push(G(u0+h*i/n,v0,s));
+  for(let i=0;i<n;i++)P.push(G(u0+h,v0+h*i/n,s));
+  for(let i=0;i<n;i++)P.push(G(u0+h-h*i/n,v0+h,s));
+  for(let i=0;i<n;i++)P.push(G(u0,v0+h-h*i/n,s));
+  return P;
+}
+function shoelace(P){let A=0;for(let i=0;i<P.length;i++){const p=P[i],q=P[(i+1)%P.length];A+=p[0]*q[1]-q[0]*p[1];}return Math.abs(A)/2;}
+const ease=x=>x<=0?0:x>=1?1:x*x*(3-2*x);
+
+function arrow(g,x0,y0,x1,y1,col,w){
+  const dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy);if(L<1)return;
+  const ux=dx/L,uy=dy/L,hl=Math.min(10,L*0.4);
+  g.strokeStyle=col;g.fillStyle=col;g.lineWidth=w;
+  g.beginPath();g.moveTo(x0,y0);g.lineTo(x1-ux*hl*0.6,y1-uy*hl*0.6);g.stroke();
+  g.beginPath();g.moveTo(x1,y1);g.lineTo(x1-ux*hl-uy*hl*0.5,y1-uy*hl+ux*hl*0.5);
+  g.lineTo(x1-ux*hl+uy*hl*0.5,y1-uy*hl-ux*hl*0.5);g.closePath();g.fill();
+}
+function setEq(){
+  const el=document.getElementById("mEq");
+  el.innerHTML="\\( "+M().tex+" \\)";
+  if(window.piaRenderMath)window.piaRenderMath(el);
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  const nar=setFont(W);
+  const m=M(),s=S.s,div=Math.round(W*0.5);S.divider=div;
+  const top=30;
+  const L=mkView(0,top,div-8,H-top-30,[m.uR[0],m.vR[0]],[m.uR[1],m.vR[1]],28);S.viewL=L;
+  bbox(s);
+  const R=mkView(div+8,top,W-div-8,H-top-30,S.bb.lo,S.bb.hi,28);
+  g.strokeStyle=C.hair;g.lineWidth=1;g.beginPath();g.moveTo(div,0);g.lineTo(div,H);g.stroke();
+  g.font=MONO;g.fillStyle=C.mut;g.textAlign="left";
+  g.fillText(nar?"(u, v) · drag the cell":"(u, v) plane · drag the cell",12,18);
+  g.fillText((nar?"(x, y) image":"(x, y) plane · the image")+(s<1?(nar?" · s = ":"  · morph s = ")+fmt(s):""),div+16,18);
+
+  /* ---- left: regular grid ---- */
+  g.save();g.beginPath();g.rect(0,top,div-2,H-top);g.clip();
+  const nu=Math.round((m.uR[1]-m.uR[0])/m.du),nv=Math.round((m.vR[1]-m.vR[0])/m.dv);
+  g.lineWidth=1;
+  for(let i=0;i<=nu;i++){const u=m.uR[0]+m.du*i;const ax=Math.abs(u)<1e-9;
+    g.strokeStyle=ax?C.axis:C.accA+"0.45)";g.lineWidth=ax?1.6:1;
+    g.beginPath();g.moveTo(L.X(u),L.Y(m.vR[0]));g.lineTo(L.X(u),L.Y(m.vR[1]));g.stroke();}
+  for(let j=0;j<=nv;j++){const v=m.vR[0]+m.dv*j;const ax=Math.abs(v)<1e-9;
+    g.strokeStyle=ax?C.axis:C.accA+"0.45)";g.lineWidth=ax?1.6:1;
+    g.beginPath();g.moveTo(L.X(m.uR[0]),L.Y(v));g.lineTo(L.X(m.uR[1]),L.Y(v));g.stroke();}
+  g.fillStyle=C.dim;g.textAlign="center";
+  for(let i=0;i<=nu;i+=2){const u=m.uR[0]+m.du*i;g.fillText(fmt(u,1),L.X(u),L.Y(m.vR[0])+14);}
+  g.textAlign="right";
+  for(let j=0;j<=nv;j+=2){const v=m.vR[0]+m.dv*j;g.fillText(S.m==="polar"?fmt(v/Math.PI,2)+"π":fmt(v,1),L.X(m.uR[0])-6,L.Y(v)+4);}
+  g.fillStyle=C.mut;g.textAlign="center";g.fillText(S.m==="polar"?"u = r":"u",L.X((m.uR[0]+m.uR[1])/2),L.Y(m.vR[0])+28);
+  g.textAlign="left";g.fillText(S.m==="polar"?"v = θ":"v",L.X(m.uR[0])-4,L.Y(m.vR[1])-8);
+  /* the cell */
+  const{u0,v0,h}=S;
+  g.fillStyle=C.amberA+"0.35)";g.strokeStyle=C.amber;g.lineWidth=2;
+  g.beginPath();g.rect(L.X(u0),L.Y(v0+h),L.X(u0+h)-L.X(u0),L.Y(v0)-L.Y(v0+h));g.fill();g.stroke();
+  g.fillStyle=C.amber;g.beginPath();g.arc(L.X(u0),L.Y(v0),4,0,TAU);g.fill();
+  g.fillStyle=C.ink;g.textAlign="left";g.fillText("h = "+fmt(h),L.X(u0+h)+5,L.Y(v0+h/2)+4);
+  g.restore();
+
+  /* ---- right: the image ---- */
+  g.save();g.beginPath();g.rect(div+2,top,W-div-2,H-top);g.clip();
+  /* x, y axes of the target plane */
+  g.strokeStyle=C.axis;g.lineWidth=1;g.setLineDash([2,4]);
+  g.beginPath();g.moveTo(R.X(0),top);g.lineTo(R.X(0),H);g.stroke();
+  g.beginPath();g.moveTo(div,R.Y(0));g.lineTo(W,R.Y(0));g.stroke();g.setLineDash([]);
+  g.fillStyle=C.dim;g.textAlign="center";
+  const xs=Math.max(1,Math.round((S.bb.hi[0]-S.bb.lo[0])/6));
+  for(let x=Math.ceil(S.bb.lo[0]);x<=S.bb.hi[0];x+=xs)if(x)g.fillText(x,R.X(x),R.Y(0)+13);
+  g.textAlign="right";
+  for(let y=Math.ceil(S.bb.lo[1]);y<=S.bb.hi[1];y+=xs)if(y)g.fillText(y,R.X(0)-5,R.Y(y)+4);
+  g.fillStyle=C.mut;g.textAlign="left";g.fillText("x",Math.min(W-14,R.X(S.bb.hi[0])+6),R.Y(0)+13);g.fillText("y",R.X(0)+5,top+14);
+  /* the bent grid */
+  const poly=(pts,col,w)=>{g.strokeStyle=col;g.lineWidth=w;g.beginPath();let pen=false;
+    for(const p of pts){if(!isFinite(p[0])||!isFinite(p[1])){pen=false;continue;}
+      const x=R.X(p[0]),y=R.Y(p[1]);pen?g.lineTo(x,y):g.moveTo(x,y);pen=true;}g.stroke();};
+  const K=48;
+  for(let i=0;i<=nu;i++){const u=m.uR[0]+m.du*i,pts=[];
+    for(let k=0;k<=K;k++)pts.push(G(u,m.vR[0]+(m.vR[1]-m.vR[0])*k/K,s));
+    poly(pts,C.acc,Math.abs(u)<1e-9?1.8:1);}
+  for(let j=0;j<=nv;j++){const v=m.vR[0]+m.dv*j,pts=[];
+    for(let k=0;k<=K;k++)pts.push(G(m.uR[0]+(m.uR[1]-m.uR[0])*k/K,v,s));
+    poly(pts,C.acc,Math.abs(v)<1e-9?1.8:1);}
+  /* |det J| scale over the grid, for the tint */
+  let dmax=1e-9;
+  for(let i=0;i<=8;i++)for(let j=0;j<=8;j++){
+    const d=Math.abs(jac(m.uR[0]+(m.uR[1]-m.uR[0])*i/8,m.vR[0]+(m.vR[1]-m.vR[0])*j/8,s).det);
+    if(isFinite(d)&&d>dmax)dmax=d;}
+  /* the image cell */
+  const J=jac(u0,v0,s),P=cellPoly(s),Aex=shoelace(P),Alin=Math.abs(J.det)*h*h;
+  const tint=Math.min(1,Math.abs(J.det)/dmax);
+  g.beginPath();P.forEach((p,i)=>{const x=R.X(p[0]),y=R.Y(p[1]);i?g.lineTo(x,y):g.moveTo(x,y);});g.closePath();
+  g.fillStyle=C.amberA+"0.35)";g.fill();
+  g.fillStyle=C.hotA+(0.75*tint).toFixed(2)+")";g.fill();
+  g.strokeStyle=C.amber;g.lineWidth=2;g.stroke();
+  /* tangent vectors and their parallelogram */
+  const p0=G(u0,v0,s),pu=[p0[0]+h*J.xu,p0[1]+h*J.yu],pv=[p0[0]+h*J.xv,p0[1]+h*J.yv],puv=[pu[0]+h*J.xv,pu[1]+h*J.yv];
+  g.strokeStyle=C.ink;g.lineWidth=1;g.setLineDash([4,3]);
+  g.beginPath();g.moveTo(R.X(p0[0]),R.Y(p0[1]));g.lineTo(R.X(pu[0]),R.Y(pu[1]));g.lineTo(R.X(puv[0]),R.Y(puv[1]));g.lineTo(R.X(pv[0]),R.Y(pv[1]));g.closePath();g.stroke();g.setLineDash([]);
+  arrow(g,R.X(p0[0]),R.Y(p0[1]),R.X(pu[0]),R.Y(pu[1]),C.amber,2.2);
+  arrow(g,R.X(p0[0]),R.Y(p0[1]),R.X(pv[0]),R.Y(pv[1]),C.blue,2.2);
+  g.fillStyle=C.ink;g.beginPath();g.arc(R.X(p0[0]),R.Y(p0[1]),3.5,0,TAU);g.fill();
+  g.font=MONO;
+  const lab=(tip,col,txt)=>{const dx=R.X(tip[0])-R.X(p0[0]),dy=R.Y(tip[1])-R.Y(p0[1]),n=Math.hypot(dx,dy)||1;
+    const ux=dx/n,uy=dy/n;g.fillStyle=col;g.textAlign=ux<-0.2?"right":"left";
+    g.fillText(txt,R.X(tip[0])+ux*8,R.Y(tip[1])+uy*8+4);};
+  lab(pu,C.amber,"h·(x_u, y_u)");lab(pv,C.blue,"h·(x_v, y_v)");
+  g.restore();
+  /* legend */
+  g.textAlign="right";g.fillStyle=C.amber;g.fillText(nar?"cell tint ∝ |det J|":"cell: true image, tinted by |det J| (redder = more)",W-12,H-26);
+  g.fillStyle=C.ink;g.fillText(nar?"dashed: area |det J|·h²":"dashed: tangent parallelogram, area |det J|·h²",W-12,H-12);
+
+  /* ---- solved live ---- */
+  const list=[
+    ["corner (u₀, v₀), h","("+fmt(u0)+", "+fmt(v0)+"), "+fmt(h)],
+    ["corner image (x, y)","("+fmt(p0[0],3)+", "+fmt(p0[1],3)+")"],
+    ["J row 1:  x_u   x_v",fmt(J.xu,3)+"   "+fmt(J.xv,3),"amber"],
+    ["J row 2:  y_u   y_v",fmt(J.yu,3)+"   "+fmt(J.yv,3),"blue"],
+    ["det J = x_u y_v − x_v y_u",fmt(J.det,4),"hot"]];
+  if(S.m==="polar"&&s>=1)list.push(["polar check: det J = r = u₀",fmt(u0,4),"hot"]);
+  if(S.m==="cust"&&s>=1&&S.astX)list.push(["(default custom: 4(u₀² + v₀²))",fmt(4*(u0*u0+v0*v0),4)]);
+  list.push(["true cell area (shoelace)",fmt(Aex,5),"acc"]);
+  list.push(["|det J|·h²",fmt(Alin,5),"amber"]);
+  list.push(["ratio, → 1 as h → 0",fmt(Aex/Alin,4),"blue"]);
+  rows(list);
+  document.getElementById("oLive").textContent="det J = "+fmt(J.det,4)+(S.m==="polar"&&s>=1?" = r":"");
+  document.getElementById("err").textContent=S.err;
+}
+
+/* ---------- morph animation ---------- */
+let raf=0;
+const DUR=1.6;
+function loop(ts){
+  if(!S.last)S.last=ts;
+  S.t+=Math.min(0.05,(ts-S.last)/1000);
+  S.last=ts;
+  S.s=ease(S.t/DUR);
+  draw();
+  if(S.t<DUR)raf=requestAnimationFrame(loop);else{S.s=1;S.running=false;draw();}
+}
+function reset(){S.t=0;S.last=0;S.s=0;if(raf)cancelAnimationFrame(raf);raf=0;S.running=false;}
+function start(){if(!S.running){S.running=true;raf=requestAnimationFrame(loop);}}
+
+/* ---------- controls ---------- */
+const el=id=>document.getElementById(id);
+function setSliders(){
+  const m=M();
+  el("sU").min=Math.round(m.uR[0]*100);el("sU").max=Math.round(m.uR[1]*100);
+  el("sV").min=Math.round(m.vR[0]*100);el("sV").max=Math.round(m.vR[1]*100);
+  clampCell();
+  el("sU").value=Math.round(S.u0*100);el("sV").value=Math.round(S.v0*100);el("sH").value=Math.round(S.h*100);
+  el("rU").textContent="u₀ = "+S.u0.toFixed(2);el("rV").textContent="v₀ = "+S.v0.toFixed(2);el("rH").textContent="h = "+S.h.toFixed(2);
+}
+function clampCell(){
+  const m=M();
+  S.h=Math.min(S.h,m.uR[1]-m.uR[0],m.vR[1]-m.vR[0]);
+  S.u0=Math.max(m.uR[0],Math.min(m.uR[1]-S.h,S.u0));
+  S.v0=Math.max(m.vR[0],Math.min(m.vR[1]-S.h,S.v0));
+}
+function choose(k){
+  S.m=k;const m=M();S.u0=m.u0;S.v0=m.v0;S.h=m.h;
+  document.querySelectorAll(".seg button").forEach(x=>x.classList.toggle("on",x.dataset.m===k));
+  setSliders();setEq();reset();start();
+}
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",function(){
+  if(this.dataset.m==="cust")applyCustom();else{S.err="";choose(this.dataset.m);}
+}));
+function applyCustom(){
+  try{S.astX=parse(el("fX").value,["u","v"]);S.astY=parse(el("fY").value,["u","v"]);S.err="";}
+  catch(e){S.astX=S.astY=null;S.err=e.message;}
+  choose("cust");
+}
+el("bGo").addEventListener("click",applyCustom);
+["fX","fY"].forEach(id=>el(id).addEventListener("keydown",e=>{if(e.key==="Enter")applyCustom();}));
+function bind(id,set){el(id).addEventListener("input",e=>{set(+e.target.value);clampCell();
+  el("rU").textContent="u₀ = "+S.u0.toFixed(2);el("rV").textContent="v₀ = "+S.v0.toFixed(2);el("rH").textContent="h = "+S.h.toFixed(2);
+  draw();});}
+bind("sU",v=>{S.u0=v/100;});
+bind("sV",v=>{S.v0=v/100;});
+bind("sH",v=>{S.h=v/100;});
+el("bRe").addEventListener("click",()=>{reset();start();});
+
+/* drag the cell in the left plane */
+function toLogical(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+function moveCell(e){
+  const p=toLogical(e),Lv=S.viewL;if(!Lv)return;
+  S.u0=Lv.XI(p.x)-S.h/2;S.v0=Lv.YI(p.y)-S.h/2;clampCell();
+  el("sU").value=Math.round(S.u0*100);el("sV").value=Math.round(S.v0*100);
+  el("rU").textContent="u₀ = "+S.u0.toFixed(2);el("rV").textContent="v₀ = "+S.v0.toFixed(2);
+  draw();
+}
+cv.addEventListener("pointerdown",e=>{
+  const p=toLogical(e);if(p.x>S.divider)return;
+  S.drag=true;cv.setPointerCapture(e.pointerId);moveCell(e);
+});
+cv.addEventListener("pointermove",e=>{if(S.drag)moveCell(e);});
+cv.addEventListener("pointerup",()=>{S.drag=false;});
+cv.addEventListener("pointercancel",()=>{S.drag=false;});
+window.addEventListener("resize",draw);
+setSliders();setEq();reset();start();
+</script>
+</body>
+</html>

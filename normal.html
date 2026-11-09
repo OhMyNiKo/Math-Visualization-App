@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>The Normal Distribution and Standardisation · Physics Intuition App</title>
+<script src="theme.js"></script>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:6px;margin-bottom:10px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:14px var(--mono);padding:8px 10px;min-width:0}
+.fin input:focus{outline:none;border-color:var(--acc)}
+.fin button{background:var(--panel2);border:1px solid var(--acc);color:var(--acc);
+  font:600 12px var(--mono);padding:0 12px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · NORMAL DISTRIBUTION · MODULE 24 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>The Normal Distribution and Standardisation</h1>
+    <p class="sub">Slide the mean and the standard deviation and watch the bell on the left slide and
+    stretch while the standard bell on the right never moves. Drag the two bounds \(x_1 &lt; x_2\) on
+    either plot: the shaded probability is computed under both curves and is always the same number.
+    Press Standardise to see \(X\) squashed onto \(Z\).</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx">\(\displaystyle Z = \frac{X-\mu}{\sigma},\quad f(x)=\frac{1}{\sigma\sqrt{2\pi}}\,e^{-\frac{(x-\mu)^2}{2\sigma^2}} \)
+        <span class="mutx">· \(\displaystyle P(x_1 &lt; X &lt; x_2) = \Phi(z_2)-\Phi(z_1) \)</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="seg">
+          <button data-k="between" class="on">P(x&#8321; &lt; X &lt; x&#8322;)</button>
+          <button data-k="below">P(X &lt; x&#8322;)</button>
+          <button data-k="above">P(X &gt; x&#8321;)</button>
+        </div>
+        <div class="ctl"><label><span>mean</span><b id="rMu">&mu; = 1.00</b></label>
+          <input type="range" id="sMu" min="-500" max="500" value="100"></div>
+        <div class="ctl"><label><span>standard deviation</span><b id="rSg">&sigma; = 1.50</b></label>
+          <input type="range" id="sSg" min="30" max="300" value="150"></div>
+        <div class="ctl"><label><span>lower bound (drag it)</span><b id="rX1">x&#8321; = &minus;0.50</b></label>
+          <input type="range" id="sX1" min="-900" max="900" value="-50" step="5"></div>
+        <div class="ctl"><label><span>upper bound (drag it)</span><b id="rX2">x&#8322; = 3.00</b></label>
+          <input type="range" id="sX2" min="-900" max="900" value="300" step="5"></div>
+        <button class="btn" id="bRe">&#8635; Standardise (replay)</button>
+        <p class="hint">Amber marks: &mu;&plusmn;&sigma; holds 68.3%, &mu;&plusmn;2&sigma; 95.4%, &mu;&plusmn;3&sigma; 99.7%.
+        Both plots share one vertical scale, so heights are comparable.</p>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"A larger &sigma; just makes the bell wider." It cannot: the area under any density is
+        exactly 1, so when &sigma; grows the peak \( \tfrac{1}{\sigma\sqrt{2\pi}} \) must fall, and
+        when &sigma; shrinks it must rise. And the standard table is not a different distribution:
+        standardising only relabels the axis, so the area under \(Z\) between \(z_1\) and \(z_2\) is
+        the very same probability as under \(X\): right now
+        <span class="live" id="oLive">?</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: \( \Phi(z)=\tfrac12\,\mathrm{erfc}(-z/\sqrt2) \), with erfc from the exponentially
+    weighted power series \( \mathrm{erf}(x)=\tfrac{2}{\sqrt\pi}e^{-x^2}\sum 2^n x^{2n+1}/(2n+1)!! \)
+    for \(|x|&lt;2\) and the Laplace continued fraction (100 convergents) beyond: relative error below
+    \(10^{-13}\) in both tails, absolute error below \(10^{-15}\), better than any printed table.
+    The morph interpolates \((\mu,\sigma)\to(0,1)\) while holding the bounds at fixed \(z\), so the
+    shaded area is preserved exactly. One file of vanilla JavaScript, no libraries beyond the shared
+    KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>!isFinite(v)?"—":(v<0?"−":"")+Math.abs(v).toFixed(d);
+const MONO="11px ui-monospace,Menlo,monospace";
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    `<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+
+/* ---------- erf, erfc, Φ ---------- */
+const RPI=1/Math.sqrt(Math.PI);
+function erfcPos(x){                       /* x >= 0 */
+  if(x<2){                                 /* erf(x) = 2/√π e^{-x²} Σ 2ⁿx^{2n+1}/(2n+1)!!, all terms positive */
+    let term=x,sum=x;const x2=x*x;
+    for(let n=1;n<400;n++){term*=2*x2/(2*n+1);sum+=term;if(term<sum*1e-17)break;}
+    return 1-2*RPI*Math.exp(-x2)*sum;
+  }
+  if(x>27)return 0;                        /* erfc(27) < 1e-318 */
+  let t=x;for(let k=100;k>=1;k--)t=x+(k/2)/t;   /* erfc(x) = e^{-x²}/(√π (x+ (1/2)/(x+ 1/(x+ (3/2)/(x+…))))) */
+  return RPI*Math.exp(-x*x)/t;
+}
+const SQ2=Math.SQRT2;
+function Phi(z){return z<0?0.5*erfcPos(-z/SQ2):1-0.5*erfcPos(z/SQ2);}
+const pdf=(x,mu,sg)=>Math.exp(-0.5*((x-mu)/sg)**2)/(sg*Math.sqrt(2*Math.PI));
+
+/* ---------- state ---------- */
+const S={mu:1.0,sg:1.5,x1:-0.5,x2:3.0,k:"between",t:0,last:0,anim:false,drag:null};
+const XMIN=-9,XMAX=9,YMAX=1.45;
+const ease=s=>s*s*(3-2*s);
+/* morph progress: 1.5 s squash, 1.5 s hold, 1.5 s back */
+function morph(){
+  if(!S.anim)return 0;
+  const t=S.t;
+  if(t<1.5)return ease(t/1.5);
+  if(t<3.0)return 1;
+  if(t<4.5)return 1-ease((t-3)/1.5);
+  S.anim=false;return 0;
+}
+function panels(W,H){
+  const PAD={l:44,r:14,t:56,b:48},GAP=40;
+  const pw=(W-PAD.l-PAD.r-GAP)/2;
+  const L={x0:PAD.l,x1:PAD.l+pw,xmin:XMIN,xmax:XMAX,name:"X ~ N(μ, σ²)"};
+  const R={x0:PAD.l+pw+GAP,x1:W-PAD.r,xmin:-4,xmax:4,name:"Z ~ N(0, 1)"};
+  for(const P of[L,R]){
+    P.y0=H-PAD.b;P.y1=PAD.t;
+    P.X=x=>P.x0+(x-P.xmin)/(P.xmax-P.xmin)*(P.x1-P.x0);
+    P.Y=y=>P.y0-y/YMAX*(P.y0-P.y1);
+    P.XI=px=>P.xmin+(px-P.x0)/(P.x1-P.x0)*(P.xmax-P.xmin);
+  }
+  return{L,R};
+}
+
+function drawPanel(g,P,mu,sg,lo,hi,ghost){
+  /* frame, grid, axis */
+  g.save();
+  g.beginPath();g.rect(P.x0,P.y1-8,P.x1-P.x0,P.y0-P.y1+8);g.clip();
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  for(let x=Math.ceil(P.xmin);x<=P.xmax;x++){g.beginPath();g.moveTo(P.X(x),P.y1);g.lineTo(P.X(x),P.y0);g.stroke();}
+  for(let y=0.2;y<YMAX;y+=0.2){g.beginPath();g.moveTo(P.x0,P.Y(y));g.lineTo(P.x1,P.Y(y));g.stroke();}
+  /* shaded probability */
+  const a=Math.max(P.xmin,lo),b=Math.min(P.xmax,hi);
+  if(b>a){
+    g.fillStyle=C.accA+"0.28)";g.beginPath();g.moveTo(P.X(a),P.y0);
+    for(let px=P.X(a);px<=P.X(b);px+=1)g.lineTo(px,P.Y(pdf(P.XI(px),mu,sg)));
+    g.lineTo(P.X(b),P.Y(pdf(b,mu,sg)));g.lineTo(P.X(b),P.y0);g.closePath();g.fill();
+  }
+  /* 68-95-99.7 marks */
+  g.strokeStyle=C.amber;g.fillStyle=C.amber;g.lineWidth=1;g.font=MONO;g.textAlign="center";
+  for(let k=-3;k<=3;k++){
+    if(!k)continue;
+    const x=mu+k*sg;if(x<P.xmin||x>P.xmax)continue;
+    g.setLineDash([3,3]);g.beginPath();g.moveTo(P.X(x),P.y0);g.lineTo(P.X(x),P.Y(pdf(x,mu,sg)));g.stroke();g.setLineDash([]);
+    g.beginPath();g.moveTo(P.X(x),P.y0-5);g.lineTo(P.X(x),P.y0+5);g.stroke();
+    if(k>0)g.fillText((k>1?k:"")+"σ",P.X(x),Math.min(P.Y(pdf(x,mu,sg))-6,P.y0-14));
+  }
+  /* ghost of the un-morphed curve */
+  if(ghost){
+    g.strokeStyle=C.dim;g.lineWidth=1.2;g.setLineDash([4,4]);g.beginPath();
+    for(let px=P.x0;px<=P.x1;px+=1){const y=P.Y(pdf(P.XI(px),ghost.mu,ghost.sg));px===P.x0?g.moveTo(px,y):g.lineTo(px,y);}
+    g.stroke();g.setLineDash([]);
+  }
+  /* the curve */
+  g.strokeStyle=C.acc;g.lineWidth=2.4;g.beginPath();
+  for(let px=P.x0;px<=P.x1;px+=1){const y=P.Y(pdf(P.XI(px),mu,sg));px===P.x0?g.moveTo(px,y):g.lineTo(px,y);}
+  g.stroke();
+  g.restore();
+  /* axis + labels */
+  g.strokeStyle=C.axis;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(P.x0,P.y0);g.lineTo(P.x1,P.y0);g.stroke();
+  g.beginPath();g.moveTo(P.x0,P.y1-8);g.lineTo(P.x0,P.y0);g.stroke();
+  g.font=MONO;g.fillStyle=C.dim;g.textAlign="center";
+  const step=P.xmax-P.xmin>10?2:1;
+  for(let x=Math.ceil(P.xmin);x<=P.xmax;x++)if(!(x%step))g.fillText(x,P.X(x),P.y0+14);
+  g.textAlign="right";
+  for(let y=0.5;y<YMAX;y+=0.5)g.fillText(y.toFixed(1),P.x0-4,P.Y(y)+4);
+  g.textAlign="left";g.fillStyle=C.ink;g.font="bold 13px ui-monospace,Menlo,monospace";
+  g.fillText(P.name,P.x0+6,P.y1-14);g.font=MONO;
+}
+function handle(g,P,x,label){
+  if(x<P.xmin||x>P.xmax)return;
+  g.setLineDash([5,4]);g.strokeStyle=C.acc;g.lineWidth=1;
+  g.beginPath();g.moveTo(P.X(x),P.y1);g.lineTo(P.X(x),P.y0);g.stroke();g.setLineDash([]);
+  g.fillStyle=C.acc;g.beginPath();g.arc(P.X(x),P.y0,6.5,0,7);g.fill();
+  g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+  g.fillStyle=C.acc;g.textAlign="center";g.font=MONO;g.fillText(label,P.X(x),P.y0+32);
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  const{L,R}=panels(W,H);
+  const s=morph();
+  const mu=S.mu*(1-s),sg=S.sg+(1-S.sg)*s;
+  const z1=(S.x1-S.mu)/S.sg,z2=(S.x2-S.mu)/S.sg;
+  const lo=S.k==="above"?S.x1:S.k==="below"?-Infinity:S.x1;
+  const hi=S.k==="below"?S.x2:S.k==="above"?Infinity:S.x2;
+  const zlo=isFinite(lo)?(lo-S.mu)/S.sg:-Infinity,zhi=isFinite(hi)?(hi-S.mu)/S.sg:Infinity;
+  /* morphed bounds keep fixed z, so the area is preserved */
+  const mlo=isFinite(lo)?mu+sg*zlo:lo,mhi=isFinite(hi)?mu+sg*zhi:hi;
+
+  drawPanel(g,L,mu,sg,mlo,mhi,s>0?{mu:S.mu,sg:S.sg}:null);
+  drawPanel(g,R,0,1,zlo,zhi,null);
+  if(S.k!=="below")handle(g,L,mu+sg*z1,"x₁"),handle(g,R,z1,"z₁");
+  if(S.k!=="above")handle(g,L,mu+sg*z2,"x₂"),handle(g,R,z2,"z₂");
+
+  /* legend line */
+  g.font=MONO;g.textAlign="left";
+  g.fillStyle=C.amber;g.fillText("amber: μ±σ 68.3% · μ±2σ 95.4% · μ±3σ 99.7%",L.x0,20);
+  g.fillStyle=C.acc;g.textAlign="right";g.fillText("shaded: the same probability, twice",R.x1,20);
+  /* arrow between the panels */
+  const gx=(L.x1+R.x0)/2,gy=(L.y0+L.y1)/2;
+  g.strokeStyle=s>0?C.amber:C.dim;g.fillStyle=s>0?C.amber:C.dim;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(gx-12,gy);g.lineTo(gx+10,gy);g.lineTo(gx+4,gy-5);g.moveTo(gx+10,gy);g.lineTo(gx+4,gy+5);g.stroke();
+  g.textAlign="center";g.fillText("z=(x−μ)/σ",gx,gy-12);
+  if(s>0){g.fillStyle=C.amber;g.textAlign="left";
+    g.fillText("standardising: μ → "+fmt(mu)+", σ → "+fmt(sg),L.x0+6,L.y1+4);}
+
+  /* readouts (for the real μ, σ, not the morphed ones) */
+  const p1=Phi(z1),p2=Phi(z2);
+  const P=S.k==="between"?p2-p1:S.k==="below"?p2:1-p1;
+  const lab=S.k==="between"?"P(x₁&lt;X&lt;x₂) = Φ(z₂)−Φ(z₁)":S.k==="below"?"P(X&lt;x₂) = Φ(z₂)":"P(X&gt;x₁) = 1−Φ(z₁)";
+  const list=[["μ, σ",fmt(S.mu)+", "+fmt(S.sg)]];
+  if(S.k!=="below")list.push(["x₁ → z₁ = (x₁−μ)/σ",fmt(S.x1)+" → "+fmt(z1,3)]);
+  if(S.k!=="above")list.push(["x₂ → z₂ = (x₂−μ)/σ",fmt(S.x2)+" → "+fmt(z2,3)]);
+  if(S.k!=="below")list.push(["Φ(z₁)",fmt(p1,5),"blue"]);
+  if(S.k!=="above")list.push(["Φ(z₂)",fmt(p2,5),"blue"]);
+  list.push([lab,fmt(P,5),"acc"]);
+  list.push(["peak 1/(σ√2π)",fmt(pdf(S.mu,S.mu,S.sg),4),"amber"]);
+  list.push(["area under each curve","1 (always)"]);
+  list.push(["interpretation","same area, new axis","blue"]);
+  rows(list);
+  document.getElementById("oLive").textContent=fmt(P,4)+" on both plots";
+}
+
+/* ---------- animation ---------- */
+let raf=0;
+function loop(ts){
+  if(!S.last)S.last=ts;
+  S.t+=Math.min(0.05,(ts-S.last)/1000);
+  S.last=ts;
+  draw();
+  if(S.anim)raf=requestAnimationFrame(loop);else raf=0;
+}
+function reset(){S.t=0;S.last=0;S.anim=false;if(raf){cancelAnimationFrame(raf);raf=0;}}
+function replay(){reset();S.anim=true;raf=requestAnimationFrame(loop);}
+
+/* ---------- controls ---------- */
+const $=id=>document.getElementById(id);
+function labels(){
+  $("rMu").innerHTML="μ = "+fmt(S.mu);$("rSg").innerHTML="σ = "+fmt(S.sg);
+  $("rX1").innerHTML="x₁ = "+fmt(S.x1);$("rX2").innerHTML="x₂ = "+fmt(S.x2);
+  $("sMu").value=Math.round(S.mu*100);$("sSg").value=Math.round(S.sg*100);
+  $("sX1").value=Math.round(S.x1*100);$("sX2").value=Math.round(S.x2*100);
+}
+function setX1(v){S.x1=Math.max(XMIN,Math.min(XMAX-0.05,v));if(S.x2<=S.x1+0.05)S.x2=S.x1+0.05;}
+function setX2(v){S.x2=Math.max(XMIN+0.05,Math.min(XMAX,v));if(S.x1>=S.x2-0.05)S.x1=S.x2-0.05;}
+function bind(id,set){$(id).addEventListener("input",e=>{set(+e.target.value);labels();reset();draw();});}
+bind("sMu",v=>{S.mu=v/100;});
+bind("sSg",v=>{S.sg=v/100;});
+bind("sX1",v=>setX1(v/100));
+bind("sX2",v=>setX2(v/100));
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",function(){
+  document.querySelectorAll(".seg button").forEach(x=>x.classList.remove("on"));this.classList.add("on");
+  S.k=this.dataset.k;reset();draw();
+}));
+$("bRe").addEventListener("click",replay);
+
+/* ---------- dragging the bounds on either plot ---------- */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+cv.addEventListener("pointerdown",e=>{
+  const p=pos(e),{W,H}=fit();const{L,R}=panels(W,H);
+  reset();
+  const P=p.x<(L.x1+R.x0)/2?L:R;
+  const xs=P===L?[S.x1,S.x2]:[(S.x1-S.mu)/S.sg,(S.x2-S.mu)/S.sg];
+  const d1=S.k==="below"?1e9:Math.abs(p.x-P.X(xs[0])),d2=S.k==="above"?1e9:Math.abs(p.x-P.X(xs[1]));
+  if(Math.min(d1,d2)>40)return;
+  S.drag={which:d1<=d2?1:2,P};
+  cv.setPointerCapture(e.pointerId);move(e);
+});
+function move(e){
+  if(!S.drag)return;
+  const p=pos(e),{W,H}=fit();const{L,R}=panels(W,H);
+  const P=S.drag.P===L||S.drag.P.name===L.name?L:R;
+  let x=P.XI(p.x);if(P===R)x=S.mu+S.sg*x;
+  x=Math.round(x*20)/20;
+  S.drag.which===1?setX1(x):setX2(x);
+  labels();draw();
+}
+cv.addEventListener("pointermove",move);
+cv.addEventListener("pointerup",()=>{S.drag=null;});
+cv.addEventListener("pointercancel",()=>{S.drag=null;});
+window.addEventListener("resize",draw);
+labels();draw();
+</script>
+</body>
+</html>

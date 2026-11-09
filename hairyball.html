@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<title>The Hairy Ball Theorem · Physics Intuition App</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px}
+.seg button{flex:1;background:var(--panel2);color:var(--mut);border:0;border-right:1px solid var(--hair);
+  font:600 13px/1 var(--sans);padding:10px 4px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--acc);color:#04120d}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.btn.dim{border-color:var(--hair);color:var(--mut)}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.hint a{color:var(--acc);text-decoration:none}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · THE HAIRY BALL THEOREM · MODULE 12 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>The Hairy Ball Theorem</h1>
+    <p class="sub">A sphere covered in hair, and a comb: you. Switch to comb mode and try, with
+    all the patience you have, to flatten every hair. The red bald spots will move wherever you
+    push them &mdash; and they will never, ever disappear.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The theorem</span>
+        <span class="fx">\(\displaystyle \chi(S^{2})=2 \)
+        <span class="mutx">&nbsp;·&nbsp;Poincar&eacute;&ndash;Hopf:&nbsp;</span>
+        \(\displaystyle \sum \operatorname{index}(\text{zeros})=\chi \)
+        <span class="mutx">&nbsp;·&nbsp;so a continuous tangent field MUST vanish somewhere</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="seg">
+          <button id="bRot" class="on">Rotate view</button>
+          <button id="bComb">Comb the hair</button>
+        </div>
+        <button class="btn" id="bEast">Reset: combed along latitudes</button>
+        <button class="btn dim" id="bSouth">Reset: combed pole to pole</button>
+        <p class="hint">In comb mode, drag across the ball: hairs near the cursor lie down along
+        your stroke. Inspired by the 3Blue1Brown treatment &mdash;
+        <a href="https://www.bilibili.com/video/BV1WtoTBiEdg/?spm_id_from=333.337.search-card.all.click&amp;vd_source=5a3c7ff6368c2f5b0e3c4ebaaf9ab48b"
+        target="_blank" rel="noopener">watch the animation (bilibili)</a>.</p>
+      </div>
+      <div class="card">
+        <h3>Readout</h3>
+        <div class="read">
+          <div class="r"><span class="k">bald spots right now</span><span class="v hot" id="oZ">2</span></div>
+          <div class="r"><span class="k">required index total</span><span class="v amber">+2, always</span></div>
+          <div class="r"><span class="k">hairs on the ball</span><span class="v" id="oN">?</span></div>
+          <div class="r"><span class="k">flattest hair anywhere</span><span class="v acc" id="oMin">?</span></div>
+        </div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>It is not lack of combing skill. On a sphere, <b>every</b> continuous field of tangent
+        hair has a zero &mdash; the indices of the bald spots must total &chi; = 2, so you can merge
+        the two cowlicks into one double cowlick, or split them, but never reach zero of them.
+        A torus (&chi; = 0) combs flat; a sphere never does. Same theorem, other outfit: at every
+        moment there is at least one point on Earth with <b>no horizontal wind at all</b>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: 1,000 hairs on a latitude&ndash;longitude grid, each a tangent vector; combing
+    projects your stroke direction onto the local tangent plane and blends it in with a smooth
+    brush. Bald spots are hairs shorter than 18 percent of full length, clustered. The Poincar&eacute;&ndash;Hopf
+    theorem forces &Sigma; index = &chi;(S&sup2;) = 2 for any continuous choice, which is why the
+    counter never reads zero. One file of vanilla JavaScript, no libraries, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+
+/* grid of hairs on the sphere */
+const NLAT=25,NLON=40;
+const pts=[];        // {n:[x,y,z] normal, eth, eph: tangent basis, v:[a,b] hair in basis}
+for(let i=0;i<=NLAT;i++){
+  const th=Math.PI*i/NLAT;                       // 0..pi (0 = north pole)
+  const nlon=(i===0||i===NLAT)?1:NLON;
+  for(let j=0;j<nlon;j++){
+    const ph=2*Math.PI*j/nlon;
+    const st=Math.sin(th),ct=Math.cos(th),sp=Math.sin(ph),cp=Math.cos(ph);
+    const n=[st*cp,st*sp,ct];
+    const eth=[ct*cp,ct*sp,-st];                 // toward south
+    const eph=[-sp,cp,0];                        // toward east
+    pts.push({n,eth,eph,v:[0,0]});
+  }
+}
+function combEast(){for(const p of pts){const s=Math.hypot(p.n[0],p.n[1]);p.v=[0,s];}}   // ∂φ (dies at poles)
+function combSouth(){for(const p of pts){const s=Math.hypot(p.n[0],p.n[1]);p.v=[s,0];}}  // ∂θ (dies at poles)
+combEast();
+
+const S={mode:"rot",yaw:0.7,pitch:0.35,drag:null};
+
+function rot(p){
+  const cy=Math.cos(S.yaw),sy=Math.sin(S.yaw),cp=Math.cos(S.pitch),sp=Math.sin(S.pitch);
+  const x1=p[0]*cy+p[1]*sy, y1=-p[0]*sy+p[1]*cy, z1=p[2];
+  return [x1, y1*cp+z1*sp, -y1*sp+z1*cp];       // [screen-x, depth, screen-up]
+}
+function unrotDir(d){                            // screen direction -> world direction
+  const cy=Math.cos(S.yaw),sy=Math.sin(S.yaw),cp=Math.cos(S.pitch),sp=Math.sin(S.pitch);
+  /* inverse of rot for a direction: first inverse pitch, then inverse yaw */
+  const x1=d[0], y1=d[1]*cp-d[2]*sp, z1=d[1]*sp+d[2]*cp;
+  return [x1*cy-y1*sy, x1*sy+y1*cy, z1];
+}
+
+function hair3(p){
+  return [
+    p.v[0]*p.eth[0]+p.v[1]*p.eph[0],
+    p.v[0]*p.eth[1]+p.v[1]*p.eph[1],
+    p.v[0]*p.eth[2]+p.v[1]*p.eph[2]
+  ];
+}
+
+function zeros(){
+  /* cluster hairs with |v| below threshold into bald spots */
+  const bald=[];
+  for(let idx=0;idx<pts.length;idx++){
+    const p=pts[idx];
+    if(Math.hypot(p.v[0],p.v[1])<0.18)bald.push(idx);
+  }
+  /* greedy cluster by 3D distance */
+  const used=new Set(),clusters=[];
+  for(const i of bald){
+    if(used.has(i))continue;
+    const c=[i];used.add(i);
+    for(const j of bald){
+      if(used.has(j))continue;
+      const a=pts[i].n,b=pts[j].n;
+      if(Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])<0.5){c.push(j);used.add(j);}
+    }
+    clusters.push(c);
+  }
+  return clusters;
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  const cx=W/2,cy=H/2,R=Math.min(W,H)*0.40;
+
+  /* silhouette */
+  g.strokeStyle=C.hair;g.lineWidth=1.5;
+  g.beginPath();g.arc(cx,cy,R,0,7);g.stroke();
+  g.fillStyle="rgba(19,26,34,.6)";g.beginPath();g.arc(cx,cy,R,0,7);g.fill();
+
+  const cls=zeros();
+  const baldSet=new Set();cls.forEach(c=>c.forEach(i=>baldSet.add(i)));
+
+  /* hairs: back first, then front */
+  const order=pts.map((p,i)=>({i,d:rot(p.n)[1]})).sort((a,b)=>a.d-b.d);
+  let minLen=1;
+  for(const o of order){
+    const p=pts[o.i];
+    const rp=rot(p.n);
+    const front=rp[1]>0;
+    const px=cx+rp[0]*R, py=cy-rp[2]*R;
+    const h=hair3(p), rh=rot(h);
+    const len=Math.hypot(p.v[0],p.v[1]);
+    if(len<minLen)minLen=len;
+    const L=R*0.085*Math.max(len,0.12);
+    /* root dot */
+    g.fillStyle=front?C.mutA+".85)":"rgba(70,80,92,.35)";
+    g.beginPath();g.arc(px,py,front?1.6:1.1,0,7);g.fill();
+    /* hair segment (screen-projected tangent) */
+    const hx=rh[0],hz=rh[2];
+    const hl=Math.hypot(hx,hz)||1;
+    g.strokeStyle=front?(baldSet.has(o.i)?C.hotA+".95)":C.accA+".85)")
+                       :"rgba(60,86,82,.30)";
+    g.lineWidth=front?1.6:1;
+    g.beginPath();g.moveTo(px,py);
+    g.lineTo(px+hx/hl*L*Math.min(1,hl*1.4),py-hz/hl*L*Math.min(1,hl*1.4));g.stroke();
+  }
+  /* bald spot markers */
+  for(const c of cls){
+    let bx=0,by=0,bz=0;
+    c.forEach(i=>{bx+=pts[i].n[0];by+=pts[i].n[1];bz+=pts[i].n[2];});
+    const m=Math.hypot(bx,by,bz)||1;
+    const rp=rot([bx/m,by/m,bz/m]);
+    if(rp[1]<=0)continue;               // hidden side
+    const px=cx+rp[0]*R,py=cy-rp[2]*R;
+    g.strokeStyle=C.hot;g.lineWidth=2;
+    g.beginPath();g.arc(px,py,12,0,7);g.stroke();
+    g.font="10px ui-monospace,Menlo,monospace";g.fillStyle=C.hot;g.textAlign="center";
+    g.fillText("bald",px,py-16);
+  }
+  g.font="11px ui-monospace,Menlo,monospace";g.textAlign="left";
+  g.fillStyle=C.dim;
+  g.fillText(S.mode==="rot"?"drag: rotate the ball · red = a hair that cannot lie down"
+                           :"drag: comb — hairs follow your stroke",12,H-12);
+  /* readout */
+  document.getElementById("oZ").textContent=cls.length;
+  document.getElementById("oN").textContent=pts.length;
+  document.getElementById("oMin").textContent=(minLen*100).toFixed(0)+"% flat-length";
+}
+
+/* interaction */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+cv.addEventListener("pointerdown",e=>{S.drag=pos(e);cv.setPointerCapture(e.pointerId);
+  cv.style.cursor=S.mode==="rot"?"grabbing":"crosshair";});
+cv.addEventListener("pointermove",e=>{
+  if(!S.drag)return;
+  const p=pos(e),dx=p.x-S.drag.x,dy=p.y-S.drag.y;
+  if(S.mode==="rot"){
+    S.yaw+=dx*0.010;S.pitch+=dy*0.008;
+    S.pitch=Math.max(-1.4,Math.min(1.4,S.pitch));
+  }else{
+    const{W,H}=fit(),cx=W/2,cy=H/2,R=Math.min(W,H)*0.40;
+    if(Math.hypot(dx,dy)>1){
+      const d3=unrotDir([dx,0,-dy]);                     // stroke direction in world
+      for(const q of pts){
+        const rp=rot(q.n);
+        if(rp[1]<=0.05)continue;                         // only front-facing
+        const px=cx+rp[0]*R,py=cy-rp[2]*R;
+        const dist=Math.hypot(px-p.x,py-p.y);
+        if(dist>70)continue;
+        const w=Math.exp(-dist*dist/(2*34*34))*0.5;
+        /* project stroke into tangent basis */
+        const a=d3[0]*q.eth[0]+d3[1]*q.eth[1]+d3[2]*q.eth[2];
+        const b=d3[0]*q.eph[0]+d3[1]*q.eph[1]+d3[2]*q.eph[2];
+        const m=Math.hypot(a,b)||1;
+        q.v[0]=q.v[0]*(1-w)+(a/m)*w;
+        q.v[1]=q.v[1]*(1-w)+(b/m)*w;
+        const vm=Math.hypot(q.v[0],q.v[1]);
+        if(vm>1){q.v[0]/=vm;q.v[1]/=vm;}
+      }
+    }
+  }
+  S.drag=p;draw();
+});
+cv.addEventListener("pointerup",()=>{S.drag=null;cv.style.cursor=S.mode==="rot"?"grab":"crosshair";});
+document.getElementById("bRot").addEventListener("click",function(){
+  S.mode="rot";cv.style.cursor="grab";
+  this.classList.add("on");document.getElementById("bComb").classList.remove("on");});
+document.getElementById("bComb").addEventListener("click",function(){
+  S.mode="comb";cv.style.cursor="crosshair";
+  this.classList.add("on");document.getElementById("bRot").classList.remove("on");});
+document.getElementById("bEast").addEventListener("click",()=>{combEast();draw();});
+document.getElementById("bSouth").addEventListener("click",()=>{combSouth();draw();});
+window.addEventListener("resize",draw);
+draw();
+</script>
+</body>
+</html>

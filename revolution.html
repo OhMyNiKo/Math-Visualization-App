@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Volumes of Revolution · Physics Intuition App</title>
+<script src="theme.js"></script>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1 1 45%;background:var(--panel2);color:var(--mut);border:0;
+  border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  font:600 12px/1 var(--sans);padding:10px 4px;cursor:pointer;min-width:45%}
+.seg button.on{background:var(--acc);color:#04120d}
+.fin{display:flex;gap:6px;margin-bottom:10px}
+.fin input{flex:1;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);
+  font:14px var(--mono);padding:8px 10px;min-width:0}
+.fin input:focus{outline:none;border-color:var(--acc)}
+.fin button{background:var(--panel2);border:1px solid var(--acc);color:var(--acc);
+  font:600 12px var(--mono);padding:0 12px;cursor:pointer}
+.fin button:hover{background:var(--acc);color:#04120d}
+.err{font-family:var(--mono);font-size:11.5px;color:var(--hot);min-height:16px;margin-bottom:6px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600;text-align:right}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+.ctl.off{opacity:.35;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · VOLUMES OF REVOLUTION · MODULE 22 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Volumes of Revolution (Disc Method)</h1>
+    <p class="sub">Spin the graph of \( f \) about the x-axis and the region under it sweeps out a solid.
+    Slice that solid into \( n \) thin discs of radius \( f(x_k) \): their volumes add up to a Riemann sum
+    that closes in on \( \pi\!\int_a^b f^2\,dx \). Choose the curve, drag the bounds and the disc count,
+    spin the profile with the rotation slider, and replay to watch the discs stack in one by one.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx">\(\displaystyle V = \pi \int_a^b [f(x)]^2\,dx \)
+        <span class="mutx">· disc sum \(\displaystyle \sum_{k=1}^{n} \pi\,[f(x_k)]^2\,\Delta x \) · washer with a hole of radius c:
+        \(\displaystyle V=\pi\int_a^b \big|[f(x)]^2-c^2\big|\,dx \)</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="fin"><input type="text" id="fIn" value="sqrt(x)" spellcheck="false">
+          <button id="bGo">Plot</button></div>
+        <div class="err" id="err"></div>
+        <div class="seg" id="segF">
+          <button data-f="sqrt(x)" data-a="0" data-b="4" class="on">√x</button>
+          <button data-f="x^2" data-a="0" data-b="1.5">x²</button>
+          <button data-f="sin(x)+1.2" data-a="0" data-b="4">sin x + 1.2</button>
+          <button data-f="2-x/2" data-a="0" data-b="4">2 − x/2</button>
+          <button data-f="exp(-x)+0.3" data-a="0" data-b="4">e^(−x) + 0.3</button>
+        </div>
+        <div class="seg" id="segM">
+          <button data-m="disc" class="on">Solid (discs)</button>
+          <button data-m="washer">Washer (hole c)</button>
+        </div>
+        <div class="ctl"><label><span>lower bound</span><b id="rA">a = 0.00</b></label>
+          <input type="range" id="sA" min="0" max="350" value="0"></div>
+        <div class="ctl"><label><span>upper bound</span><b id="rB">b = 4.00</b></label>
+          <input type="range" id="sB" min="50" max="400" value="400"></div>
+        <div class="ctl"><label><span>number of discs</span><b id="rN">n = 8</b></label>
+          <input type="range" id="sN" min="2" max="80" value="8" step="1"></div>
+        <div class="ctl"><label><span>rotation of the profile</span><b id="rR">φ = 50°</b></label>
+          <input type="range" id="sR" min="0" max="360" value="50" step="1"></div>
+        <div class="ctl off" id="cC"><label><span>hole radius (washer)</span><b id="rC">c = 0.60</b></label>
+          <input type="range" id="sC" min="0" max="250" value="60"></div>
+        <button class="btn" id="bRe">&#8635; Replay</button>
+        <p class="hint">Supported: + − * / ^ ( ), implicit products, sin cos tan atan exp ln sqrt sinh cosh
+        tanh, pi and e. The radius used is |f(x)|.</p>
+      </div>
+      <div class="card">
+        <h3>Solved live</h3>
+        <div class="read" id="solved"></div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>"Twice the height, twice the volume." No: a disc's volume goes with the <b>square</b> of its
+        radius, \( \pi r^2\,\Delta x \), so doubling \( f \) everywhere multiplies every disc, and the whole
+        solid, by four, not two. Recomputing the integral right now with \( 2f \) in place of \( f \)
+        multiplies V by <span class="live" id="oLive">?</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Mathematics: the disc sum uses midpoints \( x_k=a+(k-\tfrac12)\Delta x \); the exact volume is
+    \( \pi\int_a^b |f^2-c^2|\,dx \) by composite Simpson with 2000 panels (error \( O(h^4) \) on smooth
+    stretches); the picture is an oblique orthographic projection with the axis of revolution horizontal
+    and each disc drawn as an ellipse. One file of vanilla JavaScript, no libraries beyond the shared
+    KaTeX layer, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>{if(!isFinite(v))return"—";const r=Math.abs(v).toFixed(d);return(v<0&&+r!==0?"−":"")+r;};
+const MONO="11px ui-monospace,Menlo,monospace";
+function rows(list){
+  document.getElementById("solved").innerHTML=list.map(([k,v,c])=>
+    `<div class="r"><span class="k">${k}</span><span class="v ${c||""}">${v}</span></div>`).join("");
+}
+
+/* ---------- tiny expression parser (shared with the Taylor module) ---------- */
+function tokenize(s){
+  const T=[];let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(c===" "||c==="\t"){i++;continue;}
+    if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      const v=parseFloat(s.slice(i,j));if(!isFinite(v))throw new Error("bad number");
+      T.push({t:"num",v});i=j;continue;}
+    if(/[a-zA-Z_]/.test(c)){let j=i;while(j<s.length&&/[a-zA-Z_]/.test(s[j]))j++;
+      T.push({t:"id",v:s.slice(i,j)});i=j;continue;}
+    if("+-*/^(),".includes(c)){T.push({t:c});i++;continue;}
+    throw new Error("unexpected character '"+c+"'");
+  }
+  return T;
+}
+const FNS=["sin","cos","tan","atan","exp","ln","log","sqrt","sinh","cosh","tanh"];
+function parse(s){
+  const T=tokenize(s);let p=0;
+  const peek=()=>T[p];
+  const eat=t=>{if(!T[p]||T[p].t!==t)throw new Error("expected '"+t+"'");return T[p++];};
+  function expr(){let a=term();
+    while(peek()&&(peek().t==="+"||peek().t==="-")){const op=T[p++].t;a={t:"bin",op,a,b:term()};}
+    return a;}
+  function term(){let a=factor();
+    for(;;){const n=peek();
+      if(n&&(n.t==="*"||n.t==="/")){const op=T[p++].t;a={t:"bin",op,a,b:factor()};}
+      else if(n&&(n.t==="num"||n.t==="id"||n.t==="(")){a={t:"bin",op:"*",a,b:factor()};}
+      else break;}
+    return a;}
+  function factor(){
+    if(peek()&&peek().t==="-"){p++;return{t:"neg",a:factor()};}
+    if(peek()&&peek().t==="+"){p++;return factor();}
+    return power();}
+  function power(){const a=atom();
+    if(peek()&&peek().t==="^"){p++;return{t:"bin",op:"^",a,b:factor()};}
+    return a;}
+  function atom(){
+    const n=peek();
+    if(!n)throw new Error("expression ends too early");
+    if(n.t==="num"){p++;return{t:"num",v:n.v};}
+    if(n.t==="("){p++;const e=expr();eat(")");return e;}
+    if(n.t==="id"){p++;const name=n.v.toLowerCase();
+      if(peek()&&peek().t==="("){
+        if(!FNS.includes(name))throw new Error("unknown function '"+name+"'");
+        p++;const e=expr();eat(")");return{t:"call",fn:name,a:e};}
+      if(name==="x")return{t:"var"};
+      if(name==="pi")return{t:"num",v:Math.PI};
+      if(name==="e")return{t:"num",v:Math.E};
+      if(FNS.includes(name))throw new Error("'"+name+"' needs parentheses: "+name+"(x)");
+      throw new Error("unknown name '"+n.v+"'");}
+    throw new Error("unexpected '"+n.t+"'");}
+  const e=expr();
+  if(p<T.length)throw new Error("could not parse the whole expression");
+  return e;
+}
+const NF={sin:Math.sin,cos:Math.cos,tan:Math.tan,atan:Math.atan,exp:Math.exp,ln:Math.log,
+  log:Math.log,sqrt:Math.sqrt,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh};
+function evalNum(n,x){
+  switch(n.t){
+    case "num":return n.v;
+    case "var":return x;
+    case "neg":return -evalNum(n.a,x);
+    case "bin":{const a=evalNum(n.a,x),b=evalNum(n.b,x);
+      return n.op==="+"?a+b:n.op==="-"?a-b:n.op==="*"?a*b:n.op==="/"?a/b:Math.pow(a,b);}
+    case "call":return NF[n.fn](evalNum(n.a,x));
+  }
+}
+
+/* ---------- state and numerics ---------- */
+const S={txt:"sqrt(x)",ast:null,err:"",a:0,b:4,n:8,rot:50,c:0.6,mode:"disc",t:0,last:0};
+function F(x){try{const v=evalNum(S.ast,x);return isFinite(v)?v:NaN;}catch(e){return NaN;}}
+const R=x=>{const v=Math.abs(F(x));return isFinite(v)?v:0;};
+const hole=()=>S.mode==="washer"?S.c:0;
+function integrand(x,scale){const r=scale*R(x),c=hole();return Math.PI*Math.abs(r*r-c*c);}
+function simpson(scale){
+  const N=2000,h=(S.b-S.a)/N;let s=integrand(S.a,scale)+integrand(S.b,scale);
+  for(let i=1;i<N;i++)s+=(i%2?4:2)*integrand(S.a+i*h,scale);
+  return s*h/3;
+}
+function discSum(){
+  const dx=(S.b-S.a)/S.n;let s=0;
+  for(let k=0;k<S.n;k++)s+=integrand(S.a+(k+0.5)*dx,1)*dx;
+  return s;
+}
+function recompile(){
+  S.err="";
+  try{S.ast=parse(S.txt);}catch(e){S.ast=null;S.err=e.message;}
+}
+
+/* ---------- drawing ---------- */
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  const sx=W/760;
+  /* oblique orthographic projection: axis of revolution horizontal; (x, y, z) -> screen */
+  const XMIN=-0.35,XMAX=4.35,SX=(W-70*sx)/(XMAX-XMIN),X0=40*sx-XMIN*SX,Y0=H*0.52;
+  let rmax=0.01;
+  if(S.ast){for(let i=0;i<=200;i++)rmax=Math.max(rmax,R(S.a+(S.b-S.a)*i/200));}
+  const rlim=Math.max(rmax,hole(),0.4);
+  const SY=(H*0.40)/rlim,SZ=0.36*SY;
+  const P=(x,y,z)=>[X0+x*SX+z*SZ,Y0-y*SY];
+  const ell=(x,r)=>{const[cx,cy]=P(x,0,0);g.beginPath();g.ellipse(cx,cy,Math.max(0.01,r*SZ),Math.max(0.01,r*SY),0,0,2*Math.PI);};
+
+  /* axis of revolution and the y-axis */
+  const[ax0,ay0]=P(XMIN,0,0),[ax1]=P(XMAX,0,0);
+  g.strokeStyle=C.axis;g.lineWidth=1.5;g.setLineDash([6,4]);
+  g.beginPath();g.moveTo(ax0,ay0);g.lineTo(ax1,ay0);g.stroke();g.setLineDash([]);
+  g.beginPath();g.moveTo(P(0,-rlim*0.98,0)[0],P(0,-rlim*0.98,0)[1]);g.lineTo(P(0,rlim*0.98,0)[0],P(0,rlim*0.98,0)[1]);g.stroke();
+  g.font=MONO;g.fillStyle=C.dim;g.textAlign="left";
+  g.fillText("axis of revolution (x)",ax1-130*sx,ay0-6);
+  g.fillText("y",P(0,rlim*0.98,0)[0]+5,P(0,rlim*0.98,0)[1]+4);
+  for(let x=0;x<=4;x++){const[tx,ty]=P(x,0,0);g.beginPath();g.moveTo(tx,ty-3);g.lineTo(tx,ty+3);g.stroke();g.fillText(x,tx+3,ty+14);}
+
+  const phi=S.rot*Math.PI/180*Math.min(1,S.t/2.0);
+  const cvis=Math.min(S.n,Math.floor(S.t/2.4*S.n)+1);
+  const dx=(S.b-S.a)/S.n;
+
+  if(S.ast){
+    /* end caps hint at the whole solid */
+    g.strokeStyle=C.dim;g.lineWidth=1;g.setLineDash([3,3]);
+    ell(S.a,R(S.a));g.stroke();ell(S.b,R(S.b));g.stroke();g.setLineDash([]);
+
+    /* swept surface: faint longitudinal profiles from 0 to phi, then the two live profiles */
+    const prof=(ang,col,wd)=>{
+      g.strokeStyle=col;g.lineWidth=wd;g.beginPath();let pen=false;
+      for(let i=0;i<=160;i++){const x=S.a+(S.b-S.a)*i/160,r=R(x);
+        const[px,py]=P(x,r*Math.cos(ang),r*Math.sin(ang));pen?g.lineTo(px,py):g.moveTo(px,py);pen=true;}
+      g.stroke();
+    };
+    const steps=Math.floor(phi/(Math.PI/12));
+    for(let k=1;k<=steps;k++)prof(k*Math.PI/12,C.accA+"0.22)",1);
+    /* the discs, sweeping in one by one */
+    for(let k=0;k<cvis;k++){
+      const xk=S.a+(k+0.5)*dx,r=R(xk),x1=xk-dx/2,x2=xk+dx/2,last=k===cvis-1&&cvis<S.n;
+      const[t1x,t1y]=P(x1,r,0),[t2x,t2y]=P(x2,r,0),[b1x,b1y]=P(x1,-r,0),[b2x,b2y]=P(x2,-r,0);
+      g.fillStyle=C.accA+"0.18)";g.beginPath();g.moveTo(t1x,t1y);g.lineTo(t2x,t2y);g.lineTo(b2x,b2y);g.lineTo(b1x,b1y);g.closePath();g.fill();
+      g.strokeStyle=C.accA+"0.5)";g.lineWidth=1;g.beginPath();g.moveTo(t1x,t1y);g.lineTo(t2x,t2y);g.stroke();
+      g.beginPath();g.moveTo(b1x,b1y);g.lineTo(b2x,b2y);g.stroke();
+      ell(x2,r);g.fillStyle=C.accA+"0.28)";g.fill();g.strokeStyle=last?C.amber:C.acc;g.lineWidth=last?2:1.2;g.stroke();
+      if(S.mode==="washer"&&S.c>0){ell(x2,Math.min(S.c,r));g.fillStyle=C.hotA+"0.25)";g.fill();g.strokeStyle=C.hot;g.lineWidth=1;g.stroke();}
+    }
+    /* the generating curve (phi = 0) and its spun copy at phi and phi + pi */
+    g.strokeStyle=C.dim;g.lineWidth=1.2;g.beginPath();let pen=false;
+    for(let i=0;i<=300;i++){const x=XMIN+0.3+(XMAX-0.3-XMIN)*i/300;const y=F(x);
+      if(!isFinite(y)||Math.abs(y)>rlim*1.3){pen=false;continue;}
+      const[px,py]=P(x,y,0);pen?g.lineTo(px,py):g.moveTo(px,py);pen=true;}
+    g.stroke();
+    prof(0,C.acc,2.8);
+    if(phi>0.01){prof(phi,C.amber,2.2);prof(phi+Math.PI,C.amberA+"0.7)",1.4);
+      /* the spun tip at x = b traces an arc: draw it */
+      const rb=R(S.b);g.strokeStyle=C.amber;g.lineWidth=1;g.setLineDash([2,3]);g.beginPath();
+      for(let i=0;i<=40;i++){const a=phi*i/40;const[px,py]=P(S.b,rb*Math.cos(a),rb*Math.sin(a));i?g.lineTo(px,py):g.moveTo(px,py);}
+      g.stroke();g.setLineDash([]);}
+    /* hole line for the washer */
+    if(S.mode==="washer"&&S.c>0){g.strokeStyle=C.hot;g.lineWidth=1.4;g.setLineDash([5,3]);
+      const[h0x,h0y]=P(S.a,S.c,0),[h1x,h1y]=P(S.b,S.c,0);g.beginPath();g.moveTo(h0x,h0y);g.lineTo(h1x,h1y);g.stroke();
+      const[l0x,l0y]=P(S.a,-S.c,0),[l1x,l1y]=P(S.b,-S.c,0);g.beginPath();g.moveTo(l0x,l0y);g.lineTo(l1x,l1y);g.stroke();g.setLineDash([]);
+      g.fillStyle=C.hot;g.textAlign="left";g.fillText("hole radius c = "+fmt(S.c,2),h1x+6,h1y+4);}
+    /* bounds */
+    g.fillStyle=C.ink;g.textAlign="center";
+    g.fillText("a = "+fmt(S.a,2),P(S.a,0,0)[0],Y0+rlim*SY+18);
+    g.fillText("b = "+fmt(S.b,2),P(S.b,0,0)[0],Y0+rlim*SY+18);
+  }
+  /* legend */
+  g.textAlign="left";g.fillStyle=C.acc;g.fillText("— f(x), the generating curve",12,16);
+  g.fillStyle=C.amber;g.fillText("— the profile spun by φ = "+Math.round(phi*180/Math.PI)+"°",12,30);
+  g.fillStyle=C.acc;g.fillText("◯ discs: "+cvis+" of "+S.n+" placed, Δx = "+fmt(dx,3),12,44);
+
+  /* readouts */
+  document.getElementById("err").textContent=S.err;
+  const Vd=S.ast?discSum():NaN,Ve=S.ast?simpson(1):NaN,V2=S.ast?simpson(2):NaN;
+  rows([
+    ["Δx = (b − a)/n",fmt(dx,4)],
+    ["disc sum Σ π f(xₖ)² Δx",fmt(Vd,4),"acc"],
+    ["exact V = π∫f² dx",fmt(Ve,4),"amber"],
+    ["error |sum − V|",isFinite(Vd)?Math.abs(Vd-Ve).toExponential(2):"—","hot"],
+    ["relative error",isFinite(Vd)&&Ve>0?fmt(100*Math.abs(Vd-Ve)/Ve,3)+" %":"—","hot"],
+    ["max radius of the solid",fmt(rmax,4),"blue"],
+    ["V with 2f instead of f",fmt(V2,4)],
+    [S.mode==="washer"?"hole radius c":"hole radius c (solid)",S.mode==="washer"?fmt(S.c,2):"0"]
+  ]);
+  document.getElementById("oLive").textContent=Ve>0?fmt(V2/Ve,3)+"×":"—";
+}
+
+/* ---------- animation loop ---------- */
+let raf;
+function loop(ts){
+  if(!S.last)S.last=ts;
+  S.t+=Math.min(0.05,(ts-S.last)/1000);
+  S.last=ts;
+  draw();
+  raf=requestAnimationFrame(loop);
+}
+function reset(){S.t=0;S.last=0;}
+function lbl(id,txt){document.getElementById(id).textContent=txt;}
+function bind(id,set){document.getElementById(id).addEventListener("input",e=>{set(+e.target.value);draw();});}
+bind("sA",v=>{S.a=v/100;if(S.a>=S.b-0.2){S.b=S.a+0.2;document.getElementById("sB").value=Math.round(S.b*100);lbl("rB","b = "+fmt(S.b,2));}lbl("rA","a = "+fmt(S.a,2));});
+bind("sB",v=>{S.b=v/100;if(S.b<=S.a+0.2){S.a=S.b-0.2;document.getElementById("sA").value=Math.round(S.a*100);lbl("rA","a = "+fmt(S.a,2));}lbl("rB","b = "+fmt(S.b,2));});
+bind("sN",v=>{S.n=v;lbl("rN","n = "+S.n);});
+bind("sR",v=>{S.rot=v;lbl("rR","φ = "+S.rot+"°");S.t=Math.max(S.t,2.0);});
+bind("sC",v=>{S.c=v/100;lbl("rC","c = "+fmt(S.c,2));});
+document.querySelectorAll("#segF button").forEach(b=>b.addEventListener("click",function(){
+  document.getElementById("fIn").value=this.dataset.f;S.txt=this.dataset.f;
+  S.a=+this.dataset.a;S.b=+this.dataset.b;
+  document.getElementById("sA").value=Math.round(S.a*100);document.getElementById("sB").value=Math.round(S.b*100);
+  lbl("rA","a = "+fmt(S.a,2));lbl("rB","b = "+fmt(S.b,2));
+  document.querySelectorAll("#segF button").forEach(x=>x.classList.remove("on"));this.classList.add("on");
+  recompile();reset();draw();
+}));
+document.querySelectorAll("#segM button").forEach(b=>b.addEventListener("click",function(){
+  document.querySelectorAll("#segM button").forEach(x=>x.classList.remove("on"));this.classList.add("on");
+  S.mode=this.dataset.m;document.getElementById("cC").classList.toggle("off",S.mode!=="washer");
+  draw();
+}));
+function apply(){
+  S.txt=document.getElementById("fIn").value;
+  document.querySelectorAll("#segF button").forEach(b=>b.classList.remove("on"));
+  recompile();reset();draw();
+}
+document.getElementById("bGo").addEventListener("click",apply);
+document.getElementById("fIn").addEventListener("keydown",e=>{if(e.key==="Enter")apply();});
+document.getElementById("bRe").addEventListener("click",()=>{reset();draw();});
+window.addEventListener("resize",draw);
+recompile();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

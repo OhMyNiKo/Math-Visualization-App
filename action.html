@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<title>The Least Action Principle · Physics Intuition App</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;
+  color:var(--mut);margin-bottom:5px}
+.ctl label b{color:var(--ink);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:22px}
+.btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--acc);
+  color:var(--acc);font:600 13px/1 var(--mono);padding:11px;cursor:pointer;letter-spacing:.06em}
+.btn:hover{background:var(--acc);color:#04120d}
+.btn.dim{border-color:var(--hair);color:var(--mut)}
+.gauge{margin-top:6px;border:1px solid var(--hair);height:26px;position:relative;background:var(--panel2)}
+.gauge .fill{position:absolute;left:0;top:0;bottom:0;background:rgba(77,208,181,.35)}
+.gauge .mark{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--amber)}
+.gauge .txt{position:absolute;right:6px;top:4px;font:600 12px var(--mono);color:var(--ink)}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9;margin-top:8px}
+.read .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)} .v.hot{color:var(--hot)} .v.blue{color:var(--blue)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.7}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center;line-height:1.2}
+.eq .frac .nu{display:block;padding:0 5px;border-bottom:1px solid var(--mut)}
+.eq .frac .de{display:block;padding:0 5px}
+.eq sub,.eq sup{font-size:10px}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · THE LEAST ACTION PRINCIPLE · MODULE 10 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>The Least Action Principle</h1>
+    <p class="sub">A ball must get from A to B in a fixed time, through gravity. The path nature
+    picks is drawn from the start; it is the one with the least action S. Grab any handle and bend
+    the path however you like: S is recomputed live, and it can only go up.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx">\(\displaystyle S[y]=\int_0^T\left(\tfrac12 m\dot y^{2}-mgy\right)dt \)
+        <span class="mutx">&nbsp;·&nbsp;nature: \(\displaystyle \delta S = 0 \)</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Controls</h3>
+        <div class="ctl"><label><span>gravity g</span><b id="rG">g = 9.8</b></label>
+          <input type="range" id="sG" min="20" max="160" value="98"></div>
+        <button class="btn" id="bBack">&#8617; One click back to the true path</button>
+        <button class="btn dim" id="bWig">Wiggle it at random</button>
+        <p class="hint">Drag the teal handles to bend the trial path; drag A or B to move the
+        endpoints. The dashed amber curve is the least-action path and never leaves the screen.</p>
+      </div>
+      <div class="card">
+        <h3>The action meter</h3>
+        <div class="gauge"><div class="fill" id="gFill"></div><div class="mark" id="gMark"></div>
+          <span class="txt" id="gTxt">S</span></div>
+        <div class="read">
+          <div class="r"><span class="k">S of your path</span><span class="v acc" id="oS">?</span></div>
+          <div class="r"><span class="k">S of the true path</span><span class="v amber" id="oSm">?</span></div>
+          <div class="r"><span class="k">excess &Delta;S (never negative)</span><span class="v hot" id="oDS">?</span></div>
+        </div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>The ball does not take the straight line, and nature is not "trying paths". The true
+        motion is the <b>stationary point</b> of S: bend the curve anywhere, in any direction,
+        and &Delta;S = <span class="live" id="oLive">?</span> only grows. The parabola is the
+        one shape that trades kinetic against potential energy so perfectly that every tiny
+        wiggle cancels to first order. Quantum mechanics keeps score the same way, with phases.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Physics: fixed endpoints and fixed total time T = 1.2 (m = 1); trial path y(t) is a Catmull&ndash;Rom
+    curve through nine handles, sampled at 400 points; S = &Sigma;(&frac12;y&#775;&sup2; &minus; gy)&Delta;t.
+    The analytic optimum y&#8727;(t) = y&#8320; + v&#8320;t &minus; &frac12;gt&sup2; with
+    v&#8320; = (y&#8321;&minus;y&#8320;+&frac12;gT&sup2;)/T is integrated with the same rule, so
+    &Delta;S &ge; 0 up to rounding. Faint arrows: the uniform gravity field.
+    One file of vanilla JavaScript, no libraries, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=2)=>(v<0?"−":"")+Math.abs(v).toFixed(d);
+
+const T=1.2, NP=9, NS=400;
+const S={g:9.8, yA:1.0, yB:0.6, pts:new Array(NP).fill(0), drag:-1};
+/* world: t in [0,T] horizontal; y in [YMIN,YMAX] vertical (up positive) */
+const YMIN=-1.2, YMAX=4.4, PADL=54, PADR=20, PADT=16, PADB=40;
+
+function optimal(t){
+  const v0=(S.yB-S.yA+0.5*S.g*T*T)/T;
+  return S.yA+v0*t-0.5*S.g*t*t;
+}
+function snapToOptimal(){
+  for(let i=0;i<NP;i++)S.pts[i]=optimal(T*i/(NP-1));
+  S.pts[0]=S.yA;S.pts[NP-1]=S.yB;
+}
+/* Catmull-Rom through handles, sampled */
+function samplePath(){
+  const ys=new Float64Array(NS+1);
+  const P=i=>S.pts[Math.max(0,Math.min(NP-1,i))];
+  for(let s=0;s<=NS;s++){
+    const u=(NP-1)*s/NS, i=Math.min(NP-2,Math.floor(u)), f=u-i;
+    const p0=P(i-1),p1=P(i),p2=P(i+1),p3=P(i+2);
+    ys[s]=0.5*((2*p1)+(-p0+p2)*f+(2*p0-5*p1+4*p2-p3)*f*f+(-p0+3*p1-3*p2+p3)*f*f*f);
+  }
+  ys[0]=S.pts[0];ys[NS]=S.pts[NP-1];
+  return ys;
+}
+function actionOf(ys){
+  const dt=T/NS;let s=0;
+  for(let i=0;i<NS;i++){
+    const vy=(ys[i+1]-ys[i])/dt, ym=(ys[i+1]+ys[i])/2;
+    s+=(0.5*vy*vy-S.g*ym)*dt;
+  }
+  return s;
+}
+function optSamples(){
+  /* the optimum expressed in the SAME spline family as the trial path, so that
+     ΔS is exactly zero when the handles sit on the true path */
+  const save=S.pts.slice();
+  for(let i=0;i<NP;i++)S.pts[i]=optimal(T*i/(NP-1));
+  S.pts[0]=S.yA;S.pts[NP-1]=S.yB;
+  const ys=samplePath();
+  S.pts=save;
+  return ys;
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  const X=t=>PADL+t/T*(W-PADL-PADR);
+  const Y=y=>PADT+(YMAX-y)/(YMAX-YMIN)*(H-PADT-PADB);
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+
+  /* gravity field: faint downward arrows */
+  g.strokeStyle=C.mutA+".16)";g.lineWidth=1.2;
+  for(let px=PADL+22;px<W-PADR;px+=52)for(let py=PADT+18;py<H-PADB;py+=56){
+    g.beginPath();g.moveTo(px,py);g.lineTo(px,py+16);g.stroke();
+    g.beginPath();g.moveTo(px-3,py+12);g.lineTo(px,py+17);g.lineTo(px+3,py+12);g.stroke();
+  }
+  g.font="11px ui-monospace,Menlo,monospace";g.fillStyle=C.dim;g.textAlign="left";
+  g.fillText("uniform gravity field g↓",W-PADR-170,PADT+14);
+
+  /* axes */
+  g.strokeStyle=C.axis;g.lineWidth=1.5;
+  g.beginPath();g.moveTo(PADL,PADT);g.lineTo(PADL,H-PADB);g.lineTo(W-PADR,H-PADB);g.stroke();
+  g.fillStyle=C.mut;g.textAlign="center";
+  g.fillText("time t →",(PADL+W-PADR)/2,H-12);
+  g.save();g.translate(16,(H-PADB+PADT)/2);g.rotate(-Math.PI/2);g.fillText("height y",0,0);g.restore();
+
+  /* optimal path, dashed amber, always visible */
+  g.setLineDash([6,5]);g.strokeStyle=C.amber;g.lineWidth=2;
+  g.beginPath();
+  for(let i=0;i<=NS;i++){
+    const t=T*i/NS,px=X(t),py=Y(optimal(t));
+    i?g.lineTo(px,py):g.moveTo(px,py);
+  }
+  g.stroke();g.setLineDash([]);
+
+  /* trial path */
+  const ys=samplePath();
+  g.strokeStyle=C.acc;g.lineWidth=2.6;
+  g.beginPath();
+  for(let i=0;i<=NS;i++){
+    const px=X(T*i/NS),py=Y(ys[i]);
+    i?g.lineTo(px,py):g.moveTo(px,py);
+  }
+  g.stroke();
+
+  /* handles */
+  for(let i=0;i<NP;i++){
+    const px=X(T*i/(NP-1)),py=Y(S.pts[i]);
+    const end=(i===0||i===NP-1);
+    g.fillStyle=end?C.ink:C.acc;
+    g.beginPath();g.arc(px,py,end?8:6.5,0,7);g.fill();
+    g.strokeStyle=C.edge;g.lineWidth=2;g.stroke();
+  }
+  g.fillStyle=C.ink;g.textAlign="center";g.font="bold 12px ui-monospace,Menlo,monospace";
+  g.fillText("A",X(0),Y(S.pts[0])-14);
+  g.fillText("B",X(T),Y(S.pts[NP-1])-14);
+  g.font="11px ui-monospace,Menlo,monospace";
+  g.fillStyle=C.amber;g.textAlign="left";
+  g.fillText("- - the true (least-action) path",PADL+8,PADT+14);
+  g.fillStyle=C.acc;g.fillText("— your trial path (drag the dots)",PADL+8,PADT+30);
+
+  /* action */
+  const Su=actionOf(ys), So=actionOf(optSamples());
+  let dS=Su-So; if(dS<1e-4&&dS>-1e-3)dS=0;
+  document.getElementById("oS").textContent=fmt(Su,3);
+  document.getElementById("oSm").textContent=fmt(So,3);
+  document.getElementById("oDS").textContent="+"+fmt(Math.max(0,dS),3);
+  document.getElementById("oLive").textContent="+"+fmt(Math.max(0,dS),3);
+  /* gauge: So sits at 25%, scale extra to the right */
+  const span=Math.max(8,Math.abs(So)*0.6);
+  const frac=Math.max(0.02,Math.min(1,0.25+0.75*(dS/span)));
+  document.getElementById("gFill").style.width=(frac*100)+"%";
+  document.getElementById("gMark").style.left="25%";
+  document.getElementById("gTxt").textContent="S = "+fmt(Su,2);
+}
+
+/* interaction */
+function pos(e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+cv.addEventListener("pointerdown",e=>{
+  const p=pos(e),{W,H}=fit();
+  const X=t=>PADL+t/T*(W-PADL-PADR);
+  const Y=y=>PADT+(YMAX-y)/(YMAX-YMIN)*(H-PADT-PADB);
+  let best=-1,bd=26;
+  for(let i=0;i<NP;i++){
+    const d=Math.hypot(p.x-X(T*i/(NP-1)),p.y-Y(S.pts[i]));
+    if(d<bd){bd=d;best=i;}
+  }
+  S.drag=best;
+  if(best>=0)cv.setPointerCapture(e.pointerId);
+});
+cv.addEventListener("pointermove",e=>{
+  if(S.drag<0)return;
+  const p=pos(e),{H}=fit();
+  const y=YMAX-(p.y-PADT)/(H-PADT-PADB)*(YMAX-YMIN);
+  const yy=Math.max(YMIN+0.05,Math.min(YMAX-0.05,y));
+  S.pts[S.drag]=yy;
+  if(S.drag===0)S.yA=yy;
+  if(S.drag===NP-1)S.yB=yy;
+  draw();
+});
+cv.addEventListener("pointerup",()=>{S.drag=-1;});
+
+document.getElementById("sG").addEventListener("input",e=>{
+  S.g=e.target.value/10;document.getElementById("rG").textContent="g = "+S.g.toFixed(1);draw();});
+document.getElementById("bBack").addEventListener("click",()=>{snapToOptimal();draw();});
+document.getElementById("bWig").addEventListener("click",()=>{
+  for(let i=1;i<NP-1;i++)S.pts[i]+=(((i*2654435761)%1000)/1000-0.5)*0.9*(0.4+((i*40503)%7)/7);
+  draw();});
+window.addEventListener("resize",draw);
+snapToOptimal();draw();
+</script>
+</body>
+</html>

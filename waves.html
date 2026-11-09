@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<title>Wave Builder · Physics Intuition App</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#131a22; --panel2:#0f151c; --ink:#e6edf3; --mut:#8b98a5;
+  --hair:#26313c; --acc:#4dd0b5; --amber:#f0b429; --hot:#ff6b5e; --blue:#6cb6ff;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.shell{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 0;border-bottom:2px solid var(--acc);font-family:var(--mono);font-size:12px}
+.top .wm{letter-spacing:.16em;text-transform:uppercase}
+.top .wm b{color:var(--acc)}
+.top nav{display:flex;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--mut);text-decoration:none;margin-left:18px}
+.top nav a:hover{color:var(--acc)}
+header.h{padding:26px 0 18px}
+h1{font-size:26px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-top:4px;max-width:60em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:16px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.cwrap{background:var(--panel);border:1px solid var(--hair);padding:10px}
+canvas{display:block;width:100%;height:auto}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--hair);padding:14px 16px}
+.card h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:10px}
+.seg{display:flex;border:1px solid var(--hair);margin-bottom:12px}
+.seg button{flex:1;background:var(--panel2);color:var(--mut);border:0;border-right:1px solid var(--hair);
+  font:600 12.5px/1 var(--sans);padding:10px 4px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--acc);color:#04120d}
+.harm{display:grid;grid-template-columns:34px 1fr 52px;gap:8px;align-items:center;
+  font-family:var(--mono);font-size:12px;margin-bottom:6px}
+.harm .n{color:var(--mut)}
+.harm .a{text-align:right;font-weight:600}
+input[type=range]{width:100%;accent-color:var(--acc);height:20px}
+.read{font-family:var(--mono);font-size:13px;line-height:1.9}
+.read .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--hair)}
+.read .r:last-child{border-bottom:0}
+.read .k{color:var(--mut)}
+.read .v{font-weight:600}
+.v.acc{color:var(--acc)} .v.amber{color:var(--amber)}
+.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:12px 14px;font-size:13.5px}
+.mis .mk{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px}
+.mis .live{font-family:var(--mono);color:var(--acc)}
+.eq{margin-top:10px;border-top:1px solid var(--hair);padding:10px 6px 4px;display:flex;
+  gap:16px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.eq .lbl{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.eq .fx{color:var(--ink)}
+.eq .frac{display:inline-block;vertical-align:middle;text-align:center;line-height:1.2}
+.eq .frac .nu{display:block;padding:0 5px;border-bottom:1px solid var(--mut)}
+.eq .frac .de{display:block;padding:0 5px}
+.eq sub,.eq sup{font-size:10px}
+.eq .mutx{color:var(--mut)}
+foot{display:block;margin-top:28px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);line-height:1.8}
+foot a{color:var(--acc);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · WAVE BUILDER · MODULE 4 OF 29</span>
+    <nav>
+      <a href="index.html">All modules</a>
+    </nav>
+  </div>
+
+  <header class="h">
+    <h1>Wave Builder</h1>
+    <p class="sub">Nine smooth sine waves and nine sliders. Stack them and watch corners, ramps,
+    and squares appear out of pure roundness. This is Fourier synthesis, the idea behind every
+    audio format, JPEG, and half of quantum mechanics.</p>
+  </header>
+
+  <div class="grid">
+    <div class="cwrap"><canvas id="cv" width="760" height="520"></canvas>
+      <div class="eq"><span class="lbl">The defining equation</span>
+        <span class="fx">\(\displaystyle S(x)=\sum_n a_n\sin(nx) \)
+        <span class="mutx">&nbsp;·&nbsp;square wave:&nbsp;</span>
+        \(\displaystyle a_n=\frac{4}{\pi n} \)
+        <span class="mutx">&nbsp;(odd n only)</span></span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Presets</h3>
+        <div class="seg">
+          <button id="pSq" class="on">Square</button>
+          <button id="pTr">Triangle</button>
+          <button id="pSw">Sawtooth</button>
+          <button id="pZe">Zero</button>
+        </div>
+        <h3>Harmonics a&#8345; &middot; sin(nx)</h3>
+        <div id="harms"></div>
+      </div>
+      <div class="card">
+        <h3>Readout</h3>
+        <div class="read">
+          <div class="r"><span class="k">peak of the sum</span><span class="v acc" id="oMax">0.000</span></div>
+          <div class="r"><span class="k">square target height</span><span class="v">1.000</span></div>
+          <div class="r"><span class="k">overshoot, % of the jump</span><span class="v amber" id="oOver">&ndash;</span></div>
+          <div class="r"><span class="k">theory, first harmonic 4/&pi;</span><span class="v">1.273</span></div>
+        </div>
+      </div>
+      <div class="mis">
+        <p class="mk">The misconception this kills</p>
+        <p>Adding more waves does not smooth the overshoot away. On the square preset the sum
+        spikes to <span class="live" id="oLive">?</span> beside every jump, an overshoot of about
+        9 percent of the jump size, and adding harmonics only makes the spike <b>narrower</b>, never shorter.
+        That stubborn 9 percent is the Gibbs phenomenon: a perfectly sharp corner genuinely
+        needs infinitely many smooth waves.</p>
+      </div>
+    </div>
+  </div>
+
+  <foot>
+    Physics: partial Fourier sums S(x) = &Sigma; a&#8345; sin(nx), n = 1..9. Square preset
+    a&#8345; = 4/&pi;n for odd n (a&#8321; = 1.273); triangle a&#8345; = &plusmn;8/&pi;&sup2;n&sup2;
+    for odd n; sawtooth a&#8345; = 2(&minus;1)&#8319;&#8314;&sup1;/&pi;n. The five-term square
+    partial sum overshoots by roughly 9 percent of the jump near each discontinuity (the Gibbs
+    phenomenon, 8.95 percent in the limit), measured live above.
+    One file of vanilla JavaScript, no libraries, no network.
+    &nbsp;·&nbsp; <a href="index.html">All twenty-nine modules</a>
+  </foot>
+</div>
+
+<script>
+"use strict";
+const cv=document.getElementById("cv");
+function fit(){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.width,h=Math.round(w*(520/760));
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g,W:w,H:h};
+}
+const fmt=(v,d=3)=>(v<0?"−":"")+Math.abs(v).toFixed(d);
+const N=9;
+let A=new Array(N).fill(0);
+let preset="square";
+
+const PRESETS={
+  square:  ()=>A.map((_,i)=>{const n=i+1;return n%2?4/(Math.PI*n):0;}),
+  triangle:()=>A.map((_,i)=>{const n=i+1;return n%2?8/(Math.PI*Math.PI*n*n)*((n%4===1)?1:-1):0;}),
+  sawtooth:()=>A.map((_,i)=>{const n=i+1;return 2/(Math.PI*n)*((n%2===1)?1:-1);}),
+  zero:    ()=>A.map(()=>0)
+};
+/* target shapes for reference overlay */
+function target(x){ // x in [0,2pi)
+  if(preset==="square")  return x<Math.PI?1:-1;
+  if(preset==="triangle")return (2/Math.PI)*Math.asin(Math.sin(x)); // exact triangle, peak 1 at pi/2
+  if(preset==="sawtooth")return x<Math.PI ? x/Math.PI : x/Math.PI-2; // ramp -1..1, jump at pi
+  return null;
+}
+
+const S=x=>A.reduce((s,a,i)=>s+a*Math.sin((i+1)*x),0);
+
+function build(){
+  const el=document.getElementById("harms");el.innerHTML="";
+  for(let i=0;i<N;i++){
+    const row=document.createElement("div");row.className="harm";
+    row.innerHTML=`<span class="n">a${i+1}</span>
+      <input type="range" min="-150" max="150" value="${Math.round(A[i]*100)}" data-i="${i}">
+      <span class="a" id="av${i}">${fmt(A[i],2)}</span>`;
+    el.appendChild(row);
+  }
+  el.querySelectorAll("input").forEach(inp=>inp.addEventListener("input",e=>{
+    const i=+e.target.dataset.i;A[i]=e.target.value/100;preset="custom";
+    document.querySelectorAll(".seg button").forEach(b=>b.classList.remove("on"));
+    document.getElementById("av"+i).textContent=fmt(A[i],2);
+    draw();
+  }));
+}
+
+function draw(){
+  const{g,W,H}=fit();
+  g.fillStyle=C.bg2;g.fillRect(0,0,W,H);
+  const sumH=H*0.62, compH=H-sumH;
+  const X=x=>x/(2*Math.PI)*W;
+  const Ys=v=>sumH/2 - v*sumH/2/1.9;
+  /* grid + axis */
+  g.strokeStyle=C.grid;g.lineWidth=1;
+  for(let k=0;k<=4;k++){const x=X(k*Math.PI/2);g.beginPath();g.moveTo(x,0);g.lineTo(x,sumH);g.stroke();}
+  g.strokeStyle=C.axis;g.beginPath();g.moveTo(0,Ys(0));g.lineTo(W,Ys(0));g.stroke();
+  g.font="11px ui-monospace,Menlo,monospace";g.fillStyle=C.dim;g.textAlign="center";
+  ["0","π/2","π","3π/2","2π"].forEach((t,k)=>g.fillText(t,X(k*Math.PI/2)+(k===0?10:k===4?-12:0),Ys(0)+16));
+  /* target overlay */
+  if(preset==="square"||preset==="triangle"){
+    g.strokeStyle=C.mutA+".5)";g.lineWidth=1.4;g.setLineDash([5,4]);
+    g.beginPath();
+    for(let px=0;px<=W;px++){const x=2*Math.PI*px/W;const t=target(x);
+      px===0?g.moveTo(px,Ys(t)):g.lineTo(px,Ys(t));}
+    g.stroke();g.setLineDash([]);
+  }
+  /* sum */
+  let mx=0,mxX=0;
+  g.strokeStyle=C.acc;g.lineWidth=2.6;g.beginPath();
+  for(let px=0;px<=W;px++){
+    const x=2*Math.PI*px/W,v=S(x);
+    if(v>mx){mx=v;mxX=px;}
+    px===0?g.moveTo(px,Ys(v)):g.lineTo(px,Ys(v));
+  }
+  g.stroke();
+  /* Gibbs marker on square preset: overshoot as percent of the JUMP (height 2), the classical ~9% */
+  const over=(mx-1)/2*100;
+  if(preset==="square"&&mx>1.01){
+    g.fillStyle=C.amber;
+    g.beginPath();g.arc(mxX,Ys(mx),4,0,7);g.fill();
+    g.textAlign="left";g.fillStyle=C.amber;
+    g.fillText("overshoot +"+over.toFixed(1)+"%",Math.min(mxX+8,W-120),Ys(mx)-6);
+  }
+  /* components */
+  const Yc=v=>sumH+compH/2 - v*compH/2/1.6;
+  g.strokeStyle=C.hair;g.beginPath();g.moveTo(0,sumH+1);g.lineTo(W,sumH+1);g.stroke();
+  g.strokeStyle=C.axis;g.beginPath();g.moveTo(0,Yc(0));g.lineTo(W,Yc(0));g.stroke();
+  for(let i=0;i<N;i++){
+    if(Math.abs(A[i])<0.005) continue;
+    g.strokeStyle=`${C.blueA}${0.25+0.5*Math.abs(A[i])/1.5})`;g.lineWidth=1.2;
+    g.beginPath();
+    for(let px=0;px<=W;px++){const x=2*Math.PI*px/W;
+      const v=A[i]*Math.sin((i+1)*x);
+      px===0?g.moveTo(px,Yc(v)):g.lineTo(px,Yc(v));}
+    g.stroke();
+  }
+  g.fillStyle=C.dim;g.textAlign="left";
+  g.fillText("the sum S(x)",10,16);
+  g.fillText("the nine components",10,sumH+16);
+  /* readouts */
+  document.getElementById("oMax").textContent=fmt(mx);
+  document.getElementById("oOver").textContent=preset==="square"?("+"+over.toFixed(1)+"%"):"–";
+  document.getElementById("oLive").textContent=fmt(mx);
+}
+
+function setPreset(name,btn){
+  preset=name;A=PRESETS[name]();
+  document.querySelectorAll(".seg button").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+  build();draw();
+}
+document.getElementById("pSq").addEventListener("click",function(){setPreset("square",this);});
+document.getElementById("pTr").addEventListener("click",function(){setPreset("triangle",this);});
+document.getElementById("pSw").addEventListener("click",function(){setPreset("sawtooth",this);});
+document.getElementById("pZe").addEventListener("click",function(){setPreset("zero",this);});
+window.addEventListener("resize",draw);
+A=PRESETS.square();build();draw();
+</script>
+</body>
+</html>
