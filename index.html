@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Physics Intuition App · Twenty-nine Live Modules</title>
+<title>Physics Intuition App · Thirty Live Modules</title>
 <script src="theme.js"></script>
 <style>
 :root{
@@ -30,6 +30,14 @@ h1{font-size:30px;letter-spacing:-.01em}
 .grp:first-child{margin-top:0}
 .grp span{color:var(--mut);letter-spacing:0;text-transform:none;font-family:var(--sans);font-size:13px;margin-left:12px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-top:24px}
+.search-panel{margin-top:22px;border:1px solid var(--hair);background:var(--panel);padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.search-panel label{font:10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.search-panel input{flex:1;min-width:220px;background:var(--panel2);border:1px solid var(--hair);color:var(--ink);font:14px var(--mono);padding:11px 12px;outline:none}
+.search-panel input:focus{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.search-count{font:11px var(--mono);color:var(--mut);min-width:100px;text-align:right}
+.no-results{grid-column:1/-1;border:1px dashed var(--hair);padding:22px;text-align:center;color:var(--mut);font:12px var(--mono)}
+@media(max-width:600px){.search-panel{align-items:stretch}.search-panel label,.search-count{width:100%;text-align:left}.search-panel input{min-width:0;width:100%}}
+
 .mod{background:var(--panel);border:1px solid var(--hair);padding:18px 20px;display:flex;
   flex-direction:column;gap:10px}
 .mod .mh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
@@ -53,7 +61,7 @@ foot a{color:var(--acc);text-decoration:none}
 <body>
 <div class="shell">
   <div class="top">
-    <span class="wm"><b>PHYSICS INTUITION APP</b> · TWENTY-NINE LIVE MODULES</span>
+    <span class="wm"><b>PHYSICS INTUITION APP</b> · THIRTY LIVE MODULES</span>
     <nav>
     </nav>
   </div>
@@ -69,199 +77,212 @@ foot a{color:var(--acc);text-decoration:none}
     its own on/off so a teacher can hide the answers until the class has guessed.</p>
   </header>
 
+  <section class="search-panel" aria-label="Search modules">
+    <label for="module-search">Search modules</label>
+    <input id="module-search" type="search" autocomplete="off" placeholder="Try: friction, eigenvalue, quantum, derivative…" aria-describedby="search-count">
+    <span class="search-count" id="search-count" aria-live="polite">30 modules</span>
+  </section>
+
   <div class="grid">
     <div class="grp">Physics and calculus <span>modules 1 to 15</span></div>
-    <div class="mod">
+    <div class="mod" data-search="derivative calculus tangent slope secant limit rate of change">
       <div class="mh"><h2>Derivative Playground</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 1 · calculus</p>
       <div class="kill"><b>The misconception it kills</b>
         The derivative is not a fraction of two little numbers; it is what the ratio approaches.</div>
       <a class="go" href="playground.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="electric magnetic field electromagnetism force charge trajectory vector">
       <div class="mh"><h2>Quantum Box</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 2 · quantum mechanics</p>
       <div class="kill"><b>The misconception it kills</b>
         Quantization is not a decree; energies come in steps because a confined wave must fit.</div>
       <a class="go" href="playground.html#quantum">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="wave fourier harmonic oscillation signal spectrum optics">
       <div class="mh"><h2>Field Explorer</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 3 · electromagnetism</p>
       <div class="kill"><b>The misconception it kills</b>
         Field lines are not paths particles follow; momentum makes the particle leave the line.</div>
       <a class="go" href="fields.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="energy conservation work mechanics symmetry ledger">
       <div class="mh"><h2>Wave Builder</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 4 · Fourier analysis</p>
       <div class="kill"><b>The misconception it kills</b>
         More harmonics never smooth the overshoot away; a sharp corner needs infinitely many waves.</div>
       <a class="go" href="waves.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="quantum wavefunction probability node standing wave">
       <div class="mh"><h2>The Conservation Ledger</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 5 · mechanics &amp; symmetry</p>
       <div class="kill"><b>The misconception it kills</b>
         Energy is never used up; it only changes accounts, and the total never moves.</div>
       <a class="go" href="symmetry.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="taylor series approximation polynomial convergence calculus">
       <div class="mh"><h2>Wavefunction in 3D</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 6 · quantum mechanics</p>
       <div class="kill"><b>The misconception it kills</b>
         A wavefunction is not a fuzzy ball; it is a standing wave whose nodal lines never move.</div>
       <a class="go" href="wavefunction3d.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="phase space damping oscillator velocity position mechanics">
       <div class="mh"><h2>Taylor Series Lab</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 7 · calculus</p>
       <div class="kill"><b>The misconception it kills</b>
         More terms do not always help; a Taylor series is a local impostor with a radius of trust.</div>
       <a class="go" href="taylor.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="double slit interference optics waves diffraction quantum">
       <div class="mh"><h2>Phase Space</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 8 · mechanics</p>
       <div class="kill"><b>The misconception it kills</b>
         Damping does not just shrink the swing; it spirals the whole history into a single point.</div>
       <a class="go" href="phasespace.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="least action lagrangian mechanics path variational principle">
       <div class="mh"><h2>Double-Slit Interference</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 9 · waves &amp; optics</p>
       <div class="kill"><b>The misconception it kills</b>
         Waves do not add like intensities: two bright waves can make a dark stripe.</div>
       <a class="go" href="doubleslit.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="relativity spacetime minkowski light cone simultaneity velocity">
       <div class="mh"><h2>The Least Action Principle</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 10 · mechanics</p>
       <div class="kill"><b>The misconception it kills</b>
         Nature does not take the shortest path; it takes the one no wiggle can improve.</div>
       <a class="go" href="action.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="topology hairy ball vector field sphere">
       <div class="mh"><h2>Spacetime Diagram</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 11 · special relativity</p>
       <div class="kill"><b>The misconception it kills</b>
         "Now" is not universal; change your speed and simultaneity tilts with it.</div>
       <a class="go" href="spacetime.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="quantum tunneling barrier wavefunction exponential">
       <div class="mh"><h2>The Hairy Ball Theorem</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 12 · topology</p>
       <div class="kill"><b>The misconception it kills</b>
         An uncombable sphere is not lack of skill; it is topology keeping score.</div>
       <a class="go" href="hairyball.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="integral calculus area riemann rectangles accumulation">
       <div class="mh"><h2>Quantum Tunneling</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 13 · quantum mechanics</p>
       <div class="kill"><b>The misconception it kills</b>
         The particle does not jump the wall; the wave leaks through, dying exponentially inside.</div>
       <a class="go" href="tunneling.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="mechanics projectile motion momentum collision incline parabola">
       <div class="mh"><h2>The Integral Machine</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 14 · calculus</p>
       <div class="kill"><b>The misconception it kills</b>
         The integral is not an area formula; it is the limit the rectangles are chasing.</div>
       <a class="go" href="integral.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="function transformations graph translation reflection stretch">
       <div class="mh"><h2>The Mechanics Bench</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 15 · A-Level Mechanics 1</p>
       <div class="kill"><b>The misconception it kills</b>
         Heavier does not slide faster; on a bare slope the mass cancels out of the answer.</div>
       <a class="go" href="mechanics.html">Launch &rsaquo;</a>
     </div>
+    <div class="mod" data-search="pulley wedge mechanics friction tension rope connected systems masses acceleration static kinetic friction inclined plane movable pulley constraints new module">
+      <div class="mh"><h2>Pulley–Wedge Mechanics Lab</h2><span class="pill">NEW</span></div>
+      <p class="no">MODULE 30 · connected systems &amp; friction</p>
+      <div class="kill"><b>The misconception it kills</b>
+        A single rope does not force every body to share one acceleration; constraints, moving pulleys and friction decide the motion.</div>
+      <a class="go" href="mechanics-lab.html">Launch &rsaquo;</a>
+    </div>
     <div class="grp">Mathematics for the CIE / A-Level classroom <span>modules 16 to 29</span></div>
-    <div class="mod">
+    <div class="mod" data-search="inverse function reciprocal reflection y=x domain range">
       <div class="mh"><h2>Function Transformations</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 16 · functions</p>
       <div class="kill"><b>The misconception it kills</b>
         f(x+a) does not move the graph to the right; it moves it left, and the order of stacked changes matters.</div>
       <a class="go" href="transform.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="sequence series geometric arithmetic convergence sum">
       <div class="mh"><h2>Inverse Functions</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 17 · functions</p>
       <div class="kill"><b>The misconception it kills</b>
         f⁻¹ is not 1/f; it is the mirror image of f in the line y = x.</div>
       <a class="go" href="inverse.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="epsilon limit analysis convergence n delta">
       <div class="mh"><h2>Sequences and Series</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 18 · sequences &amp; series</p>
       <div class="kill"><b>The misconception it kills</b>
         Adding infinitely many positive terms can give a finite total; a/(1−r) is where the bars are heading.</div>
       <a class="go" href="sequences.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="second derivative concavity inflection calculus">
       <div class="mh"><h2>The ε–N Limit</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 19 · analysis</p>
       <div class="kill"><b>The misconception it kills</b>
         Getting closer is not converging; the terms must eventually stay inside every band, however thin.</div>
       <a class="go" href="epsilon.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="chain rule composite function derivative calculus gears">
       <div class="mh"><h2>Higher Derivatives and Concavity</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 20 · calculus</p>
       <div class="kill"><b>The misconception it kills</b>
         f″ = 0 is not an inflection point until the sign of f″ actually changes.</div>
       <a class="go" href="concavity.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="volume revolution solids integral disk washer">
       <div class="mh"><h2>The Chain Rule as Gears</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 21 · calculus</p>
       <div class="kill"><b>The misconception it kills</b>
         Derivatives of nested functions multiply like gear ratios; they never add.</div>
       <a class="go" href="chain.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="dot cross product vectors geometry orthogonal">
       <div class="mh"><h2>Volumes of Revolution</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 22 · calculus</p>
       <div class="kill"><b>The misconception it kills</b>
         Volume grows with the square of the radius: double the curve, quadruple the solid.</div>
       <a class="go" href="revolution.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="normal distribution gaussian statistics standard deviation z score">
       <div class="mh"><h2>Dot and Cross Product</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 23 · vectors</p>
       <div class="kill"><b>The misconception it kills</b>
         The dot product is a number, the cross product a vector; a·b = 0 does not make either vector zero.</div>
       <a class="go" href="vectors.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="complex numbers complex plane geometry rotation modulus argument">
       <div class="mh"><h2>Normal Distribution and Standardisation</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 24 · statistics</p>
       <div class="kill"><b>The misconception it kills</b>
         Changing σ changes the height too, because the area must stay 1; Z has the same probability on a new axis.</div>
       <a class="go" href="normal.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="matrix linear algebra determinant transformation area eigenvalue">
       <div class="mh"><h2>Complex Arithmetic as Geometry</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 25 · complex numbers</p>
       <div class="kill"><b>The misconception it kills</b>
         Multiplying complex numbers is a rotation plus a scaling; multiplying by i is a quarter turn, nothing more.</div>
       <a class="go" href="complex.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="polar coordinates curve rose petals trigonometry">
       <div class="mh"><h2>Matrices as Linear Transformations</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 26 · linear algebra</p>
       <div class="kill"><b>The misconception it kills</b>
         The determinant is not the matrix's size; it is how much every area is scaled, with a sign for orientation.</div>
       <a class="go" href="matrix.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="hyperbolic functions catenary cosh sinh hanging chain">
       <div class="mh"><h2>Polar Curves r = f(θ)</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 27 · coordinate geometry</p>
       <div class="kill"><b>The misconception it kills</b>
         A rose with even k has 2k petals, and a negative r is drawn through the pole, not ignored.</div>
       <a class="go" href="polar.html">Launch &rsaquo;</a>
     </div>
-    <div class="mod">
+    <div class="mod" data-search="jacobian change coordinates multivariable calculus polar area">
       <div class="mh"><h2>Hyperbolic Functions and the Catenary</h2><span class="pill">LIVE</span></div>
       <p class="no">MODULE 28 · functions</p>
       <div class="kill"><b>The misconception it kills</b>
@@ -279,10 +300,39 @@ foot a{color:var(--acc);text-decoration:none}
 
   <foot>
     Sample demo built with CRCS to show what the app feels like; Niko's build grows from here.
-    Twenty-nine live modules, and every one is a self-contained file of vanilla JavaScript:
+    Thirty live modules, and every one is a self-contained file of vanilla JavaScript:
     no network, works offline (formulas are typeset by a vendored copy of KaTeX). Add
     <span style="color:var(--acc)">?theme=light</span> to any module link to open it in the light look. &nbsp;·&nbsp;
   </foot>
 </div>
+
+<script>
+(function(){
+  const input=document.getElementById('module-search');
+  const count=document.getElementById('search-count');
+  const grid=document.querySelector('.grid');
+  const cards=[...grid.querySelectorAll('.mod')];
+  const groups=[...grid.querySelectorAll('.grp')];
+  const empty=document.createElement('div'); empty.className='no-results'; empty.hidden=true; empty.textContent='No module matches that search.'; grid.appendChild(empty);
+  function apply(){
+    const q=input.value.trim().toLocaleLowerCase();
+    let visible=0;
+    cards.forEach(card=>{
+      const hay=(card.textContent+' '+(card.dataset.search||'')).toLocaleLowerCase();
+      const show=!q||hay.includes(q); card.hidden=!show; if(show)visible++;
+    });
+    groups.forEach(group=>{
+      let next=group.nextElementSibling, any=false;
+      while(next && !next.classList.contains('grp')){if(next.classList.contains('mod')&&!next.hidden)any=true; next=next.nextElementSibling;}
+      group.hidden=!!q&&!any;
+    });
+    empty.hidden=visible!==0;
+    count.textContent=visible+' module'+(visible===1?'':'s')+(q?' found':'');
+  }
+  input.addEventListener('input',apply);
+  input.addEventListener('search',apply);
+  apply();
+})();
+</script>
 </body>
 </html>

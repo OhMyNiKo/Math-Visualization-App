@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="theme-color" content="#0d1117"><meta name="description" content="Three offline mechanics experiments with adjustable masses, friction and slope angles."><title>Mechanics Lab · Three Models · Offline</title><style>
+
+:root{--bg:#0d1117;--panel:#131a22;--panel2:#0f151c;--ink:#e6edf3;--mut:#8b98a5;--hair:#26313c;--acc:#4dd0b5;--amber:#f0b429;--hot:#ff8073;--blue:#6cb6ff;--mono:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace;--sans:'Helvetica Neue',Arial,'PingFang SC',sans-serif;color-scheme:dark}
+:root[data-theme=light]{--bg:#f4f6f8;--panel:#fff;--panel2:#edf1f5;--ink:#172331;--mut:#546677;--hair:#ced7df;--acc:#087f6d;--amber:#996900;--hot:#bd4135;--blue:#226cb9;color-scheme:light}
+*{box-sizing:border-box;border-radius:0}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}button,input,select{font:inherit}button,a,input,summary{touch-action:manipulation}button{cursor:pointer}a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--amber);outline-offset:4px}.shell{max-width:1220px;margin:auto;padding:0 24px 36px}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;padding:16px 0;border-bottom:2px solid var(--acc);font:11px var(--mono);letter-spacing:.12em}.brand b{color:var(--acc)}.top nav{display:flex;align-items:center;gap:20px}.top a{color:var(--mut);letter-spacing:0}.theme{border:1px solid var(--hair);color:var(--mut);background:var(--panel2);font:11px var(--mono);padding:7px 10px}.eyebrow{font:10px var(--mono);letter-spacing:.18em;color:var(--amber);margin-bottom:8px}header{padding:28px 0 20px}h1{font-size:29px;letter-spacing:-.025em;font-weight:600;margin:0 0 6px}.sub{color:var(--mut);font-size:14px;max-width:760px;margin:0}.tabs{display:flex;border-bottom:1px solid var(--hair);gap:6px;margin-bottom:18px}.tab{padding:13px 18px;background:transparent;border:1px solid transparent;border-bottom:2px solid transparent;color:var(--mut);font-size:13px;display:flex;gap:12px;align-items:center}.tab .number{font:10px var(--mono);color:var(--mut)}.tab[aria-selected=true]{color:var(--acc);background:var(--panel);border-color:var(--hair);border-bottom-color:var(--acc)}.grid{display:grid;grid-template-columns:minmax(0,1fr) 302px;gap:16px;align-items:start}.stage{background:var(--panel);border:1px solid var(--hair);min-width:0}.stage-top{padding:12px 16px;display:flex;justify-content:space-between;gap:8px;align-items:center;border-bottom:1px solid var(--hair);font:10px var(--mono);letter-spacing:.08em;color:var(--mut)}.stage-title{display:flex;align-items:center;gap:9px}.dot{width:6px;height:6px;background:var(--acc);display:inline-block}.status{color:var(--acc);letter-spacing:0;text-align:right}canvas{display:block;width:100%;height:auto;aspect-ratio:760/510}.transport{display:flex;gap:8px;align-items:center;padding:12px 15px;border-top:1px solid var(--hair);flex-wrap:wrap}.btn{border:1px solid var(--hair);background:var(--panel2);color:var(--ink);font:12px var(--mono);padding:10px 15px;min-height:38px}.btn.primary{border-color:var(--acc);background:var(--acc);color:var(--bg);min-width:102px;font-weight:600}.btn:hover{border-color:var(--acc)}.btn:disabled{opacity:.4;cursor:default}.transport label{font:11px var(--mono);color:var(--mut);margin-left:auto}.transport select{color:var(--ink);background:var(--panel2);border:1px solid var(--hair);padding:6px;font:11px var(--mono)}.timeline{padding:0 16px 12px;display:flex;align-items:center;gap:12px}.timeline input{width:100%;accent-color:var(--acc)}.time{font:11px var(--mono);min-width:100px;color:var(--mut);text-align:right}.stage-note{color:var(--mut);font:11px/1.7 var(--mono);border-top:1px dashed var(--hair);padding:9px 16px;min-height:38px}.side{display:flex;flex-direction:column;gap:12px}.card{background:var(--panel);border:1px solid var(--hair);padding:16px}.card h2,.card h3{margin:0 0 14px;font:10px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--acc)}.ctl{margin-bottom:18px}.ctl:last-child{margin-bottom:0}.ctl-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.ctl label{font:12px var(--mono);color:var(--mut)}.value{display:flex;align-items:center;gap:5px}.value input{width:62px;border:1px solid var(--hair);background:var(--panel2);color:var(--ink);font:12px var(--mono);padding:4px 5px;text-align:right}.unit{font:10px var(--mono);color:var(--mut);min-width:15px}.ctl input[type=range]{width:100%;height:17px;accent-color:var(--acc);margin:0}.color-blue input[type=range]{accent-color:var(--blue)}.color-amber input[type=range]{accent-color:var(--amber)}.color-hot input[type=range]{accent-color:var(--hot)}.color-blue label{color:var(--blue)}.color-amber label{color:var(--amber)}.color-hot label{color:var(--hot)}.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}.preset{border:1px solid var(--hair);background:var(--panel2);color:var(--mut);font:10px var(--mono);padding:7px 8px}.preset:hover{color:var(--acc);border-color:var(--acc)}.divider{border-top:1px dashed var(--hair);margin:8px 0 16px}.tiny{font-size:11px;color:var(--mut);line-height:1.6;margin:8px 0 0}.live-grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--hair);margin-top:16px}.metric{padding:12px 10px 3px;border-right:1px solid var(--hair)}.metric:first-child{padding-left:0}.metric:last-child{border:0}.metric .k{font:10px var(--mono);color:var(--mut);margin-bottom:6px}.metric .v{font:18px var(--mono);color:var(--ink);white-space:nowrap}.metric small{font:9px var(--mono);color:var(--mut)}.read{font:12px/1.9 var(--mono)}.read .r{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--hair);padding:3px 0}.read .r:last-child{border:0}.read .k{color:var(--mut)}.read .v{text-align:right}.acc{color:var(--acc)}.amber{color:var(--amber)}.blue{color:var(--blue)}.hot{color:var(--hot)}.mis{border-left:3px solid var(--amber);background:var(--panel2);padding:14px 16px;margin-top:16px;font-size:13px}.mis h2{font:10px var(--mono);letter-spacing:.13em;color:var(--amber);margin:0 0 7px}.mis p{margin:0;line-height:1.7}.below{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;margin-top:16px}.below .card{padding:18px}.equation{font:14px/2 var(--mono);color:var(--ink);overflow-wrap:anywhere}.equation sub{font-size:10px}.equation .mut{color:var(--mut);font-size:11px}.explain{font-size:13px;color:var(--mut);margin:8px 0 0}.check{display:flex;gap:8px;font:11px var(--mono);color:var(--mut);align-items:center}.check input{accent-color:var(--acc)}.footer{margin-top:24px;padding-top:15px;border-top:1px solid var(--hair);font:10px/1.9 var(--mono);color:var(--mut)}details{font-size:12px;color:var(--mut);margin-top:12px}summary{cursor:pointer;color:var(--ink)}.details-content{padding-top:8px;font:12px/1.9 var(--mono)}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}[hidden]{display:none!important}.key{display:flex;gap:16px;font:10px var(--mono);color:var(--mut);flex-wrap:wrap;padding:0 16px 12px}.key span{display:flex;align-items:center;gap:6px}.key i{width:14px;height:2px;background:currentColor}.arrow-key{color:var(--acc)}.notice{font:10px/1.7 var(--mono);color:var(--mut);margin-top:12px}
+@media(min-width:1400px){.shell{max-width:1280px}.grid{grid-template-columns:minmax(0,1fr) 312px}}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr) 270px}.shell{padding:0 16px 28px}.tab{padding:12px}.below{grid-template-columns:1fr}}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr;align-items:start}.side .card{padding:14px}.tab{flex:1;justify-content:center;font-size:12px;padding:12px 6px;gap:7px}h1{font-size:25px}.sub{font-size:13px}.top{font-size:9px;gap:10px}.top nav{gap:12px}.stage-top{padding:11px;font-size:9px}.transport{padding:10px}.btn{font-size:11px;padding:9px 11px}.transport label{font-size:10px}.live-grid{margin-top:12px}.metric .v{font-size:17px}.metric{padding-right:5px}.metric .k{font-size:9px}.equation{font-size:12px}.stage-note{font-size:10px}.status{max-width:45%;line-height:1.5}}
+@media(max-width:430px){.side{grid-template-columns:1fr}.top nav a{display:none}.shell{padding:0 12px 24px}.metric .v{font-size:16px}.stage-top{font-size:8px}.transport label{margin-left:0}.tab .number{display:none}.tab{font-size:11px}.time{min-width:90px}}
+
+
+.tabs .tab{flex:1;justify-content:center;line-height:1.45} @media(max-width:700px){.tab{font-size:10px;gap:3px}.tab .number{display:none}}
+
+</style><script>try{document.documentElement.dataset.theme=localStorage.getItem('niko-mechanics-theme')||'dark'}catch(e){}</script></head>
+<body><div class="shell">
+<div class="top"><span class="brand"><b>PHYSICS INTUITION APP</b> · MECHANICS LAB</span><nav><a href="https://physics-intuition-app.netlify.app/" target="_blank" rel="noopener">All original modules ↗</a><button class="theme" id="theme" aria-label="Switch colour theme">Light mode</button></nav></div>
+<header><div class="eyebrow">THREE CONNECTED-SYSTEM EXPERIMENTS</div><h1 id="title">Three masses. One rope.</h1><p class="sub" id="subtitle">Two fixed pulleys, one massive moving pulley. Change a mass and let the constraint decide what moves.</p></header>
+<div class="tabs" role="tablist" aria-label="Mechanics modules"><button id="tab-pulley" class="tab" role="tab" aria-selected="true" aria-controls="experiment" data-module="pulley"><span class="number">01</span> Massive movable pulley</button><button id="tab-wedge" class="tab" role="tab" aria-selected="false" aria-controls="experiment" data-module="wedge"><span class="number">02</span> Sliding wedge + friction</button><button id="tab-slopes" class="tab" role="tab" aria-selected="false" aria-controls="experiment" data-module="slopes"><span class="number">03</span> Rough slopes + movable pulley</button></div>
+<main id="experiment" role="tabpanel" aria-labelledby="tab-pulley">
+<div class="grid"><div class="main-col"><section class="stage" aria-label="Interactive mechanics animation"><div class="stage-top"><div class="stage-title"><span class="dot"></span><span id="stage-name">IDEAL ROPE · MASSIVE HUB</span></div><span class="status" id="status" role="status">Ready to release</span></div><canvas id="canvas" width="760" height="510" role="img" aria-label="Diagram of the pulley apparatus at rest. Use Play to animate."></canvas>
+<div class="key"><span id="legend-left" class="blue"><i></i> m₁</span><span id="legend-center" class="amber"><i></i> moving pulley M</span><span id="legend-right" class="hot"><i></i> m₂</span><span class="arrow-key"><i></i> acceleration</span></div>
+<div class="transport"><button class="btn primary" id="play">▶ Play</button><button class="btn" id="reset" aria-label="Replay from the designed initial position">↺ Reset</button><button class="btn" id="step" aria-label="Advance by one sixtieth of a physical second">Step 1/60 s →</button><label for="speed">Playback <select id="speed"><option value="0.1">0.1×</option><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label></div>
+<div class="timeline"><label for="scrub" class="sr">Simulation time</label><input id="scrub" type="range" min="0" max="1000" value="0"><span class="time" id="time">0.00 / 0.00 s</span></div>
+<div class="stage-note" id="stage-note">Initial positions are chosen for this set of masses.</div></section>
+<div class="live-grid" id="metrics"></div><aside class="mis"><h2>THE MISCONCEPTION THIS KILLS</h2><p id="misconception"></p></aside></div>
+<aside class="side"><section class="card"><h2>Change the experiment</h2><div class="presets" id="presets"></div><div id="controls"></div><div class="divider"></div><label class="check"><input type="checkbox" id="arrows" checked> Show acceleration arrows</label><p class="tiny">Parameter changes reset to rest and choose safe starting positions. Length and time scales stay fixed across all masses and all modules.</p></section><section class="card"><h2>Solved live</h2><div class="read" id="readouts"></div><p class="notice" id="directions"></p></section></aside></div>
+<div class="below"><section class="card"><h2>The defining equations</h2><div class="equation" id="equations"></div><p class="explain" id="signs"></p><details><summary>Where do these equations come from?</summary><div class="details-content" id="derivation"></div></details></section><section class="card"><h2>The intuition</h2><p class="explain" id="intuition"></p><details open><summary>Model &amp; boundary conditions</summary><div class="details-content" id="assumptions"></div></details></section></div>
+</main><footer class="footer">NIKO / PHYSICS INTUITION · g = 9.81 m/s² · metres, kilograms, seconds<br>Fixed spatial scale in all modules · 1× = one physical second per real second · Step = 1/60 s · Pause before contact.</footer>
+</div><script>
+/* SI units; initially stationary, taut-rope motion. Rotational inertia neglected. */
+(function(root){
+'use strict';
+const G=9.81,DEG=Math.PI/180;
+function travel(start,accel,lo,hi){
+ let duration=Infinity,limit=-1;
+ accel.forEach((a,i)=>{if(Math.abs(a)<1e-10)return;const distance=a>0?hi[i]-start[i]:lo[i]-start[i];const stop=Math.sqrt(Math.max(0,2*distance/a));if(stop<duration){duration=stop;limit=i;}});
+ return {duration,limit};
+}
+function pulley(p){
+ const {m1,m2,mc}=p,tension=4*G/(1/m1+1/m2+4/mc);
+ const a=[G-tension/m1,G-2*tension/mc,G-tension/m2].map(v=>Math.abs(v)<1e-10?0:v);
+ const lo=[2.28,2.46,2.28],hi=[7.18,7.04,7.18];
+ const y0=a.map((v,i)=>v>0?lo[i]+.30:v<0?hi[i]-.30:(lo[i]+hi[i])/2);
+ return {kind:'pulley',p:{...p},a,tension,y0,...travel(y0,a,lo,hi),rope0:y0[0]+2*y0[1]+y0[2],balanced:a.every(v=>v===0)};
+}
+function wedge(p){
+ const alpha=(p.alpha??30)*DEG,beta=(p.beta??50)*DEG;
+ const {m1,m2,M,muS,muK}=p;
+ const A=M+m1+m2,D=m1+m2,C=m1*Math.cos(alpha)+m2*Math.cos(beta),S=m1*Math.sin(alpha)-m2*Math.sin(beta),Q=G*S;
+ const aqStatic=Q/D,NStatic=A*G-S*aqStatic,fRequired=-C*aqStatic;
+ let aX=0,aq=aqStatic,friction=fRequired,mode='stick';
+ if(Math.abs(fRequired)>muS*NStatic+1e-10){
+  mode='slip';const dir=Math.sign(Q),det=A*D-C*(C+muK*dir*S);
+  aX=((C+muK*dir*S)*Q-muK*dir*A*G*D)/det;
+  aq=(A*Q-muK*dir*C*A*G)/det;
+  friction=-muK*dir*(A*G-S*aq);
+ }
+ if(Math.abs(aq)<1e-10)aq=0;if(Math.abs(aX)<1e-10)aX=0;
+ const N=A*G-S*aq,N1=m1*(G*Math.cos(alpha)-aX*Math.sin(alpha)),N2=m2*(G*Math.cos(beta)+aX*Math.sin(beta));
+ const tension=m1*(G*Math.sin(alpha)-aq+aX*Math.cos(alpha));
+ // Change physical rig height for shallow angles, never the screen's metre scale.
+ const h=Math.min(2.7,5.4*Math.sin(alpha),5.4*Math.sin(beta));
+ const L1=h/Math.sin(alpha),L2=h/Math.sin(beta),clear=.57;
+ const s10=aq>0?clear+.12:aq<0?L1-clear-.12:L1/2;
+ const s20=aq>0?L2-clear-.12:aq<0?clear+.12:L2/2;
+ // At most 2 metres relative travel; retain a common, fixed viewport at all angles.
+ const qEnd=aq>0?Math.min(L1-clear-s10,s20-clear,2):aq<0?-Math.min(s10-clear,L2-clear-s20,2):0;
+ const duration=aq?Math.sqrt(2*qEnd/aq):Infinity,xEnd=aq?aX*qEnd/aq:0;
+ const contactLost=N1 < -1e-9?'m₁ loses contact with the left slope at release.':N2 < -1e-9?'m₂ loses contact with the right slope at release.':N < -1e-9?'The wedge loses ground contact at release.':tension < -1e-9?'The rope cannot remain taut at release.':'';
+ return {kind:'wedge',p:{...p},alpha,beta,A,D,C,S,Q,h,L1,L2,clear,s10,s20,qEnd,xEnd,duration,aX,aq,N,N1,N2,tension,friction,fRequired,NStatic,mode,balanced:aq===0&&aX===0,threshold:Math.abs(fRequired)/NStatic,contactLost};
+}
+function slopes(p){
+ const alpha=p.alpha*DEG,beta=p.beta*DEG,{m1,m2,mc,mu}=p;
+ const masses=[m1,m2],angles=[alpha,beta],normals=masses.map((m,i)=>m*G*Math.cos(angles[i]));
+ let solution;
+ // Each end may stick (0), slide up (-1), or slide down (+1).
+ // Test static friction first; no sliding direction is imposed in advance.
+ outer:for(const s1 of [0,-1,1])for(const s2 of [0,-1,1]){
+  const signs=[s1,s2];let numerator=2*G,denominator=4/mc;
+  signs.forEach((s,i)=>{if(s){numerator+=G*(Math.sin(angles[i])-mu*Math.cos(angles[i])*s);denominator+=1/masses[i];}});
+  const tension=numerator/denominator;if(!(tension>0))continue;
+  const acc=[],friction=[];let valid=true;
+  signs.forEach((s,i)=>{
+   if(s){const f=-mu*normals[i]*s,a=G*Math.sin(angles[i])-tension/masses[i]+f/masses[i];acc.push(Math.abs(a)<1e-10?0:a);friction.push(f);if(s*a < -1e-9)valid=false;}
+   else {const f=tension-masses[i]*G*Math.sin(angles[i]);acc.push(0);friction.push(f);if(Math.abs(f)>mu*normals[i]+1e-9*Math.max(1,masses[i]*G))valid=false;}
+  });
+  if(valid){const aP=-(acc[0]+acc[1])/2;solution={tension,a:[acc[0],aP,acc[1]],friction,signs,normals};break outer;}
+ }
+ if(!solution)throw new Error('No consistent friction state for this set of parameters.');
+ const h=Math.min(3.8,6.8*Math.sin(alpha),6.8*Math.sin(beta));
+ const L1=h/Math.sin(alpha),L2=h/Math.sin(beta),lo=[.60,-h+.65,.60],hi=[L1-.40,-.36,L2-.40];
+ const start=solution.a.map((a,i)=>a>0?lo[i]+.05:a<0?hi[i]-.05:(lo[i]+hi[i])/2);
+ return {kind:'slopes',p:{...p},alpha,beta,h,L1,L2,...solution,start,lo,hi,...travel(start,solution.a,lo,hi),rope0:start[0]+2*start[1]+start[2],balanced:solution.a.every(a=>a===0)};
+}
+function state(model,t){
+ if(model.contactLost)t=0;
+ t=Math.max(0,Math.min(t,Number.isFinite(model.duration)?model.duration:t));
+ if(model.kind==='pulley')return {t,y:model.y0.map((y,i)=>y+.5*model.a[i]*t*t),v:model.a.map(a=>a*t)};
+ if(model.kind==='slopes')return {t,s1:model.start[0]+.5*model.a[0]*t*t,yP:model.start[1]+.5*model.a[1]*t*t,s2:model.start[2]+.5*model.a[2]*t*t,v:model.a.map(a=>a*t)};
+ const q=.5*model.aq*t*t,X=.5*model.aX*t*t;
+ return {t,q,X,s1:model.s10+q,s2:model.s20-q,vq:model.aq*t,vX:model.aX*t};
+}
+root.Mechanics={G,pulley,wedge,slopes,state};if(typeof module!=='undefined')module.exports=root.Mechanics;
+})(typeof globalThis!=='undefined'?globalThis:this);
+
+</script><script>
+/* Same pixels/metre in all three models; no parameter-dependent zoom or time scaling. */
+(function(root){
+'use strict';
+const STEP_SECONDS=1/60,WORLD_WIDTH=16.4,WORLD_HEIGHT=8.8;
+const BOUNDS=Object.freeze({
+ pulley:Object.freeze({xmin:-2.75,xmax:2.75,ymin:-.20,ymax:8.05}),
+ wedge:Object.freeze({xmin:-8.2,xmax:8.2,ymin:-3.75,ymax:.70}),
+ slopes:Object.freeze({xmin:-8.2,xmax:8.2,ymin:-4.9,ymax:.70})
+});
+function camera(kind,width,height){
+ const b=BOUNDS[kind],px=width<500?24:42,py=height<350?26:35;
+ const scale=Math.min((width-2*px)/WORLD_WIDTH,(height-2*py)/WORLD_HEIGHT);
+ return {scale,ox:width/2-scale*(b.xmin+b.xmax)/2,oy:height/2-scale*(b.ymin+b.ymax)/2,bounds:b};
+}
+function timeAt(wallStart,timeStart,wallNow,rate,duration){return Math.max(0,Math.min(duration,timeStart+Math.max(0,wallNow-wallStart)*rate/1000));}
+function step(time,duration){return Math.min(duration,time+STEP_SECONDS);}
+root.MechanicsView={STEP_SECONDS,BOUNDS,camera,timeAt,step};if(typeof module!=='undefined')module.exports=root.MechanicsView;
+})(typeof globalThis!=='undefined'?globalThis:this);
+
+</script><script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id),P=Mechanics,V=MechanicsView;
+const stepAlpha=Math.atan(7/24)*180/Math.PI,stepBeta=Math.atan(4/3)*180/Math.PI;
+const defaults={pulley:{m1:6,mc:2,m2:3},wedge:{m1:6,m2:3,M:8,muS:.02,muK:.01,alpha:30,beta:50},slopes:{m1:5,m2:3,mc:9,mu:1/3,alpha:stepAlpha,beta:stepBeta}};
+const values=Object.fromEntries(Object.entries(defaults).map(([k,v])=>[k,{...v}]));
+const moduleNames=['pulley','wedge','slopes'];
+function moduleFromHash(){return moduleNames.includes(location.hash.slice(1))?location.hash.slice(1):'pulley';}
+const presets={pulley:[{label:'Your sketch',p:{m1:6,mc:2,m2:3}},{label:'Balanced',p:{m1:3,mc:6,m2:3}},{label:'Heavy centre',p:{m1:2,mc:12,m2:2}},{label:'Opposite ends',p:{m1:8,mc:8,m2:1}}],wedge:[{label:'Free ground',p:{m1:6,m2:3,M:8,muS:0,muK:0}},{label:'Ground holds',p:{m1:6,m2:3,M:8,muS:.3,muK:.2}},{label:'Ground slides',p:{m1:8,m2:1,M:4,muS:.06,muK:.04}},{label:'Reverse motion',p:{m1:1,m2:8,M:4,muS:.06,muK:.04}}]};
+presets.slopes=[{label:'STEP (ii): M = 9',p:{...defaults.slopes}},{label:'Limiting equilibrium',p:{...defaults.slopes,mc:6}},{label:'One side held',p:{...defaults.slopes,mc:2,mu:.1}},{label:'Smooth planes',p:{...defaults.slopes,mu:0}}];
+const controls={pulley:[['m1','Left mass m₁',.2,20,.1,'kg','blue'],['mc','Moving pulley M',.2,20,.1,'kg','amber'],['m2','Right mass m₂',.2,20,.1,'kg','hot']],wedge:[['m1','Left mass m₁',.2,20,.1,'kg','blue'],['m2','Right mass m₂',.2,20,.1,'kg','hot'],['M','Wedge mass M',.5,40,.5,'kg','amber'],['muS','Ground static μₛ',0,1,.01,'',''],['muK','Ground kinetic μₖ',0,1,.01,'','']]};
+controls.wedge.push(['alpha','Left base angle α',15,75,.1,'°','blue'],['beta','Right base angle β',15,75,.1,'°','hot']);
+controls.slopes=[['m1','Particle A mass',.2,30,.1,'kg','blue'],['m2','Particle B mass',.2,30,.1,'kg','hot'],['mc','Pulley P mass M',.2,30,.1,'kg','amber'],['mu','Plane friction μ',0,1,.01,'',''],['alpha','Left angle α',15,75,.1,'°','blue'],['beta','Right angle β',15,75,.1,'°','hot']];
+let moduleName=moduleFromHash(),model,t=0,running=false,accumulator=0;
+let clockWall=0,clockTime=0,clockRate=1;
+function anchorClock(now=performance.now()){clockWall=now;clockTime=t;clockRate=+$('speed').value;}
+function clockTimeAt(now){return V.timeAt(clockWall,clockTime,now,clockRate,model.duration);}
+let W=760,H=510,ctx=$('canvas').getContext('2d'),colors={},map,scale;
+const fmt=(v,d=2)=>Math.abs(v)<Math.pow(10,-d)/2?(0).toFixed(d):(v<0?'−':'')+Math.abs(v).toFixed(d);
+const arrowDir=(v,a='↓',b='↑')=>Math.abs(v)<1e-8?'at rest':(v>0?a:b);
+const readRow=(key,value,cls='')=>`<div class="r"><span class="k">${key}</span><span class="v ${cls}">${value}</span></div>`;
+function refreshColors(){const css=getComputedStyle(document.documentElement);for(const c of ['bg','panel','panel2','ink','mut','hair','acc','amber','hot','blue'])colors[c]=css.getPropertyValue('--'+c).trim();}
+function configure(){
+  $('title').textContent={pulley:'Three masses. One rope.',wedge:'The wedge is free to move.',slopes:'Two rough slopes. A moving pulley.'}[moduleName];
+  $('subtitle').textContent={pulley:'Two fixed pulleys, one massive moving pulley. Change a mass and let the constraint decide what moves.',wedge:'Change both base angles, the connected masses and the ground friction. The wedge is free to slide.',slopes:'Two masses on fixed rough planes share a rope with a massive movable pulley. Static friction decides which bodies start moving.'}[moduleName];
+  $('stage-name').textContent={pulley:'IDEAL ROPE · MASSIVE HUB',wedge:'SMOOTH SLOPES · ROUGH GROUND',slopes:'ROUGH FIXED PLANES · MOVING PULLEY P'}[moduleName];
+  $('legend-center').innerHTML=moduleName==='wedge'?'<i></i> wedge M':moduleName==='slopes'?'<i></i> moving pulley P':'<i></i> moving pulley M';
+  $('legend-left').innerHTML=moduleName==='slopes'?'<i></i> A':'<i></i> m₁';$('legend-right').innerHTML=moduleName==='slopes'?'<i></i> B':'<i></i> m₂';
+  document.querySelectorAll('[data-module]').forEach(b=>{const on=b.dataset.module===moduleName;b.setAttribute('aria-selected',String(on));b.tabIndex=on?0:-1;});
+  $('experiment').setAttribute('aria-labelledby','tab-'+moduleName);
+  $('controls').innerHTML=controls[moduleName].map(([key,label,min,max,step,unit,color])=>`<div class="ctl color-${color}"><div class="ctl-head"><label for="range-${key}">${label}</label><div class="value"><input id="number-${key}" type="number" min="${min}" max="${max}" step="any" aria-label="${label}, ${unit||'coefficient'}"><span class="unit">${unit}</span></div></div><input id="range-${key}" type="range" min="${min}" max="${max}" step="${step}" aria-label="${label}"></div>`).join('');
+  if(moduleName==='wedge')$('controls').insertAdjacentHTML('beforeend','<p class="tiny">μₖ ≤ μₛ. Both base angles are independent; the top angle is 180° − α − β.</p>');
+  if(moduleName==='slopes')$('controls').insertAdjacentHTML('beforeend','<p class="tiny">STEP presets use exact α = arctan(7/24), β = arctan(4/3), μ = 1/3. Displayed values are rounded. μₛ = μₖ = μ on both planes.</p>');
+  controls[moduleName].forEach(([key,label,min,max,step])=>{
+    $('range-'+key).addEventListener('input',e=>changeParam(key,+e.target.value,min,max,step));
+    $('number-'+key).addEventListener('input',e=>{if(e.target.value!==''&&Number.isFinite(+e.target.value)&&+e.target.value>=min&&+e.target.value<=max)changeParam(key,+e.target.value,min,max,step,e.target.id);});
+    $('number-'+key).addEventListener('change',e=>{if(e.target.value===''||!Number.isFinite(+e.target.value)){syncControls();return;}changeParam(key,+e.target.value,min,max,step,e.target.id);syncControls();});
+    $('number-'+key).addEventListener('keydown',e=>{if(e.key==='Enter')e.target.blur();});
+  });
+  $('presets').innerHTML=presets[moduleName].map((p,i)=>`<button class="preset" data-preset="${i}">${p.label}</button>`).join('');
+  document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>{Object.assign(values[moduleName],presets[moduleName][+b.dataset.preset].p);rebuild();}));
+  syncControls();setExplanations();rebuild();
+}
+function changeParam(key,v,min,max,step,preserve=null){
+  values[moduleName][key]=Math.min(max,Math.max(min,preserve?v:Math.round(v/step)*step));
+  if(moduleName==='wedge'){
+    const p=values.wedge;
+    if(key==='muS'&&p.muK>p.muS)p.muK=p.muS;
+    if(key==='muK'&&p.muS<p.muK)p.muS=p.muK;
+  }
+  rebuild(preserve);
+}
+function syncControls(preserve=null){controls[moduleName].forEach(([key,label,min,max,step])=>{const v=values[moduleName][key];$('range-'+key).value=v;if('number-'+key!==preserve)$('number-'+key).value=fmt(v,key==='mu'?6:(key==='alpha'||key==='beta')?3:step<.1?2:1).replace('−','-');});}
+function rebuild(preserve=null){
+  running=false;t=0;model=P[moduleName](values[moduleName]);syncControls(preserve);update();draw();
+}
+function setExplanations(){
+  if(moduleName==='pulley'){
+    $('equations').innerHTML='<span class="blue">m₁a₁ = m₁g − T</span><br><span class="hot">m₂a₂ = m₂g − T</span><br><span class="amber">Ma<sub>M</sub> = Mg − 2T</span><br>a₁ + a₂ + 2a<sub>M</sub> = 0';
+    $('signs').textContent='Down is positive for all three bodies. The same tension T acts throughout the ideal rope.';
+    $('derivation').innerHTML='The changing vertical rope lengths add to y₁ + y₂ + 2yM = constant. Differentiate twice for the acceleration constraint. Apply F = ma to each body; the moving pulley receives two upward rope forces.<br><br>T = 4g / (1/m₁ + 1/m₂ + 4/M).';
+    $('intuition').textContent='The centre gets two upward pulls, one from each side of the rope. Its displacement therefore counts twice in the rope-length budget. Both end masses can descend together while a light centre rises; the two ends do not have to move in opposite directions. Multiplying all three masses by the same factor changes the tension, not the acceleration.';
+    $('assumptions').innerHTML='One massless, inextensible rope; frictionless fixed pulleys. M is the moving assembly’s translational mass, concentrated at its hub; all rotational inertia is neglected. The rope stays taut. Each change starts a new experiment with a suitable rope length. The run pauses before a mass or pulley reaches a clearance boundary; impacts are outside this module.';
+  }else if(moduleName==='wedge'){
+    $('equations').innerHTML='A Ẍ − C q̈ = f<br>−C Ẍ + D q̈ = gS<br>N = Ag − S q̈<br><span class="mut">stick: Ẍ = 0, |f| ≤ μₛN</span><br><span class="mut">slide: f = −μₖN sign(Ẋ)</span>';
+    $('signs').textContent='X is wedge displacement to the right. Positive q sends m₁ down the left slope and m₂ up the right slope.';
+    $('derivation').innerHTML='A = M + m₁ + m₂<br>D = m₁ + m₂<br>C = m₁ cos α + m₂ cos β<br>S = m₁ sin α − m₂ sin β<br><br>The horizontal momentum is A Ẋ − C q̇. Its rate of change is the ground friction f. Projecting each block’s equation along its slope gives the second equation. The total vertical acceleration gives N = Ag − S q̈.<br><br>First solve with Ẍ = 0. If the required friction exceeds μₛN, solve the two equations with sliding friction instead.';
+    $('intuition').textContent='A stationary wedge does not mean stationary blocks: static ground friction can balance the horizontal push while the blocks move along the slopes. With no ground friction, the wedge shifts in the opposite direction to the blocks’ net horizontal motion, conserving horizontal momentum.';
+    $('assumptions').innerHTML='Rigid wedge on a horizontal floor; smooth block–wedge contacts; ideal massless rope and apex pulley. Ground coefficients satisfy 0 ≤ μₖ ≤ μₛ ≤ 1. The ground normal is solved dynamically, not assumed to equal total weight. The base angles α and β are adjustable (15°–75°). Rig height is at most 2.7 m, with each slope at most 5.4 m long. A run ends at 2 m relative travel or an earlier contact boundary. Initially all bodies are at rest. Pause before a block reaches either end of a slope; collisions and slack-rope motion are outside this module.';
+  }else{
+    $('equations').innerHTML='<span class="blue">m<sub>A</sub>a<sub>A</sub> = m<sub>A</sub>g sin α − T + f<sub>A</sub></span><br><span class="hot">m<sub>B</sub>a<sub>B</sub> = m<sub>B</sub>g sin β − T + f<sub>B</sub></span><br><span class="amber">Ma<sub>P</sub> = Mg − 2T</span><br>a<sub>A</sub> + a<sub>B</sub> + 2a<sub>P</sub> = 0';
+    $('signs').textContent='aA and aB are positive down their slopes. aP is positive vertically down. fA and fB are signed down the corresponding plane.';
+    $('derivation').innerHTML='One rope gives sA + sB + 2yP = constant. Apply F = ma along each plane and vertically to P.<br><br>Sticking: a = 0 and |f| ≤ μN.<br>Sliding: f = −μN sign(v).<br>N_A = m_A g cos α; N_B = m_B g cos β.<br><br>All nine up / down / sticking combinations are checked against the same rope tension. No direction is assumed before solving.';
+    $('intuition').textContent='The two tensions supporting P link three accelerations. A large friction force can hold one particle still while the other particle and P move. Friction reaches μN only when sliding or at limiting equilibrium.';
+    $('assumptions').innerHTML='The two planes are fixed. Smooth, light fixed pulleys Q and R; one light inextensible rope. P has translational hub mass M; rotational inertia is neglected. The same coefficient μ is used for static and kinetic friction on both planes. All bodies start from rest. Rig height is at most 3.8 m, each slope at most 6.8 m. Initial positions depend on acceleration direction. Pause before contact; impacts and slack-rope continuation are outside this model.';
+  }
+}
+function update(){
+  const s=P.state(model,t),end=Number.isFinite(model.duration)&&t>=model.duration-1e-8;
+  $('play').textContent=running?'Ⅱ Pause':end?'↺ Replay':'▶ Play';
+  $('play').disabled=model.balanced||!!model.contactLost;$('step').disabled=model.balanced||end||!!model.contactLost;$('scrub').disabled=model.balanced||!!model.contactLost;
+  $('scrub').value=Number.isFinite(model.duration)?t/model.duration*1000:0;
+  $('time').textContent=model.balanced||model.contactLost?'t = 0.000 s':`${fmt(t,3)} / ${fmt(model.duration,3)} s`;
+  let status=model.contactLost?'Contact lost at release':model.balanced?'Equilibrium':end?'End of safe travel':running?'Running':t>0?'Paused':'Ready to release';
+  $('status').textContent=status;$('status').style.color=end||model.contactLost?colors.amber:colors.acc;
+  const metreScale=V.camera(moduleName,W,H).scale;
+  const fixedNote=`Fixed scale: 1 m = ${fmt(metreScale,1)} px · 1 playback second = ${fmt(+$('speed').value,2)} physical seconds.`;
+  $('stage-note').textContent=(model.contactLost?model.contactLost+' ':model.balanced?'Equilibrium. ':end?'Paused before contact. ':'')+fixedNote;
+  if(moduleName==='pulley'){
+    const names=['m₁','M','m₂'],cls=['blue','amber','hot'];
+    $('metrics').innerHTML=model.a.map((a,i)=>`<div class="metric"><div class="k">${names[i]} ACCELERATION</div><div class="v ${cls[i]}" style="color:var(--${cls[i]})">${fmt(Math.abs(a))} <small>m/s² ${arrowDir(a,'↓','↑')}</small></div></div>`).join('');
+    $('readouts').innerHTML=readRow('Rope tension T',fmt(model.tension)+' N','acc')+model.a.map((a,i)=>readRow('a'+['₁','M','₂'][i],fmt(a)+' m/s²',cls[i])).join('')+s.v.map((v,i)=>readRow('v'+['₁','M','₂'][i],fmt(v)+' m/s',cls[i])).join('')+readRow('Rope constraint',fmt(model.a[0]+model.a[2]+2*model.a[1],3),'acc')+readRow('Safe run',model.balanced?'equilibrium':fmt(model.duration)+' s');
+    $('directions').textContent='Signed acceleration: + down, − up. Constraint readout: a₁ + a₂ + 2aM.';
+    const bothDown=model.a[0]>0&&model.a[2]>0,bothUp=model.a[0]<0&&model.a[2]<0;
+    $('misconception').innerHTML=model.balanced?'The three masses balance when <span class="acc">m₁ = m₂ = M/2</span>. The moving pulley is supported by two tensions.':bothDown?'Both end masses fall <span class="acc">at the same time</span>. A moving centre makes that possible: its upward motion pays for both growing end segments.':bothUp?'Both end masses rise <span class="acc">at the same time</span>. The heavy centre descends, feeding rope to both sides.':'A single rope does not make all three accelerations equal. The constraint is <span class="acc">a₁ + a₂ + 2aM = 0</span>.';
+    $('canvas').setAttribute('aria-label',`Movable pulley experiment. Left acceleration ${fmt(model.a[0])}, centre ${fmt(model.a[1])}, right ${fmt(model.a[2])} metres per second squared, positive downward. Time ${fmt(t)} seconds.`);
+  }else if(moduleName==='wedge'){
+    $('metrics').innerHTML=`<div class="metric"><div class="k">WEDGE Ẍ</div><div class="v amber" style="color:var(--amber)">${fmt(Math.abs(model.aX))} <small>m/s² ${arrowDir(model.aX,'→','←')}</small></div></div><div class="metric"><div class="k">RELATIVE q̈</div><div class="v blue" style="color:var(--blue)">${fmt(model.aq)} <small>m/s²</small></div></div><div class="metric"><div class="k">GROUND CONTACT</div><div class="v acc" style="color:var(--acc);font-size:16px">${model.mode==='stick'?'STATIC':'SLIDING'}</div></div>`;
+    $('readouts').innerHTML=readRow('Wedge Ẍ',fmt(model.aX)+' m/s²','amber')+readRow('Relative q̈',fmt(model.aq)+' m/s²','blue')+readRow('Ground friction f',fmt(model.friction)+' N','acc')+readRow('Ground normal N',fmt(model.N)+' N')+readRow('Rope tension T',fmt(model.tension)+' N')+readRow('Holding threshold μₛ',fmt(model.threshold,3))+readRow('Wedge velocity Ẋ',fmt(s.vX)+' m/s','amber')+readRow('Relative velocity q̇',fmt(s.vq)+' m/s','blue')+readRow('Wedge shift X',fmt(s.X)+' m','amber')+readRow('Safe run',model.balanced?'equilibrium':fmt(model.duration)+' s');
+    $('directions').textContent='The arrows show ground-frame acceleration. q̈ is measured relative to the wedge. +X points right; +q sends m₁ down its slope.';
+    $('misconception').innerHTML=model.balanced?'Balanced slopes depend on <span class="acc">m₁ sin α = m₂ sin β</span>, not on equal masses. Here the different angles compensate for the different masses.':model.mode==='stick'?'The wedge stays still while the blocks move. Static friction supplies just the required <span class="acc">'+fmt(Math.abs(model.fRequired))+' N</span>; it does not automatically equal μₛN.':'The ground normal is <span class="acc">'+fmt(model.N)+' N</span>, while the total weight is '+fmt(model.A*P.G)+' N. The blocks accelerate vertically, so using N = total weight would give the wrong friction.';
+    $('canvas').setAttribute('aria-label',`Connected masses on a wedge with ${fmt(model.p.alpha,3)} and ${fmt(model.p.beta,3)} degree slopes. Ground ${model.mode==='stick'?'holds the wedge stationary':'allows sliding'}. Wedge acceleration ${fmt(model.aX)} metres per second squared to the right. Time ${fmt(t)} seconds.`);
+    if(model.contactLost){
+      $('metrics').innerHTML='<div class="metric"><div class="k">WEDGE ACCELERATION</div><div class="v">—</div></div><div class="metric"><div class="k">RELATIVE ACCELERATION</div><div class="v">—</div></div><div class="metric"><div class="k">CONSTRAINED MOTION</div><div class="v amber" style="font-size:13px">NOT VALID</div></div>';
+      $('readouts').innerHTML=readRow('Required left normal',fmt(model.N1)+' N','blue')+readRow('Required right normal',fmt(model.N2)+' N','hot')+readRow('Motion','paused at release','amber');
+      $('misconception').textContent=model.contactLost+' A slope cannot pull a block into contact: a negative required normal means that sliding along both planes is no longer a valid model. Change the angles, masses or ground friction to keep both contacts.';
+      $('directions').textContent='The numbers above are the normals that maintaining contact would require. Detached motion is outside this constrained model.';
+      $('canvas').setAttribute('aria-label',model.contactLost+' Simulation paused at release.');
+    }
+
+  }else{
+    const names=['A','P','B'],classes=['blue','amber','hot'];
+    $('metrics').innerHTML=model.a.map((a,i)=>`<div class="metric"><div class="k">${names[i]} ACCELERATION</div><div class="v" style="color:var(--${classes[i]})">${fmt(Math.abs(a))} <small>m/s² ${arrowDir(a,i===1?'↓':'down',i===1?'↑':'up')}</small></div></div>`).join('');
+    $('readouts').innerHTML=readRow('Rope tension T',fmt(model.tension)+' N','acc')+model.a.map((a,i)=>readRow('a'+names[i],fmt(a)+' m/s²',classes[i])).join('')+s.v.map((v,i)=>readRow('v'+names[i],fmt(v)+' m/s',classes[i])).join('')+readRow('A contact',model.signs[0]===0?'sticking':model.signs[0]<0?'sliding up':'sliding down','blue')+readRow('B contact',model.signs[1]===0?'sticking':model.signs[1]<0?'sliding up':'sliding down','hot')+readRow('Friction fA',fmt(model.friction[0])+' N','blue')+readRow('Friction fB',fmt(model.friction[1])+' N','hot')+readRow('Rope constraint',fmt(model.a[0]+2*model.a[1]+model.a[2],4),'acc')+readRow('Safe run',model.balanced?'equilibrium':fmt(model.duration)+' s');
+    $('directions').textContent='A and B: + down the plane. P: + down vertically. Green arrows show acceleration direction in the ground frame.';
+    $('misconception').innerHTML=model.balanced?'A rough plane can supply <span class="acc">less than μN</span> and hold a particle still. The limiting-equilibrium preset has both particles just on the point of moving up.':model.signs.some(x=>x===0)?'One particle stays fixed while the other moves. The pulley responds at <span class="acc">half the opposite acceleration</span> of the moving particle.':'The centre motion changes the rope available to both particles. Its displacement counts twice: <span class="acc">aA + aB + 2aP = 0</span>.';
+    $('canvas').setAttribute('aria-label',`Particles A and B on fixed rough planes at ${fmt(model.p.alpha,3)} and ${fmt(model.p.beta,3)} degrees, connected to massive moving pulley P. Signed accelerations ${model.a.map(x=>fmt(x)).join(', ')} metres per second squared. Time ${fmt(t)} seconds.`);
+  }
+}
+function setupMap(kind){
+  const camera=V.camera(kind,W,H);scale=camera.scale;
+  map=(x,y)=>[camera.ox+x*scale,camera.oy+y*scale];
+}
+function line(points,color,width=1,dash=[]){ctx.beginPath();points.forEach((p,i)=>{const v=map(...p);i?ctx.lineTo(...v):ctx.moveTo(...v);});ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.stroke();ctx.setLineDash([]);}
+function polygon(points,fill,stroke,width=1){ctx.beginPath();points.forEach((p,i)=>{const v=map(...p);i?ctx.lineTo(...v):ctx.moveTo(...v);});ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke();}}
+function text(x,y,value,color=colors.ink,size=12,align='center'){const v=map(x,y);ctx.font=`${size}px ui-monospace,Menlo,monospace`;ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillStyle=color;ctx.fillText(value,...v);}
+function labelAtPixel(x,y,value,color,size=11,align='left'){ctx.font=`${size}px ui-monospace,Menlo,monospace`;ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillStyle=color;ctx.fillText(value,x,y);}
+function arrow(x,y,dx,dy,value){
+  if(!$('arrows').checked||model.contactLost||Math.hypot(dx,dy)<1e-8)return;
+  const base=map(x,y),mag=Math.hypot(dx,dy),len=Math.min(W<500?32:46,16+7*Math.sqrt(mag));
+  const vx=dx/mag*len,vy=dy/mag*len;
+  const end=[Math.max(14,Math.min(W-14,base[0]+vx)),Math.max(17,Math.min(H-17,base[1]+vy))];
+  const ang=Math.atan2(end[1]-base[1],end[0]-base[0]);
+  ctx.strokeStyle=colors.acc;ctx.fillStyle=colors.acc;ctx.lineWidth=1.7;ctx.beginPath();ctx.moveTo(...base);ctx.lineTo(...end);ctx.stroke();ctx.beginPath();ctx.moveTo(...end);ctx.lineTo(end[0]-7*Math.cos(ang-.45),end[1]-7*Math.sin(ang-.45));ctx.lineTo(end[0]-7*Math.cos(ang+.45),end[1]-7*Math.sin(ang+.45));ctx.closePath();ctx.fill();
+}
+function wheel(x,y,r,angle,moving=false){
+ const v=map(x,y),rr=r*scale;
+ ctx.beginPath();ctx.arc(...v,rr,0,2*Math.PI);ctx.fillStyle=colors.panel2;ctx.fill();ctx.strokeStyle=moving?colors.amber:colors.mut;ctx.lineWidth=moving?2:1.5;ctx.stroke();
+ for(let k=0;k<4;k++){const ang=angle+k*Math.PI/2;ctx.beginPath();ctx.moveTo(v[0]+.24*rr*Math.cos(ang),v[1]+.24*rr*Math.sin(ang));ctx.lineTo(v[0]+.79*rr*Math.cos(ang),v[1]+.79*rr*Math.sin(ang));ctx.strokeStyle=colors.hair;ctx.lineWidth=1.5;ctx.stroke();}
+ ctx.beginPath();ctx.arc(...v,Math.max(2.5,rr*.10),0,Math.PI*2);ctx.fillStyle=moving?colors.amber:colors.mut;ctx.fill();
+}
+function mass(x,y,name,m,color){
+ const w=.76,h=.65;
+ polygon([[x-w/2,y-h/2],[x+w/2,y-h/2],[x+w/2,y+h/2],[x-w/2,y+h/2]],colors.panel2,color,1.8);
+ const pix=map(x,y);if(scale*w>46){labelAtPixel(pix[0],pix[1]-7,name,color,12,'center');labelAtPixel(pix[0],pix[1]+9,fmt(m,1)+' kg',colors.ink,10,'center');}else{labelAtPixel(pix[0],pix[1],name,color,11,'center');}
+}
+function ground(y,xmin,xmax){
+ line([[xmin,y],[xmax,y]],colors.mut,1);
+ for(let x=xmin;x<xmax;x+=.28)line([[x,y+.02],[x-.14,y+.15]],colors.hair,1);
+}
+function drawPulley(){
+ setupMap('pulley');
+ const s=P.state(model,t),[y1,yc,y2]=s.y,cy=.95,R=.62,r=.50,xl=-1.12,xr=1.12,outer=1.74;
+ ground(7.75,-2.55,2.55);
+ line([[-2.15,0],[2.15,0]],colors.mut,2);
+ for(let x=-2.15;x<2.15;x+=.25)line([[x,0],[x+.15,-.13]],colors.hair,1);
+ [xl,xr].forEach(x=>line([[x,0],[x,cy]],colors.mut,2));
+ wheel(xl,cy,R,-(y1-model.y0[0])/R);wheel(xr,cy,R,(y2-model.y0[2])/R);
+ wheel(0,yc,r,((y1-model.y0[0])-(y2-model.y0[2]))/(2*r),true);
+ ctx.beginPath();ctx.moveTo(...map(-outer,y1-.325));ctx.lineTo(...map(-outer,cy));
+ let c=map(xl,cy);ctx.arc(c[0],c[1],R*scale,Math.PI,2*Math.PI,false);ctx.lineTo(...map(-r,yc));
+ c=map(0,yc);ctx.arc(c[0],c[1],r*scale,Math.PI,0,true);ctx.lineTo(...map(r,cy));
+ c=map(xr,cy);ctx.arc(c[0],c[1],R*scale,Math.PI,2*Math.PI,false);ctx.lineTo(...map(outer,y2-.325));
+ ctx.strokeStyle=colors.ink;ctx.lineWidth=1.9;ctx.stroke();
+ mass(-outer,y1,'m₁',model.p.m1,colors.blue);mass(outer,y2,'m₂',model.p.m2,colors.hot);
+ const centre=map(0,yc);labelAtPixel(centre[0],centre[1]-.19*scale,'M',colors.amber,12,'center');
+ if(scale>35)labelAtPixel(centre[0],centre[1]+.22*scale,fmt(model.p.mc,1)+' kg',colors.ink,10,'center');
+ arrow(-outer-.55,y1,0,model.a[0]);arrow(.76,yc,0,model.a[1]);arrow(outer+.55,y2,0,model.a[2]);
+ if(t>0){[[-outer,model.y0[0],colors.blue],[0,model.y0[1],colors.amber],[outer,model.y0[2],colors.hot]].forEach(([x,y,c])=>{ctx.globalAlpha=.3;line([[x-.12,y],[x+.12,y]],c,1,[3,3]);ctx.globalAlpha=1;});}
+ labelAtPixel(15,18,'DOWN = POSITIVE',colors.mut,9);
+ labelAtPixel(W-15,H-15,'rope length conserved',colors.mut,9,'right');
+}
+function drawWedge(){
+ const m=model,s=P.state(m,t),a=m.alpha,b=m.beta,L=m.h/Math.tan(a),R=m.h/Math.tan(b),minX=V.BOUNDS.wedge.xmin,maxX=V.BOUNDS.wedge.xmax,floor=0;
+ setupMap('wedge');
+ ground(floor,minX,maxX);
+ // A floor ruler stays fixed while the wedge translates.
+ for(let x=Math.ceil(minX);x<=maxX;x++){line([[x,.02],[x,.10]],colors.hair);if(W>480)text(x,.29,`${x}m`,colors.mut,9);}
+ if(Math.abs(m.xEnd)>.01){ctx.globalAlpha=.35;line([[-L,0],[0,-m.h],[R,0]],colors.mut,1,[5,5]);ctx.globalAlpha=1;}
+ const X=s.X;
+ polygon([[X-L,0],[X,-m.h],[X+R,0]],colors.panel2,colors.amber,1.7);
+ line([[X-L,0],[X+R,0]],colors.amber,2);
+ text(X+(R-L)*.22,-.62,`M = ${fmt(m.p.M,1)} kg`,colors.amber,W<480?10:12);
+ if(W>430){text(X-L+.35,-.18,fmt(model.p.alpha,1)+'°',colors.mut,10);text(X+R-.35,-.18,fmt(model.p.beta,1)+'°',colors.mut,10);}
+ function block(slopeDist,left,massVal,name,color){
+   const ang=left?a:b,ux=left?-Math.cos(ang):Math.cos(ang),uy=Math.sin(ang),nx=left?-Math.sin(ang):Math.sin(ang),ny=-Math.cos(ang),hh=.18,hw=.27;
+   const x=X+ux*slopeDist+nx*hh,y=-m.h+uy*slopeDist+ny*hh;
+   const points=[[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]].map(([u,n])=>[x+ux*u+nx*n,y+uy*u+ny*n]);
+   const tangent=[X+nx*hh,-m.h+ny*hh];
+   line([[x-ux*hw,y-uy*hw],tangent],colors.ink,1.7);
+   polygon(points,colors.panel,color,1.8);
+   const p=map(x,y);labelAtPixel(p[0],p[1],name,color,11,'center');
+   // Labels sit outside the slope, in the reserved margin.
+   const lp=map(x+nx*.50,y+ny*.50);labelAtPixel(lp[0],lp[1],fmt(massVal,1)+' kg',color,W<480?9:11,'center');
+   const ax=m.aX-m.aq*Math.cos(ang),ay=left?m.aq*Math.sin(ang):-m.aq*Math.sin(ang);
+   arrow(x+nx*.95,y+ny*.95,ax,ay);
+ }
+ block(s.s1,true,m.p.m1,'m₁',colors.blue);block(s.s2,false,m.p.m2,'m₂',colors.hot);
+ wheel(X,-m.h,.18,-(s.q/.18),false);
+ // The short upper arc joins the two tangent rope segments.
+ const apex=map(X,-m.h);ctx.beginPath();ctx.arc(...apex,.18*scale,-Math.PI/2-a,-Math.PI/2+b,false);ctx.strokeStyle=colors.ink;ctx.lineWidth=1.7;ctx.stroke();
+ arrow(X+(R-L)*.22,-.95,m.aX,0);
+ // Ground friction uses a separate, explicitly named direction marker.
+ if(Math.abs(m.friction)>1e-9){
+   const px=map(X+(R-L)/2,.48),d=Math.sign(m.friction),len=26;
+   ctx.beginPath();ctx.moveTo(px[0]-d*len/2,px[1]);ctx.lineTo(px[0]+d*len/2,px[1]);ctx.strokeStyle=colors.acc;ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.moveTo(px[0]+d*len/2,px[1]);ctx.lineTo(px[0]+d*len/2-d*5,px[1]-3);ctx.lineTo(px[0]+d*len/2-d*5,px[1]+3);ctx.closePath();ctx.fillStyle=colors.acc;ctx.fill();
+   labelAtPixel(px[0]+len/2+9,px[1],'f',colors.acc,10);
+ }
+ labelAtPixel(15,18,m.contactLost?'CONTACT LOST — CONSTRAINED MOTION PAUSED':m.mode==='stick'?'GROUND HOLDS THE WEDGE':'WEDGE SLIDES ON THE GROUND',colors.acc,W<500?8:9);
+ labelAtPixel(W-15,H-15,'X →   |   q: left block downhill',colors.mut,W<500?8:9,'right');
+}
+function drawSlopes(){
+ const m=model,s=P.state(m,t),a=m.alpha,b=m.beta,R=.18,r=.28,xQ=-r-R,xR=r+R,top=-m.h;
+ setupMap('slopes');
+ const leftFoot=xQ-m.L1*Math.cos(a),rightFoot=xR+m.L2*Math.cos(b);
+ ground(0,-8.0,8.0);
+ polygon([[leftFoot,0],[xQ,top],[xQ,0]],colors.panel2,colors.mut,1.4);
+ polygon([[xR,top],[xR,0],[rightFoot,0]],colors.panel2,colors.mut,1.4);
+ function particle(distance,left,name,massValue,color){
+  const ang=left?a:b,axle=left?xQ:xR,ux=(left?-1:1)*Math.cos(ang),uy=Math.sin(ang),nx=(left?-1:1)*Math.sin(ang),ny=-Math.cos(ang),hw=.25,hh=.18;
+  const x=axle+ux*distance+nx*hh,y=top+uy*distance+ny*hh;
+  const corners=[[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]].map(([u,n])=>[x+ux*u+nx*n,y+uy*u+ny*n]);
+  polygon(corners,colors.panel,color,1.8);
+  text(x,y,name,color,11);
+  const label=map(x+nx*.60,y+ny*.60);labelAtPixel(label[0],label[1],fmt(massValue,1)+' kg',color,W<500?9:11,'center');
+  const acc=m.a[left?0:2];arrow(x+nx*1.0,y+ny*1.0,ux*acc,uy*acc);
+  return {x:x-ux*hw,y:y-uy*hw};
+ }
+ // Axles sit at the tops of the fixed planes. Each outer rope segment is
+ // tangent to its fixed pulley and parallel to the corresponding slope.
+ wheel(xQ,top,R,(s.s1-m.start[0])/R);wheel(xR,top,R,-(s.s2-m.start[2])/R);
+ wheel(0,s.yP,r,((s.s1-m.start[0])-(s.s2-m.start[2]))/(2*r),true);
+ const A=particle(s.s1,true,'A',m.p.m1,colors.blue),B=particle(s.s2,false,'B',m.p.m2,colors.hot);
+ ctx.beginPath();ctx.moveTo(...map(A.x,A.y));
+ const nL=[-Math.sin(a),-Math.cos(a)],nR=[Math.sin(b),-Math.cos(b)];
+ ctx.lineTo(...map(xQ+nL[0]*R,top+nL[1]*R));
+ let c=map(xQ,top);ctx.arc(c[0],c[1],R*scale,-Math.PI/2-a,0,false);
+ ctx.lineTo(...map(-r,s.yP));c=map(0,s.yP);ctx.arc(c[0],c[1],r*scale,Math.PI,0,true);
+ ctx.lineTo(...map(r,top));c=map(xR,top);ctx.arc(c[0],c[1],R*scale,Math.PI,3*Math.PI/2+b,false);
+ ctx.lineTo(...map(B.x,B.y));ctx.strokeStyle=colors.ink;ctx.lineWidth=1.7;ctx.stroke();
+ text(xQ,top-.43,'Q',colors.mut,11);text(xR,top-.43,'R',colors.mut,11);
+ const cp=map(0,s.yP);labelAtPixel(cp[0],cp[1]-.10*scale,'P',colors.amber,10,'center');
+ labelAtPixel(cp[0],cp[1]+.55*scale,fmt(m.p.mc,1)+' kg',colors.amber,W<500?9:10,'center');
+ arrow(.70,s.yP,0,m.a[1]);
+ if(W>430){text(leftFoot+.7,.40,fmt(m.p.alpha,2)+'°',colors.mut,10);text(rightFoot-.7,.40,fmt(m.p.beta,2)+'°',colors.mut,10);}
+ labelAtPixel(15,18,m.balanced?'EQUILIBRIUM':m.signs.some(x=>x===0)?'ONE PARTICLE HELD BY STATIC FRICTION':'COUPLED MOTION ON FIXED ROUGH PLANES',colors.acc,W<500?8:9);
+ labelAtPixel(W-15,H-15,'+A, +B downhill   |   +P vertically down',colors.mut,W<500?8:9,'right');
+}
+
+function draw(){
+ if(!model)return;
+ ctx.clearRect(0,0,W,H);ctx.fillStyle=colors.panel;ctx.fillRect(0,0,W,H);
+ if(moduleName==='pulley')drawPulley();else if(moduleName==='wedge')drawWedge();else drawSlopes();
+ drawMetreRuler();
+}
+function drawMetreRuler(){
+ const x=20,y=H-35;ctx.strokeStyle=colors.mut;ctx.lineWidth=1;ctx.beginPath();
+ ctx.moveTo(x,y);ctx.lineTo(x+scale,y);ctx.moveTo(x,y-4);ctx.lineTo(x,y+4);
+ ctx.moveTo(x+scale,y-4);ctx.lineTo(x+scale,y+4);ctx.stroke();
+ labelAtPixel(x+scale/2,y-12,'1 m',colors.mut,10,'center');
+}
+function resize(){
+ const canvas=$('canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3);
+ W=rect.width;H=W<600?Math.max(340,W*.95):Math.min(480,W*510/760);
+ canvas.style.height=H+'px';canvas.style.aspectRatio='auto';canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);refreshColors();draw();if(model)update();
+}
+function animate(now){
+ if(running&&model&&!model.balanced&&!model.contactLost){
+   t=clockTimeAt(now);
+   if(t>=model.duration)running=false;
+   draw();if(now-accumulator>75||!running){update();accumulator=now;}
+ }
+ requestAnimationFrame(animate);
+}
+$('play').addEventListener('click',()=>{if(model.balanced||model.contactLost)return;const now=performance.now();if(running){t=clockTimeAt(now);running=false;}else{if(t>=model.duration)t=0;anchorClock(now);running=true;}update();draw();});
+$('reset').addEventListener('click',()=>{t=0;running=false;update();draw();});
+$('step').addEventListener('click',()=>{running=false;if(model.balanced||model.contactLost)return;t=V.step(t,model.duration);update();draw();});
+$('scrub').addEventListener('input',e=>{running=false;if(!model.balanced&&!model.contactLost)t=+e.target.value/1000*model.duration;update();draw();});
+$('speed').addEventListener('change',()=>{const now=performance.now();if(running)t=clockTimeAt(now);anchorClock(now);update();draw();});$('arrows').addEventListener('change',draw);
+function switchModule(name){moduleName=name;try{history.replaceState(null,'','#'+name);}catch(e){location.hash=name;}configure();resize();}
+document.querySelectorAll('[data-module]').forEach(b=>b.addEventListener('click',()=>switchModule(b.dataset.module)));
+document.querySelectorAll('[data-module]').forEach(b=>b.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();const i=moduleNames.indexOf(moduleName),next=moduleNames[(i+(e.key==='ArrowRight'?1:2))%3];switchModule(next);$('tab-'+next).focus();}}));
+window.addEventListener('hashchange',()=>{moduleName=moduleFromHash();configure();resize();});
+function themeLabel(){$('theme').textContent=document.documentElement.dataset.theme==='light'?'Dark mode':'Light mode';}
+$('theme').addEventListener('click',()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='light'?'dark':'light';try{localStorage.setItem('niko-mechanics-theme',document.documentElement.dataset.theme);}catch(e){}themeLabel();refreshColors();update();draw();});
+window.addEventListener('resize',resize);document.addEventListener('visibilitychange',()=>{if(document.hidden&&running){t=clockTimeAt(performance.now());running=false;update();draw();}});
+// Small public inspection surface, also useful to a host embedding these modules.
+window.MechanicsLab={get module(){return moduleName;},get model(){return model;},get time(){return t;},setParameters(name,p){Object.assign(values[name],p);moduleName=name;configure();resize();},getState(){return P.state(model,t);},getPresentation(){return {camera:V.camera(moduleName,W,H),playbackRate:+$('speed').value,stepSeconds:V.STEP_SECONDS};}};
+refreshColors();themeLabel();configure();resize();requestAnimationFrame(animate);
+})();
+
+</script></body></html>
